@@ -1,7 +1,9 @@
 #include <libhal-micromod/micromod.hpp>
 
-#include "../applications/applications.hpp"
-namespace sjsu::arm{
+#include "../applications/application.hpp"
+
+namespace sjsu::arm {
+
 hardware_map_t initialize_platform()
 {
   using namespace hal::literals;

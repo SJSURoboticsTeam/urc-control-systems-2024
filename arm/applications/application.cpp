@@ -1,4 +1,3 @@
-#include <chrono>
 
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
