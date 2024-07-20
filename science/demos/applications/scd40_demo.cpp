@@ -12,7 +12,7 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 namespace sjsu::science {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   auto& i2c2 = *p_framework.i2c;
@@ -45,7 +45,5 @@ hal::status application(application_framework& p_framework)
         hal::print<64>(terminal, "RH Levels: %f\n", RH_levels);
 
     }
-
-  return hal::success();
 }
 }  // namespace sjsu::science

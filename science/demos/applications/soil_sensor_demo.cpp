@@ -15,7 +15,7 @@ using namespace std::chrono_literals;
 
 
 
- hal::result<hal::i2c::transaction_t> probe(
+ hal::i2c::transaction_t probe(
   hal::i2c& p_i2c,
   hal::byte p_address, hal::steady_clock& p_steady_clock, hal::time_duration p_duration) {
   // p_data_in: empty placeholder for transcation's data_in
@@ -27,7 +27,7 @@ using namespace std::chrono_literals;
   return p_i2c.transaction(p_address, std::span<hal::byte>{}, data_in, timeout);
 }
 
-hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_clock) {
+void probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_clock) {
   hal::print(console, "\n\nProbing i2c2\n");
   i2c = i2c;
   for(hal::byte addr = 0x08; addr < 0x78; addr++) {
@@ -42,8 +42,6 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_
     }
   }
   hal::print(console, "\n");
-
-  return hal::success();
 }
 
 
@@ -65,7 +63,7 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_
 
 namespace sjsu::science {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   // auto& i2c = *p_framework.i2c;

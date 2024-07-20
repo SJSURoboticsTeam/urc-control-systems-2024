@@ -11,7 +11,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-hal::status probe_bus(hal::i2c& i2c, hal::serial& console) {
+void probe_bus(hal::i2c& i2c, hal::serial& console) {
   hal::print(console, "\n\nProbing i2c2\n");
   for(hal::byte addr = 0x08; addr < 0x78; addr++) {
     if (hal::probe(i2c, addr)) {
@@ -25,7 +25,6 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console) {
   }
   hal::print(console, "\n");
 
-  return hal::success();
 }
 
 
@@ -61,7 +60,7 @@ void print_binary(hal::serial& console, hal::byte val) {
 
 namespace sjsu::science {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   auto& i2c = *p_framework.i2c;
@@ -115,7 +114,5 @@ hal::status application(application_framework& p_framework)
       hal::print<40>(console, "| %-3.1f | %-8.2f | %-4.1f | %-4.1f |\n", readings.temperature, average_pressure / 1000, readings.humidity, height - init_height);
     }
   }
-
-  return hal::success();
 }
 }  // namespace sjsu::science
