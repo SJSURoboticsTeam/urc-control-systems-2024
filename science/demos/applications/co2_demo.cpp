@@ -12,14 +12,14 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 namespace sjsu::science {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   auto& i2c2 = *p_framework.i2c;
   auto& clock = *p_framework.steady_clock;
   auto& terminal = *p_framework.terminal;
 
-  auto co2_sensor = HAL_CHECK(science::co2_sensor::create(i2c2, clock));
+  auto co2_sensor = science::co2_sensor::create(i2c2, clock);
 
   while (true) {
     hal::delay(clock, 500ms);
@@ -27,7 +27,5 @@ hal::status application(application_framework& p_framework)
     hal::print<64>(terminal, "C02: %d\n", co2_level);
     hal::delay(clock, 1ms);
   }
-
-  return hal::success();
 }
 }  // namespace sjsu::science

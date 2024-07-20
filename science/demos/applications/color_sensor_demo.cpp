@@ -11,7 +11,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-hal::status probe_bus(hal::i2c& i2c, hal::serial& console) {
+void probe_bus(hal::i2c& i2c, hal::serial& console) {
   hal::print(console, "\n\nProbing i2c2\n");
   for(hal::byte addr = 0x08; addr < 0x78; addr++) {
     if (hal::probe(i2c, addr)) {
@@ -24,13 +24,11 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console) {
     }
   }
   hal::print(console, "\n");
-
-  return hal::success();
 }
 
 namespace sjsu::science {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   auto& i2c2 = *p_framework.i2c;
@@ -38,17 +36,15 @@ hal::status application(application_framework& p_framework)
   auto& terminal = *p_framework.terminal;
 
   hal::print(terminal, "hi\n");
-  HAL_CHECK(probe_bus(i2c2, terminal));
+  probe_bus(i2c2, terminal);
 
   //create the stuff here
-  auto color_sensor = HAL_CHECK(science::opt4048::create(i2c2, clock, terminal));
+  auto color_sensor = science::opt4048::create(i2c2, clock, terminal);
   while(true){
     hal::print(terminal, "\nnew measurement\n");
-    auto readings = HAL_CHECK(color_sensor.get_data());
+    auto readings = color_sensor.get_data();
     hal::print<40>(terminal, "R: %f\t G: %f\t B: %f\n", readings.r, readings.g, readings.b);
     hal::delay(clock, 50ms);
   }
-
-  return hal::success();
 }
 }  // namespace sjsu::science

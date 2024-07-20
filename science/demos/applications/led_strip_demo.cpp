@@ -28,7 +28,7 @@ struct effect_hardware {
  * @param period 
  * @return hal::status 
  */
-hal::status beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
+void beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
   hal::time_duration half_period = period / 2;
   while(true) {
     hal::light_strip_util::set_all(hardware.lights, on_value);
@@ -46,7 +46,7 @@ hal::status beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness o
  * @param hardware 
  * @return hal::status 
  */
-hal::status rampup_rampdown(effect_hardware hardware) {
+void rampup_rampdown(effect_hardware hardware) {
   while (true) {
     for(auto i = hardware.lights.begin(); i != hardware.lights.end(); i ++) {
       *i = hal::colors::WHITE;
