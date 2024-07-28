@@ -41,22 +41,27 @@ hal::result<hal::bme::bme680> hal::bme::bme680::create(hal::i2c& p_i2c, hal::byt
   return bme;
 }
 
+hal::bme::bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) {
+    m_i2c = &p_i2c;
+    m_address = p_address;
+    bme.read_addr();
+    bme.soft_reset();
+    bme.get_calibration_coefficients();
+}
+
 hal::status hal::bme::bme680::soft_reset() {
   HAL_CHECK(write_register(0xE0, 0xB6));
 
   return hal::success();
 }
 
-[[nodiscard]] hal::result<hal::byte> hal::bme::bme680::read_addr() {
+[[nodiscard]] hal::byte hal::bme::bme680::read_addr() {
   std::array<hal::byte, 1> out;
   HAL_CHECK(read_registers(registers::id, out));
   return out[0];
 }
 
-hal::bme::bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) {
-    m_i2c = &p_i2c;
-    m_address = p_address;
-}
+
 
 
 hal::status hal::bme::bme680::set_filter_coefficient(filter_coeff coeff) {

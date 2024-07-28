@@ -42,12 +42,16 @@
 #include "../applications/application.hpp"
 
 namespace sjsu::science {
-hal::status initialize_processor()
+hardware_map_t initialize_processor()
 {
   hal::cortex_m::initialize_data_section();
   hal::cortex_m::initialize_floating_point_unit();
 
-  return hal::success();
+  hal::micromod::v1::initialize_platform();
+
+  return{
+    .pump_controller = &pump_controller,
+  };
 }
 
 hal::result<application_framework> initialize_platform()

@@ -21,7 +21,7 @@
 //   binary, decimal, hex
 // };
 
-namespace hal::bme {
+namespace sjsu::science {
 class bme680
 {
 public:
@@ -82,41 +82,35 @@ public:
   /// The device address when 0x76 is connected to GND.
   static constexpr hal::byte address_ground = 0x76;
 
-  /// @brief Create a new bme680 on an i2c bus at a given address.
-  /// @param p_i2c i2c bus of the device
-  /// @param p_address address of the bme680, defaults to 0x76
-  /// @return 
-  static result<bme680> create(hal::i2c& p_i2c, hal::byte p_address = address_ground);
-
 
   /// @brief Reads the "Chip Ident" register
   /// @return Should return the address of the chip
-  [[nodiscard]] hal::result<hal::byte> read_addr();
+  [[nodiscard]] hal::byte read_addr();
 
 
   /// @brief Reset the sensor
   /// @return 
-  [[nodiscard]] hal::status soft_reset();
+  void soft_reset();
 
   /// @brief Set the coefficient value of the onboard iir filter.
   /// @param coeff 
   /// @return v
-  [[nodiscard]] hal::status set_filter_coefficient(filter_coeff coeff);
+  void set_filter_coefficient(filter_coeff coeff);
   /// @brief Set the oversampling values for each sensor.
   /// @param temp_osr Temperature oversampling
   /// @param press_osr Pressure oversampling
   /// @param humid_osr Humidity oversampling
   /// @return 
-  [[nodiscard]] hal::status set_oversampling(oversampling temp_osr,oversampling press_osr, oversampling humid_osr);
+  void set_oversampling(oversampling temp_osr,oversampling press_osr, oversampling humid_osr);
 
   /// @brief Set the current mode of the sensor
   /// @param p_mode 
   /// @return 
-  [[nodiscard]] hal::status set_mode(mode p_mode);
+  void set_mode(mode p_mode);
 
   /// @brief Gets the calibration coefficients on the chip
   /// @return 
-  [[nodiscard]] hal::status get_calibration_coefficients();
+  void get_calibration_coefficients();
 
   /// @brief Readings from the sensor
   struct readings_t {
@@ -127,7 +121,7 @@ public:
 
   /// @brief Sets the mode to forced and reads a single measurement.
   /// @return The readings from the sensor
-  [[nodiscard]] hal::result<readings_t> get_data();
+  [[nodiscard]] readings_t get_data();
 
   /// @brief Print calibration coefficients. For debugging
   /// @param console Console to print to
@@ -150,12 +144,12 @@ private:
   /// @param register_address Address of register
   /// @param value Value to write
   /// @return 
-  [[nodiscard]] hal::status write_register(hal::byte register_address, hal::byte value);
+  void write_register(hal::byte register_address, hal::byte value);
   /// @brief Burst read bytes starting from a register. Reads towards higher memory.
   /// @param register_address Address of register to begin reading from.
   /// @param out Buffer to store read bytes.
   /// @return 
-  [[nodiscard]] hal::status read_registers(hal::byte register_address, std::span<hal::byte> out);
+  void read_registers(hal::byte register_address, std::span<hal::byte> out);
 
   /// @brief Structure with compensated and fine temp. Used internally. Check the datasheet.
   struct compensated_temp{

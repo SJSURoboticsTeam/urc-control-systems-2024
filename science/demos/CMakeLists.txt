@@ -18,31 +18,17 @@ project(demos LANGUAGES CXX)
 
 libhal_build_demos(
   DEMOS
-  co2_demo
-  pressure_sensor_demo
-  soil_sensor_demo
   scd40_demo
-  color_sensor_demo
-  led_strip_demo
-  pump_manager_demo
-  esp8266_demo
+
 
   SOURCES
   ../platform-implementations/scd40.cpp
-  ../platform-implementations/pressure_sensor_bme680.cpp
-  ../platform-implementations/soil_sensor_sht21.cpp
-  ../platform-implementations/color_sensor_opt4048.cpp
-  ../platform-implementations/pump_manager.cpp
-  ../platform-implementations/esp8266_mission_control.cpp
-  
 
   PACKAGES
   libhal-lpc40
   libhal-util
-  libhal-esp8266
 
   LINK_LIBRARIES
   libhal::lpc40
   libhal::util
-  libhal::esp8266
 )

@@ -17,28 +17,11 @@ namespace sjsu::science {
         m_pumps[4] = &p_biuret_reagent;
     };
 
-    hal::result<pump_manager> pump_manager::create(
-        hal::steady_clock& p_clock,
-        hal::output_pin& p_deionized_water_pump, 
-        hal::output_pin& p_sample_pump, 
-        hal::output_pin& p_molisch_reagent_pump, 
-        hal::output_pin& p_sulfuric_acid_pump, 
-        hal::output_pin& p_biuret_reagent
-    ) {
-       return pump_manager(
-            p_clock,
-            p_deionized_water_pump,
-            p_sample_pump,
-            p_molisch_reagent_pump,
-            p_sulfuric_acid_pump,
-            p_biuret_reagent);
-    };
 
-    hal::status pump_manager::pump(pumps pump, hal::time_duration duration) {
-        HAL_CHECK((*(m_pumps[static_cast<int>(pump)])).level(true));
+    void pump_manager::pump(pumps pump, hal::time_duration duration) {
+        (*(m_pumps[static_cast<int>(pump)])).level(true);
         hal::delay(m_clock, duration);
-        HAL_CHECK((*(m_pumps[static_cast<int>(pump)])).level(false));
-        return hal::success();
+        (*(m_pumps[static_cast<int>(pump)])).level(false);
     }
 
 }

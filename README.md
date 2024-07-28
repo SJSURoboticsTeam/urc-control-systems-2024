@@ -10,7 +10,7 @@ For the `lpc4078 micro mod`:
 
 For the `lpc4078`
 ```bash
-conan build . -pr mod-lpc-v5 -pr arm-gcc-12.3
+conan build . -pr mod-lpc40-v5 -pr arm-gcc-12.3
 ```
 ```bash
 conan build . -pr lpc4078 -pr arm-gcc-12.3

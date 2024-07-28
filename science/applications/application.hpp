@@ -29,7 +29,7 @@
 
 
 namespace sjsu::science {
-struct application_framework
+struct hardware_map_t
 {
   // hal::input_pin* in_deionized_water_pump_pin;
   // hal::input_pin* in_sample_pump_pin;
@@ -56,8 +56,7 @@ struct application_framework
 
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.
-hal::status initialize_processor();
-hal::result<application_framework> initialize_platform();
-hal::status application(application_framework& p_framework);
+hardware_map_t initialize_platform();
+void application(hardware_map_t& p_framework);
 
 }  // namespace sjsu::science
