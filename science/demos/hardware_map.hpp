@@ -19,11 +19,12 @@
 #include <libhal/functional.hpp>
 #include <libhal/i2c.hpp>
 #include <libhal/input_pin.hpp>
+#include <libhal/output_pin.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 struct application_framework
 {
   hal::serial* terminal;
@@ -31,11 +32,15 @@ struct application_framework
   hal::input_pin* in_pin0;
   hal::input_pin* in_pin1;
   hal::input_pin* in_pin2;
-  hal::pwm* pwm_1_6;
-  hal::pwm* pwm_1_5;
-  hal::adc* adc_4;
-  hal::adc* adc_5;
-  hal::serial* esp;
+  hal::output_pin* led;
+  hal::output_pin* out_pin0;
+  hal::output_pin* out_pin1;
+  hal::output_pin* out_pin2;
+  hal::pwm* pwm0;
+  hal::pwm* pwm1;
+  hal::adc* adc0;
+  hal::adc* adc1;
+  // hal::serial* esp;
   hal::i2c* i2c;
   hal::steady_clock* steady_clock;
   hal::callback<void()> reset;
@@ -43,8 +48,8 @@ struct application_framework
 
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.
-hal::status initialize_processor();
-hal::result<application_framework> initialize_platform();
-hal::status application(application_framework& p_framework);
+void initialize_processor();
+application_framework initialize_platform();
+void application(application_framework& p_framework);
 
 }  // namespace sjsu::science

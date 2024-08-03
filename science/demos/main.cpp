@@ -11,25 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#include <libhal/error.hpp>
 #include "hardware_map.hpp"
 
 int main()
 {
-  auto platform_status = sjsu::science::initialize_platform();
-
-  if (!platform_status) {
-    hal::halt();
-  }
-
-  auto hardware_map = platform_status.value();
-  auto is_finished = application(hardware_map);
-
-  if (!is_finished) {
-    hardware_map.reset();
-  } else {
-    hal::halt();
-  }
+  auto hardware_map = sjsu::drivers::initialize_platform();
+  
+  application(hardware_map);
 
   return 0;
 }

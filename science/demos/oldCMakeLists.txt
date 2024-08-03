@@ -1,4 +1,4 @@
-# Copyright 2024 Khalil Estell
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ cmake_minimum_required(VERSION 3.20)
 project(demos LANGUAGES CXX)
 
 libhal_build_demos(
-    DEMOS
+  DEMOS
 #  co2_demo
 #  pressure_sensor_demo
 #  soil_sensor_demo
@@ -25,12 +25,15 @@ libhal_build_demos(
 #  color_sensor_demo
 #  led_strip_demo
 
-SOURCES
-    ../platform-implementations/scd40.cpp
-    ./platforms/micromod.cpp
-    PACKAGES
-#    libhal-__device__
+  SOURCES
+  ../platform-implementations/scd40.cpp
+#  ../platform-implementations/pressure_sensor_bme680.cpp
+#  ../platform-implementations/soil_sensor_sht21.cpp
+#  ../platform-implementations/color_sensor_opt4048.cpp
 
-    LINK_LIBRARIES
-#    libhal::__device__
+  PACKAGES
+  libhal-util
+
+  LINK_LIBRARIES
+  libhal::util
 )

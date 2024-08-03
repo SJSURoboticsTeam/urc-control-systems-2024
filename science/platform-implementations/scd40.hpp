@@ -7,12 +7,11 @@
 
 //TODO: maybe later add CRC and config for altitude, ambient pressure, temperature offset (or look at setting persistent values)
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 class scd40
 {
 private:
 
-    scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock);
     hal::i2c& m_i2c;
     hal::steady_clock& m_clock;
     hal::byte generate_crc(std::array<hal::byte, 2> data);
@@ -61,12 +60,12 @@ public:
         float altitude;
     };
 
-    static hal::result<scd40> create(hal::i2c& p_i2c,hal::steady_clock& p_clock);
-    hal::status start();
-    hal::result<scd40_read_data> read();
-    hal::status stop();
-    hal::result<scd40_settings> get_settings();
-    hal::status set_settings( settings setting);
+    scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock);
+    void start();
+    scd40_read_data read();
+    void stop();
+    scd40_settings get_settings();
+    void set_settings( settings setting);
 };
 
 } // namespace science
