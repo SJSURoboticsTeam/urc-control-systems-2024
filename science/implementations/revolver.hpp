@@ -3,7 +3,7 @@
 #include <libhal-lpc40/clock.hpp>
 #include <libhal-soft/rc_servo.hpp>
 #include <libhal-lpc40/pwm.hpp>
-#include <libhal-pca/pca9685.hpp>
+// #include <libhal-pca/pca9685.hpp>
 #include <libhal-lpc40/input_pin.hpp>
 #include <libhal-util/units.hpp>
 #include <libhal-util/serial.hpp>
@@ -47,11 +47,11 @@ namespace sjsu::science {
             hal::steady_clock& steady_clock_my;
             hal::serial& terminal_my;
 
-            hal::status revolverState(hal::degrees rotationState);
-            revolver(hal::servo& p_servo, hal::input_pin& p_input_pin, hal::steady_clock& p_steady_clock, hal::serial& p_terminal);
+            void revolverState(hal::degrees rotationState);
+            
 
         public:
-            static hal::result<revolver> create(hal::servo& p_servo, hal::input_pin& p_input_pin, hal::steady_clock& p_steady_clock, hal::serial& p_terminal);                             
-            hal::status revolverMoveVials(int vial);
+            revolver(hal::servo& p_servo, hal::input_pin& p_input_pin, hal::steady_clock& p_steady_clock, hal::serial& p_terminal);
+            void revolverMoveVials(int vial);
     };
 }

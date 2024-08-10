@@ -3,7 +3,7 @@
 #include <libhal-util/i2c.hpp>
 
 
-namespace hal::sht {
+namespace sjsu::science {
   class sht21 {
     public:
       const static hal::byte sht21_i2c_address = 0x40;
@@ -26,14 +26,16 @@ namespace hal::sht {
        * @param p_address I2C address of the device
        * @return hal::result<sht21> 
        */
-      static hal::result<sht21> create(hal::i2c& p_bus, hal::byte p_address = sht21_i2c_address);
+      static sht21 create(hal::i2c& p_bus, hal::byte p_address = sht21_i2c_address);
+
+      sht21(hal::i2c& p_bus, hal::byte p_address);
       
       /**
        * @brief Soft reset the sensor.
        * 
        * @return hal::status 
        */
-      hal::status soft_reset();
+      void soft_reset();
 
       /**
        * @brief Set the resolution of the relative humidity and temperature sensor.
@@ -42,7 +44,7 @@ namespace hal::sht {
        * @param p_resolution 
        * @return hal::status 
        */
-      hal::status set_resolution(resolution p_resolution);
+      void set_resolution(resolution p_resolution);
 
       /**
        * @brief Returns true when VDD on the sensor is less than 2.25 V
@@ -50,7 +52,7 @@ namespace hal::sht {
        * 
        * @return hal::result<bool> 
        */
-      hal::result<bool> is_low_battery();
+      bool is_low_battery();
 
       /**
        * @brief Enable or disable the on-chip heater.
@@ -59,21 +61,21 @@ namespace hal::sht {
        * @param p_enabled Defaults to true (enable)
        * @return hal::status 
        */
-      hal::status enable_heater(bool p_enabled = true);
+      void enable_heater(bool p_enabled = true);
 
       /**
        * @brief Perform a single relative humidity measurement. This will block until the measurement is ready.
        * 
        * @return hal::result<double> 
        */
-      hal::result<double> get_relative_humidity();
+      double get_relative_humidity();
 
       /**
        * @brief Perform a single relative humidity measurement. This will block until the measurement is ready.
        * 
        * @return hal::result<double> 
        */
-      hal::result<double> get_temperature();
+      double get_temperature();
 
     private:
       
@@ -99,6 +101,5 @@ namespace hal::sht {
        */
       hal::byte m_address;
   
-      sht21(hal::i2c& p_bus, hal::byte p_address);
   };
 };

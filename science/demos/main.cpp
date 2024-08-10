@@ -13,30 +13,18 @@
 // limitations under the License.
 
 #include "hardware_map.hpp"
+sjsu::science::application_framework platform_status{};
 
 int main()
 {
-  auto platform_status = sjsu::science::initialize_platform();
-
-  if (!platform_status) {
+ 
+  try{
+    platform_status = sjsu::science::initialize_platform();
+  }catch(...){
     hal::halt();
   }
-
-  auto hardware_map = platform_status.value();
-  auto is_finished = application(hardware_map);
-
-  if (!is_finished) {
-    hardware_map.reset();
-  } else {
-    hal::halt();
-  }
+  sjsu::science::application(platform_status);
 
   return 0;
 }
 
-namespace boost {
-void throw_exception(std::exception const&)
-{
-  hal::halt();
-}
-}  // namespace boost

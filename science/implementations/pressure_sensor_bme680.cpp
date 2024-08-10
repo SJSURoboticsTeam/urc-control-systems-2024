@@ -18,6 +18,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
+using namespace sjsu::science{
 
 // static void print_byte_array(hal::serial& console, std::span<hal::byte> arr) {
 //   for(auto& i : arr) {
@@ -31,48 +32,40 @@ using namespace std::chrono_literals;
 //   }
 // }
 
-hal::result<hal::bme::bme680> hal::bme::bme680::create(hal::i2c& p_i2c, hal::byte p_address) {
-  bme680 bme(p_i2c, p_address);
 
-  HAL_CHECK(bme.read_addr());
-  HAL_CHECK(bme.soft_reset());
-  HAL_CHECK(bme.get_calibration_coefficients());
-
-  return bme;
+bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) {
+    m_i2c = &p_i2c;
+    m_address = p_address;
+    bme.read_addr();
+    bme.soft_reset();
+    bme.get_calibration_coefficients();
 }
 
-hal::status hal::bme::bme680::soft_reset() {
-  HAL_CHECK(write_register(0xE0, 0xB6));
-
-  return hal::success();
+void bme680::soft_reset() {
+  write_register(0xE0, 0xB6);
 }
 
-[[nodiscard]] hal::result<hal::byte> hal::bme::bme680::read_addr() {
+[[nodiscard]] hal::byte bme680::read_addr() {
   std::array<hal::byte, 1> out;
-  HAL_CHECK(read_registers(registers::id, out));
+  read_registers(registers::id, out);
   return out[0];
 }
 
-hal::bme::bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) {
-    m_i2c = &p_i2c;
-    m_address = p_address;
-}
 
-
-hal::status hal::bme::bme680::set_filter_coefficient(filter_coeff coeff) {
+voiid bme680::set_filter_coefficient(filter_coeff coeff) {
   std::array<hal::byte, 1> out;
-  HAL_CHECK(read_registers(registers::config, out));
+  read_registers(registers::config, out);
   
   hal::byte original_value = out[0];
   hal::byte new_value = (original_value & (0b11100011)) | (coeff << 2);
 
-  HAL_CHECK(write_register(registers::config, new_value));
-  
-  return hal::success();
+  write_register(registers::config, new_value);
+
 }
-hal::status hal::bme::bme680::set_oversampling(oversampling temp_osr,oversampling press_osr, oversampling humid_osr) {
+
+void bme680::set_oversampling(oversampling temp_osr,oversampling press_osr, oversampling humid_osr) {
   std::array<hal::byte, 2> out;
-  HAL_CHECK(read_registers(registers::ctrl_hum, out));
+  read_registers(registers::ctrl_hum, out);
   
   hal::byte ctrl_meas_original_value = out[1];
   hal::byte ctrl_meas_new_value = (ctrl_meas_original_value & (0b00000011)) | (((hal::byte) temp_osr) << 5) | (((hal::byte) press_osr) << 2);
@@ -80,23 +73,20 @@ hal::status hal::bme::bme680::set_oversampling(oversampling temp_osr,oversamplin
   hal::byte ctrl_hum_original_value = out[0];
   hal::byte ctrl_hum_new_value = (ctrl_hum_original_value & (0b11111000)) | (((hal::byte) humid_osr) << 0);
 
-  HAL_CHECK(write_register(registers::ctrl_hum, ctrl_hum_new_value));
+  write_register(registers::ctrl_hum, ctrl_hum_new_value);
   // hal::delay(*m_steady_clock, 20ms); // Wait 10ms for readings.s
-  HAL_CHECK(write_register(registers::ctrl_meas, ctrl_meas_new_value));
+  write_register(registers::ctrl_meas, ctrl_meas_new_value);
   
-  return hal::success();
 }
 
-hal::status hal::bme::bme680::set_mode(mode p_mode) {
+void bme680::set_mode(mode p_mode) {
   std::array<hal::byte, 1> out;
-  HAL_CHECK(read_registers(registers::ctrl_meas, out));
+  read_registers(registers::ctrl_meas, out);
   
   hal::byte original_value = out[0];
   hal::byte new_value = (original_value & (0b11111100)) | (p_mode << 0);
 
-  HAL_CHECK(write_register(registers::ctrl_meas, new_value));
-
-  return hal::success();
+  write_register(registers::ctrl_meas, new_value);
 }
 
 static int16_t combine(uint8_t upper, uint8_t lower) {
@@ -152,16 +142,16 @@ static int16_t combine(uint8_t upper, uint8_t lower) {
 //   return hal::success();
 // }
 
-hal::status hal::bme::bme680::get_calibration_coefficients() {
+void bme680::get_calibration_coefficients() {
   // CHECK THE DATASHEET
   std::array<hal::byte, 0xA0-0x8A + 1> reg8A_regA0;
-  HAL_CHECK(read_registers(0x8A, reg8A_regA0));
+  read_registers(0x8A, reg8A_regA0);
 
   auto span_reg8A_regA0 = std::span(reg8A_regA0);
-  HAL_CHECK(read_registers(0x8A, span_reg8A_regA0.subspan(0, 8)));
+  read_registers(0x8A, span_reg8A_regA0.subspan(0, 8));
 
   std::array<hal::byte, 0xEE - 0xE1 + 1> regE1_regEE;
-  HAL_CHECK(read_registers(0xE1, regE1_regEE));
+  read_registers(0xE1, regE1_regEE);
 
   coefficients.par_t1 = combine(regE1_regEE[0xEA - 0xE1],regE1_regEE[0xE9 - 0xE1]);
   coefficients.par_t2 = combine(reg8A_regA0[0x8B - 0x8A], reg8A_regA0[0x8A - 0x8A]);
@@ -192,7 +182,6 @@ hal::status hal::bme::bme680::get_calibration_coefficients() {
   coefficients.par_g2 = combine(regE1_regEE[0xEC - 0xE1], regE1_regEE[0xEB - 0xE1]);
   coefficients.par_g3 = combine(0, regE1_regEE[0xEE - 0xE1]);
 
-  return hal::success();
 }
 
 // hal::result<hal::bme::bme680::readings_t> hal::bme::bme680::get_data(hal::serial& console) {
@@ -230,14 +219,14 @@ hal::status hal::bme::bme680::get_calibration_coefficients() {
 // }
 
 
-hal::result<hal::bme::bme680::readings_t> hal::bme::bme680::get_data() {
+bme680::readings_t bme680::get_data() {
   // Set the bme680 into forced mode
-  HAL_CHECK(set_mode(mode::forced));
+  set_mode(mode::forced);
   // hal::delay(*m_steady_clock, 1ms); // Wait 1ms for readings.
 
 
   std::array<hal::byte, 8> buffer;
-  HAL_CHECK(read_registers(registers::pressure_msb, buffer));
+  read_registers(registers::pressure_msb, buffer);
 
   uint32_t humidity_raw = (((uint32_t) buffer[6]) << 8) | ((uint32_t) buffer[7]);
   uint32_t temperature_raw = (((uint32_t) buffer[3]) << 12) | (((uint32_t) buffer[4]) << 4) | ((uint32_t) buffer[5] >> 4);
@@ -254,27 +243,25 @@ hal::result<hal::bme::bme680::readings_t> hal::bme::bme680::get_data() {
   return out;
 }
 
-hal::status hal::bme::bme680::write_register(hal::byte register_address, hal::byte value) {
-  HAL_CHECK(hal::write(
+  void bme680::write_register(hal::byte register_address, hal::byte value) {
+ hal::write(
     *m_i2c, 
     m_address,
      std::array<hal::byte,2> { register_address, value }, 
-     hal::never_timeout()));
+     hal::never_timeout());
 
-  return hal::success();
 }
 
-hal::status hal::bme::bme680::read_registers(hal::byte register_address, std::span<hal::byte> out) {
-  HAL_CHECK(hal::write_then_read(*m_i2c,
+void bme680::read_registers(hal::byte register_address, std::span<hal::byte> out) {
+  hal::write_then_read(*m_i2c,
                                  m_address,
                                  std::array<hal::byte, 1> { register_address },
                                  out,
-                                 hal::never_timeout()));
+                                 hal::never_timeout());
 
-  return hal::success();
 }
 
-hal::bme::bme680::compensated_temp hal::bme::bme680::compensate_temp(double temp_adc) {
+bme680::compensated_temp bme680::compensate_temp(double temp_adc) {
   // CHECK THE DATASHEET
   double var1 = ((((double)temp_adc) / 16384.0) - (((double)coefficients.par_t1) / 1024.0)) * ((double)coefficients.par_t2);
   double var2 = (((((double)temp_adc) / 131072.0) - (((double)coefficients.par_t1) / 8192.0)) *
@@ -285,7 +272,8 @@ hal::bme::bme680::compensated_temp hal::bme::bme680::compensate_temp(double temp
   out.t_comp = out.t_fine / 5120.0;
   return out;
 }
-double hal::bme::bme680::compensate_pressure(double t_fine, double press_adc) {
+
+double bme680::compensate_pressure(double t_fine, double press_adc) {
   // CHECK THE DATASHEET
 
   double var1 = ((double)t_fine / 2.0) - 64000.0;
@@ -305,7 +293,7 @@ double hal::bme::bme680::compensate_pressure(double t_fine, double press_adc) {
   ((double)coefficients.par_p7 * 128.0)) / 16.0;
   return press_comp;
 }
-double hal::bme::bme680::compensate_humidity(double temp_comp, double hum_adc) {
+double bme680::compensate_humidity(double temp_comp, double hum_adc) {
   // CHECK THE DATASHEET
 
   double var1 = hum_adc - (((double) coefficients.par_h1 * 16.0) + (((double) coefficients.par_h3 / 2.0) * temp_comp));
@@ -371,13 +359,13 @@ double hal::bme::bme680::compensate_humidity(double temp_comp, double hum_adc) {
 // }
 
 
-void hal::bme::bme680::print_calibration_coefficients(hal::serial& console) {
+void bme680::print_calibration_coefficients(hal::serial& console) {
   hal::print<512>(console, "Temp Coefficients: %10d %10d %10d\n", coefficients.par_t1, coefficients.par_t2, coefficients.par_t3);
   hal::print<512>(console, "Press Coefficients:\n%10d %10d %10d\n%10d %10d %10d\n%10d %10d %10d\n%10d %10d %10d\n%10d\n", coefficients.par_p1, coefficients.par_p2, coefficients.par_p3, coefficients.par_p4, coefficients.par_p5, coefficients.par_p6, coefficients.par_p7, coefficients.par_p8, coefficients.par_p9, coefficients.par_p10);
   hal::print<512>(console, "Humidity Coefficients:\n%10d %10d %10d\n%10d %10d %10d\n%10d\n", coefficients.par_h1, coefficients.par_h2, coefficients.par_h3, coefficients.par_h4, coefficients.par_h5, coefficients.par_h6, coefficients.par_h7);
   
+ }
 }
-
 // static int get_bit_value(hal::byte value, hal::byte bit_position) {
 //   return (value >> bit_position) & 0x01;
 // }
@@ -426,3 +414,4 @@ void hal::bme::bme680::print_calibration_coefficients(hal::serial& console) {
 //     return;
 //   }
 // }
+

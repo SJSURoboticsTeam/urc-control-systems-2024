@@ -1,6 +1,6 @@
 #pragma once
 #include "../applications/application.hpp"
-#include "mission_control.hpp"
+// #include "mission_control.hpp"
 #include <libhal/servo.hpp>
 #include <libhal/units.hpp>
 
@@ -10,10 +10,10 @@ namespace sjsu::science {
 class science_state_machine
 {
 private:
-  science_state_machine(sjsu::science::application_framework& p_application, sjsu::science::mission_control::status& p_status);  
-  sjsu::science::application_framework& hardware;
+  hardware_map_t& hardware;
   int m_count;
-  sjsu::science::mission_control::status sm_m_status;
+  int vials_used;
+  // mission_control::status sm_m_status;
 
 public:
   // struct status
@@ -28,6 +28,9 @@ public:
   // };
   // status m_status;
 
+  //Pass in status and update with can
+  science_state_machine(sjsu::science::hardware_map_t& application);
+
   enum class science_states
   {
     GET_SAMPLES,
@@ -41,18 +44,16 @@ public:
   // vial2_position current_position= SAMPLE;
   // science_states current_state= GET_SAMPLES;
 
-  static hal::result<science_state_machine> create(
-    application_framework& p_application, sjsu::science::mission_control::status& p_status );
-  hal::status run_state_machine(science_states current_state);
+  void run_state_machine(science_states current_state);
 
-  hal::status mix_solution();
-  hal::status turn_on_pump(auto pump, hal::time_duration duration);
-  hal::status move_sample(int position);
-  hal::status containment_reset();
+  void mix_solution();
+  void turn_on_pump(auto pump, hal::time_duration duration);
+  void move_sample(int position);
+  void containment_reset();
 
   int get_num_vials_left();
-  mission_control::status get_status();
-  // hal::status turn_off_pumps();
+
+  // mission_control::status get_status();
 };
 
 }  // namespace sjsu::science

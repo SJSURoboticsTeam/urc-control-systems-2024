@@ -12,14 +12,14 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 namespace sjsu::science {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   auto& i2c2 = *p_framework.i2c;
   auto& clock = *p_framework.steady_clock;
   auto& terminal = *p_framework.terminal;
   
-  auto scd40_sensor = HAL_CHECK(scd40::create(i2c2, clock));
+  auto scd40_sensor = scd40::create(i2c2, clock);
 
   while(true){
         //get settings test
@@ -46,6 +46,5 @@ hal::status application(application_framework& p_framework)
 
     }
 
-  return hal::success();
 }
 }  // namespace sjsu::science
