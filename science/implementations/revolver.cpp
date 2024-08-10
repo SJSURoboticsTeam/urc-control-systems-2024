@@ -26,9 +26,9 @@ namespace sjsu::science {
 
             while (count < vial) 
             {
-                hallState = input_pin_my.level().value().state;
+                hallState = input_pin_my.level();
                 hal::delay(steady_clock_my, m_delay);
-                hallStateDelayed = input_pin_my.level().value().state;
+                hallStateDelayed = input_pin_my.level();
 
                 if (hallState != hallStateDelayed)
                 {

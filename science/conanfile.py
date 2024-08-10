@@ -18,15 +18,12 @@ required_conan_version = ">=2.0.14"
 
 
 class demos(ConanFile):
-    python_requires = "libhal-bootstrap/[^2.1.1]"
+    python_requires = "libhal-bootstrap/[^3.0.0]"
     python_requires_extend = "libhal-bootstrap.demo"
     
     def requirements(self):
         bootstrap = self.python_requires["libhal-bootstrap"]
         bootstrap.module.add_demo_requirements(self)  
-        self.requires("libhal/[^2.0.3]")
-        self.requires("libhal-util/[^3.0.1]")
-        self.requires("libhal-rmd/[^3.0.0]")
-        self.requires("libhal-soft/[^3.0.0]")
-        self.requires("libhal-pca/[^2.0.0]")
-        self.requires("libhal-esp8266/[^2.0.1]")
+        self.requires("libhal-soft/[^5.1.0]")
+        self.requires("libhal-pca/[^4.0.0]")
+        # self.requires("libhal-esp8266/[^2.0.1]")

@@ -1,6 +1,6 @@
 #pragma once
 #include "../applications/application.hpp"
-#include "mission_control.hpp"
+// #include "mission_control.hpp"
 #include <libhal/servo.hpp>
 #include <libhal/units.hpp>
 
@@ -10,9 +10,10 @@ namespace sjsu::science {
 class science_state_machine
 {
 private:
-  application_framework& hardware;
+  hardware_map_t& hardware;
   int m_count;
-  mission_control::status sm_m_status;
+  int vials_used;
+  // mission_control::status sm_m_status;
 
 public:
   // struct status
@@ -27,7 +28,8 @@ public:
   // };
   // status m_status;
 
-  science_state_machine(application_framework& p_application, mission_control::status& p_status);
+  //Pass in status and update with can
+  science_state_machine(sjsu::science::hardware_map_t& application);
 
   enum class science_states
   {
@@ -42,7 +44,6 @@ public:
   // vial2_position current_position= SAMPLE;
   // science_states current_state= GET_SAMPLES;
 
-  science_state_machine(application_framework& p_application, mission_control::status& p_status);
   void run_state_machine(science_states current_state);
 
   void mix_solution();
@@ -51,8 +52,8 @@ public:
   void containment_reset();
 
   int get_num_vials_left();
-  mission_control::status get_status();
-  // hal::status turn_off_pumps();
+
+  // mission_control::status get_status();
 };
 
 }  // namespace sjsu::science
