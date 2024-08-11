@@ -8,7 +8,7 @@
 #include <libhal-util/streams.hpp>
 #include <libhal-util/timeout.hpp>
 #include <libhal/timeout.hpp>
-#include "mission_control.hpp"
+#include "../include/mission_control.hpp"
 
 namespace sjsu::science {
 

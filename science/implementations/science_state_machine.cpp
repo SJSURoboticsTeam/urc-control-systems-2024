@@ -1,4 +1,4 @@
-#include "science_state_machine.hpp"
+#include "../include/science_state_machine.hpp"
 #include <applications/application.hpp>
 
 using namespace std::chrono_literals;
@@ -9,7 +9,6 @@ namespace sjsu::science{
         m_count = 0;
         vials_used = 0;
     }
-// pass in mission control status intialize m_status
    
     void science_state_machine::run_state_machine(science_state_machine::science_states state){
         switch(state){

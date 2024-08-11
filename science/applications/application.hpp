@@ -24,8 +24,8 @@
 #include <libhal/steady_clock.hpp>
 
 // #include <implementations/mission_control.hpp>
-#include <implementations/pump_manager.hpp>
-#include <implementations/revolver.hpp>
+#include "../drivers/include/pump_manager.hpp"
+#include "../drivers/include/revolver.hpp"
 
 
 namespace sjsu::science {
@@ -39,8 +39,6 @@ struct hardware_map_t
   hal::steady_clock* steady_clock;
   hal::serial* terminal;
   // mission_control* mc;
-  // hal::can* can;
-  // hal::i2c* i2c;
   hal::callback<void()> reset;
 };
 

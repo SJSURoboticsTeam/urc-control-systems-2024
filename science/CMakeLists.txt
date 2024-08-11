@@ -23,7 +23,7 @@ libhal_build_demos(
     .
 
     SOURCES
-    implementations/pump_manager.cpp
-    implementations/revolver.cpp
+    ../drivers/src/pump_manager.cpp
+    ../drivers/src/revolver.cpp
     implementations/science_state_machine.cpp
 ) 
