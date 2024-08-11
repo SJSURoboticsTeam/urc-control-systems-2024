@@ -1,14 +1,17 @@
 // #pragma once
 
-#include "scd40.hpp"
+#include "../include/scd40.hpp"
 
 using namespace std::chrono_literals;
-using scd40_nm = sjsu::drivers::scd40;
+using scd40_nm = sjsu::science::scd40;
 
 
-scd40_nm::scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock) : m_i2c(p_i2c), m_clock(p_clock) {
+scd40_nm::scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock) {
+    m_i2c = p_i2c;
+    m_clock = p_clock;
     start();
 }
+
 
 void scd40_nm::start(){
     std::array<hal::byte, 2> start_address =  { start_periodic_measurement_first_half, start_periodic_measurement_second_half };
@@ -81,6 +84,7 @@ void scd40_nm::set_settings( struct settings setting) {
         hal::write(m_i2c,addresses::device_address,set_alt_address);
         hal::delay(m_clock, 1ms);
     }
+
 }
 
 hal::byte scd40_nm::generate_crc(std::array<hal::byte, 2> data){

@@ -6,7 +6,7 @@
 
 #include <array>
 #include "../hardware_map.hpp"
-#include "../../platform-implementations/sk9822.hpp"
+#include "../include/sk9822.hpp"
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
@@ -28,7 +28,7 @@ struct effect_hardware {
  * @param period 
  * @return hal::status 
  */
-void beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
+hal::status beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
   hal::time_duration half_period = period / 2;
   while(true) {
     hal::light_strip_util::set_all(hardware.lights, on_value);
@@ -46,7 +46,7 @@ void beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value
  * @param hardware 
  * @return hal::status 
  */
-void rampup_rampdown(effect_hardware hardware) {
+hal::status rampup_rampdown(effect_hardware hardware) {
   while (true) {
     for(auto i = hardware.lights.begin(); i != hardware.lights.end(); i ++) {
       *i = hal::colors::WHITE;

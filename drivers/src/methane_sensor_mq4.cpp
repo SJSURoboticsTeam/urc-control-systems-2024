@@ -4,7 +4,7 @@
 #include <libhal/adc.hpp>
 #include <cmath>
 
-#include "adc_sensor.hpp"
+#include "../include/adc_sensor.hpp"
 
 namespace sjsu::science{
 
@@ -19,8 +19,8 @@ public:
 
     /// @brief Returns read value from sensor in parts per million (PPM).
     /// @return The amount of methane near the sensor in PPM.
-    virtual hal::result<float> get_parsed_data() override{
-        float raw_adc_value = HAL_CHECK(read_raw_adc());
+    virtual float get_parsed_data() override{
+        float raw_adc_value = read_raw_adc();
 
         float ppm_value = static_cast<float>(std::pow(1000 * raw_adc_value, -2.95));
         return ppm_value;

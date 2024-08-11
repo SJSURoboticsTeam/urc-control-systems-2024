@@ -23,28 +23,28 @@
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 
+// #include <implementations/mission_control.hpp>
+#include "../drivers/include/pump_manager.hpp"
+#include "../drivers/include/revolver.hpp"
+
+
 namespace sjsu::science {
-struct application_framework
+struct hardware_map_t
 {
-  hal::serial* terminal;
-  hal::can* can;
-  hal::input_pin* in_pin0;
-  hal::input_pin* in_pin1;
-  hal::input_pin* in_pin2;
-  hal::pwm* pwm_1_6;
-  hal::pwm* pwm_1_5;
-  hal::adc* adc_4;
-  hal::adc* adc_5;
-  hal::serial* esp;
-  hal::i2c* i2c;
+  pump_manager* pump_controller;
+
+  hal::servo* mixing_servo;
+  revolver* revolver_controller;
+
   hal::steady_clock* steady_clock;
+  hal::serial* terminal;
+  // mission_control* mc;
   hal::callback<void()> reset;
 };
 
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.
-hal::status initialize_processor();
-hal::result<application_framework> initialize_platform();
-hal::status application(application_framework& p_framework);
+hardware_map_t initialize_platform();
+void application(hardware_map_t& p_framework);
 
 }  // namespace sjsu::science

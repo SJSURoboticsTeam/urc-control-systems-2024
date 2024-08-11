@@ -6,8 +6,8 @@
 #include <libhal/units.hpp>
 #include <libhal-lpc40/i2c.hpp>
 
-#include "../../platform-implementations/pressure_sensor_bme680.hpp"
-#include "../../platform-implementations/soil_sensor_sht21.hpp"
+#include "../include/pressure_sensor_bme680.hpp"
+#include "../include/soil_sensor_sht21.hpp"
 #include "../hardware_map.hpp"
 
 using namespace hal::literals;
@@ -15,7 +15,7 @@ using namespace std::chrono_literals;
 
 
 
- hal::i2c::transaction_t probe(
+ hal::result<hal::i2c::transaction_t> probe(
   hal::i2c& p_i2c,
   hal::byte p_address, hal::steady_clock& p_steady_clock, hal::time_duration p_duration) {
   // p_data_in: empty placeholder for transcation's data_in
@@ -27,7 +27,7 @@ using namespace std::chrono_literals;
   return p_i2c.transaction(p_address, std::span<hal::byte>{}, data_in, timeout);
 }
 
-void probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_clock) {
+hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_clock) {
   hal::print(console, "\n\nProbing i2c2\n");
   i2c = i2c;
   for(hal::byte addr = 0x08; addr < 0x78; addr++) {
@@ -42,6 +42,8 @@ void probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_
     }
   }
   hal::print(console, "\n");
+
+  return hal::success();
 }
 
 
@@ -63,7 +65,7 @@ void probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_
 
 namespace sjsu::science {
 
-void application(application_framework& p_framework)
+hal::status application(application_framework& p_framework)
 {
   // configure drivers
   // auto& i2c = *p_framework.i2c;

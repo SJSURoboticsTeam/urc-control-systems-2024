@@ -8,8 +8,8 @@ namespace sjsu::science {
 // functions we ened to make
 class opt4048
 {
-private:
-  opt4048(hal::i2c& p_i2c,hal::steady_clock& p_clock,hal::serial& p_terminal);
+// private:
+ 
 
   // constructor
 
@@ -78,9 +78,8 @@ public:
 												{ -0.9692660,  1.8760108,  0.0415560 },
 												{  0.0556434, -0.2040259,  1.0572252 }};
   int device_address = 0x44;  // not sure check this
-  static hal::result<opt4048> create(hal::i2c& p_i2c,
-                                hal::steady_clock& clock,
-                                hal::serial& p_terminal);
+  
+  opt4048(hal::i2c& p_i2c,hal::steady_clock& p_clock,hal::serial& p_terminal);
 
   // select light range
   // select conversiokn time
@@ -90,7 +89,7 @@ public:
   // somewhere in the middle
 
   // set register range on 0xA to 0xC
-  hal::status adjust_settings();  // keep it editable to see which performs optimally in the future
+  void adjust_settings();  // keep it editable to see which performs optimally in the future
 
   /**
    * @brief Takes in channel address and returns 2 bytes that were read
@@ -98,19 +97,19 @@ public:
    * @param buffer
    *
    */
-  hal::status read_channel(hal::byte address, std::span<hal::byte> output);
+  void read_channel(hal::byte address, std::span<hal::byte> output);
 
-  hal::result<adc_codes> get_adc_codes();
+  adc_codes get_adc_codes();
 
-  hal::result<xyz_values> adc_codes_to_xyz(adc_codes adc);
+  xyz_values adc_codes_to_xyz(adc_codes adc);
   
-  hal::result<float> sRGBCompandingFunction(float val);
+  float sRGBCompandingFunction(float val);
 
-  hal::result<rgb_values> xyz_to_rgb(xyz_values xyz);
+  rgb_values xyz_to_rgb(xyz_values xyz);
 
-  hal::result<rgb_values> get_data();  // will do all the conversions and return required data
+  rgb_values get_data();  // will do all the conversions and return required data
 
-  hal::status get_msb_exp(hal::byte register_A, std::span<uint16_t> data);
+  void get_msb_exp(hal::byte register_A, std::span<uint16_t> data);
   // set to conversion mode
     // M^-1 for sRGB @ D65 from www.brucelindbloom.com
 	

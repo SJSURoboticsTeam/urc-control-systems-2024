@@ -22,38 +22,30 @@
 
 #include "applications/application.hpp"
 
+sjsu::science::hardware_map_t hardware_map{};
+
 int main()
 {
   // Step 1. Call the processor initializer. Setups up processor to run
   // applications such as turning on a coprocessor, or copying memory from
   // storage to memory.
-  if (!sjsu::science::initialize_processor()) {
+
+  try {
+    hardware_map = sjsu::science::initialize_platform();
+  } catch (...) {
     hal::halt();
   }
 
-  auto application_resource = sjsu::science::initialize_platform();
-
-  if (!application_resource) {
-    hal::halt();
-  }
-
-  auto is_finished = sjsu::science::application(application_resource.value());
-
-  if (!is_finished) {
-    application_resource.value().reset();
-  } else {
-    hal::halt();
-  }
-
+  sjsu::science::application(hardware_map);
   return 0;
 }
 
-namespace boost {
-void throw_exception([[maybe_unused]] std::exception const& p_error)
-{
-  std::abort();
-}
-}  // namespace boost
+// namespace boost {
+// void throw_exception([[maybe_unused]] std::exception const& p_error)
+// {
+//   std::abort();
+// }
+// }  // namespace boost
 
 extern "C"
 {

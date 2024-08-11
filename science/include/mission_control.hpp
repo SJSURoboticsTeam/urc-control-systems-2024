@@ -1,5 +1,4 @@
 #pragma once
-
 #include <libhal-util/serial.hpp>
 #include <libhal/motor.hpp>
 #include <libhal/serial.hpp>
@@ -7,45 +6,65 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/timeout.hpp>
 
-namespace sjsu::science{
+namespace sjsu::science {
 
 static constexpr char kResponseBodyFormat[] =
-  "{\"HB\":%d,\"IO\":%d,\"WO\":%d,\"DM\":\"%c\",\"CMD\":[%d,%d]}\n";
+  "{\"HB\":%d,\"IO\":%d,\"SR\":%d,\"PP\":\"%d\",\"CR\":\"%d\"}\n";
 
 static constexpr char kGETRequestFormat[] =
-  "drive?heartbeat_count=%d&is_operational=%d&wheel_orientation=%d&drive_mode=%"
-  "c&speed=%d&angle=%d";
+  "science?heartbeat_count=%d&is_operational=%d&sample_recieved=%d&pause_play=%"
+  "c&contianment_reset=%dnum_vials%dsample_finished%d";
 
+static constexpr char get_request[] = "GET / %s HTTP/1.1\r\n"
+                                      "Host: 192.168.0.211:5000\r\n"
+                                      "Keep-Alive: timeout=1000\r\n"
+                                      "Connection: keep-alive\r\n"
+                                      "\r\n";
 
 class mission_control
 {
-  public:
+public:
   struct mc_commands
   {
-    char mode = 'D';
-    int speed = 0;
-    int angle = 0;
-    int wheel_orientation = 0;
-    int is_operational = 0;
     int heartbeat_count = 0;
-    hal::status print(hal::serial* terminal)
+    int is_operational = 0;
+    int sample_recieved = 0;
+    int pause_play = 0;
+    int contianment_reset = 0;
+
+    void print(hal::serial* terminal)
     {
       hal::print<128>(*terminal,
                       "HB: %d\n"
                       "IS_OP: %d\n"
-                      "Speed: %d\n"
-                      "Angle: %d\n"
-                      "Mode: %c\n"
-                      "Wheel Orientation: %d\n",
+                      "Sample_Recieved: %d\n"
+                      "Pause_Play: %d\n"
+                      "Contianment_Reset: %d\n",
                       heartbeat_count,
                       is_operational,
-                      speed,
-                      angle,
-                      mode,
-                      wheel_orientation);
-      return hal::success();
+                      sample_recieved,
+                      pause_play,
+                      contianment_reset);
     }
   };
+  struct status
+  {
+    int heartbeat_count = 0;
+    int is_operational = 1;
+    int sample_recieved = 0;
+    int pause_play = 0;
+    int contianment_reset = 0;
+    int num_vials_used = 0;
+    int is_sample_finished = 0;
+  };
+  // // static status m_status;
+  // status m_status;
+
+  //! @note mission_control::GetStatus();
+  //! @note mission_control::GetStatus() { return instance->m_status; }
+
+  // static mission_control* instance;
+
   /**
    * @brief Get the command object
    *
@@ -68,16 +87,17 @@ class mission_control
    * commands have been received, then this should return the default
    * initialized command.
    */
-  hal::result<mc_commands> get_command(hal::function_ref<hal::timeout_function> p_timeout)
+  mc_commands get_command(
+    hal::function_ref<hal::timeout_function> p_timeout)
   {
-    return impl_get_command(p_timeout);
+    return impl_get_command( p_timeout);
   }
 
   virtual ~mission_control() = default;
 
 private:
-  virtual hal::result<mc_commands> impl_get_command(
+  virtual mc_commands impl_get_command(
     hal::function_ref<hal::timeout_function> p_timeout) = 0;
 };
 
-}
+}  // namespace sjsu::science
