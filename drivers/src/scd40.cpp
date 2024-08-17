@@ -3,7 +3,7 @@
 #include "../include/scd40.hpp"
 
 using namespace std::chrono_literals;
-using scd40_nm = sjsu::science::scd40;
+using scd40_nm = sjsu::drivers::scd40;
 
 
 scd40_nm::scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock) {

@@ -52,4 +52,4 @@ void initialize_processor();
 application_framework initialize_platform();
 void application(application_framework& p_framework);
 
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

@@ -61,7 +61,7 @@ hal::status rampup_rampdown(effect_hardware hardware) {
   }
 }
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 hal::status application(application_framework& p_resources)
 {
   using namespace std::literals;

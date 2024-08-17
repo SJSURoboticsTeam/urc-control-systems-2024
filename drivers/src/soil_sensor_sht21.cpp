@@ -3,7 +3,7 @@
 #include <span>
 #include <libhal/units.hpp>
 
-using namespace sjsu::science{
+using namespace sjsu::drivers{
 sht21(hal::i2c& p_bus, hal::byte p_address) {
   m_i2c = &p_bus;
   m_address = p_address;

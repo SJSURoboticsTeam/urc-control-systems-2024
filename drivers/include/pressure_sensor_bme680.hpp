@@ -21,7 +21,7 @@
 //   binary, decimal, hex
 // };
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 class bme680
 {
 public:

@@ -11,7 +11,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 
 hal::status application(application_framework& p_framework)
 {
@@ -35,4 +35,4 @@ hal::status application(application_framework& p_framework)
 
   return hal::success();
 }
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

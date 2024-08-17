@@ -59,7 +59,7 @@ void print_binary(hal::serial& console, hal::byte val) {
         get_bit_value(val, 0) + '0');
 }
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 
 hal::status application(application_framework& p_framework)
 {
@@ -118,4 +118,4 @@ hal::status application(application_framework& p_framework)
 
   return hal::success();
 }
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

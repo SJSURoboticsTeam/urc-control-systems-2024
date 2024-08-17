@@ -48,4 +48,4 @@ void application(application_framework& p_framework)
 
     }
 }
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

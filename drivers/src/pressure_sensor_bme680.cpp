@@ -18,7 +18,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-using namespace sjsu::science{
+using namespace sjsu::drivers{
 
 
 bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) {

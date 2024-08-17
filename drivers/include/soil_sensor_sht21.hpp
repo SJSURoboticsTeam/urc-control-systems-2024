@@ -3,7 +3,7 @@
 #include <libhal-util/i2c.hpp>
 
 
-namespace sjsu::science {
+namespace sjsu::drivers {
   class sht21 {
     public:
       const static hal::byte sht21_i2c_address = 0x40;

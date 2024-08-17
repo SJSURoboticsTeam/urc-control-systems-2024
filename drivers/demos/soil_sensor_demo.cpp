@@ -63,7 +63,7 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_
 //         get_bit_value(val, 0) + '0');
 // }
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 
 hal::status application(application_framework& p_framework)
 {
@@ -103,4 +103,4 @@ hal::status application(application_framework& p_framework)
 
   return hal::success();
 }
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

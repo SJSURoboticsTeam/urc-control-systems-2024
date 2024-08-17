@@ -6,7 +6,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 opt4048::opt4048(hal::i2c& p_i2c, hal::steady_clock& p_clock, hal::serial& p_terminal){
     m_i2c = p_i2c;
     m_clock = p_clock;

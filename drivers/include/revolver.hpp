@@ -10,7 +10,7 @@
 #include <libhal-lpc40/uart.hpp>
 
 
-namespace sjsu::science {
+namespace sjsu::drivers {
    
     class revolver 
     {
