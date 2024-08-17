@@ -130,7 +130,7 @@ opt4048::adc_codes opt4048::get_adc_codes(){ //returns x,y,
 
 void opt4048::get_msb_exp(hal::byte register_A, std::span<uint16_t> data) {
     std::array<hal::byte, 2> output;
-    HAL_CHECK(read_channel(register_A, output ));   
+    read_channel(register_A, output );   
     // print<30>(m_terminal, "0x%02x: \t", register_A);
     // print<30>(m_terminal, "OUTPUT 0: 0x%02x\t", output[0]);
     // print<30>(m_terminal, "OUTPUT 1: 0x%02x\n", output[1]);
@@ -222,9 +222,9 @@ opt4048::rgb_values opt4048::xyz_to_rgb(xyz_values xyz) {
 	// xyz.x /= D65_Illuminant.x;
 	// xyz.y /= D65_Illuminant.y;
 	// xyz.z /= D65_Illuminant.y;
-    // float rgbR = HAL_CHECK(sRGBCompandingFunction(xyz.x * XYZ_to_RGB[0][0] + xyz.y * XYZ_to_RGB[0][1] + xyz.z * XYZ_to_RGB[0][2]));
-    // float rgbG = HAL_CHECK(sRGBCompandingFunction(xyz.x * XYZ_to_RGB[1][0] + xyz.y * XYZ_to_RGB[1][1] + xyz.z * XYZ_to_RGB[1][2]));
-    // float rgbB = HAL_CHECK(sRGBCompandingFunction(xyz.x * XYZ_to_RGB[2][0] + xyz.y * XYZ_to_RGB[2][1] + xyz.z * XYZ_to_RGB[2][2]));
+    // float rgbR = sRGBCompandingFunction(xyz.x * XYZ_to_RGB[0][0] + xyz.y * XYZ_to_RGB[0][1] + xyz.z * XYZ_to_RGB[0][2]);
+    // float rgbG = sRGBCompandingFunction(xyz.x * XYZ_to_RGB[1][0] + xyz.y * XYZ_to_RGB[1][1] + xyz.z * XYZ_to_RGB[1][2]);
+    // float rgbB = sRGBCompandingFunction(xyz.x * XYZ_to_RGB[2][0] + xyz.y * XYZ_to_RGB[2][1] + xyz.z * XYZ_to_RGB[2][2]);
 	// rgb.r = std::min(1.0f, std::max(0.0f, rgbR)) * 255;
 	// rgb.g = std::min(1.0f, std::max(0.0f, rgbG)) * 255;
 	// rgb.b = std::min(1.0f, std::max(0.0f, rgbB)) * 255;
@@ -233,12 +233,12 @@ opt4048::rgb_values opt4048::xyz_to_rgb(xyz_values xyz) {
 }
 
 opt4048::rgb_values opt4048::get_data(){// will do all the conversions and return required data
-    auto adc = HAL_CHECK(get_adc_codes());
+    auto adc = get_adc_codes();
     // hal::print(m_terminal, "got adc codes\n");
-    auto xyz = HAL_CHECK(adc_codes_to_xyz(adc));
+    auto xyz = adc_codes_to_xyz(adc);
     // hal::print(m_terminal, "got xyz codes\n");
 
-    auto rgb = HAL_CHECK(xyz_to_rgb(xyz));
+    auto rgb = xyz_to_rgb(xyz);
     // hal::print(m_terminal, "got rgb codes\n");
 
     return rgb;

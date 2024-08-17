@@ -15,7 +15,7 @@ using namespace std::chrono_literals;
 
 
 
- hal::result<hal::i2c::transaction_t> probe(
+ hal::i2c::transaction_t probe(
   hal::i2c& p_i2c,
   hal::byte p_address, hal::steady_clock& p_steady_clock, hal::time_duration p_duration) {
   // p_data_in: empty placeholder for transcation's data_in
@@ -27,7 +27,7 @@ using namespace std::chrono_literals;
   return p_i2c.transaction(p_address, std::span<hal::byte>{}, data_in, timeout);
 }
 
-hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_clock) {
+void probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_steady_clock) {
   hal::print(console, "\n\nProbing i2c2\n");
   i2c = i2c;
   for(hal::byte addr = 0x08; addr < 0x78; addr++) {
@@ -43,7 +43,6 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_
   }
   hal::print(console, "\n");
 
-  return hal::success();
 }
 
 
@@ -65,24 +64,24 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console, hal::steady_clock& p_
 
 namespace sjsu::drivers {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   // auto& i2c = *p_framework.i2c;
   auto& clock = *p_framework.steady_clock;
   auto& console = *p_framework.terminal;
 
-  auto i2c = HAL_CHECK(hal::lpc40::i2c::get(2));
+  auto i2c = hal::lpc40::i2c::get(2);
 
   hal::print(console, "reset?\n");
 
 
-  HAL_CHECK(probe_bus(i2c, console, clock));
+  probe_bus(i2c, console, clock);
 
-  hal::result<hal::sht::sht21> maybe_soil = hal::sht::sht21::create(i2c);
+  hal::sht::sht21 maybe_soil = hal::sht::sht21(i2c);
   while(maybe_soil.has_error()) {
     hal::print(console, "sensor create error :(\n");
-    maybe_soil = hal::sht::sht21::create(i2c);
+    maybe_soil = hal::sht::sht21(i2c);
     hal::delay(clock, 50ms);
   }
 
@@ -90,8 +89,8 @@ hal::status application(application_framework& p_framework)
 
 //   int i = 0;
   while (true) {
-    hal::result<double> maybe_temp = soil.get_temperature();
-    hal::result<double> maybe_humid = soil.get_relative_humidity();
+    double maybe_temp = soil.get_temperature();
+    double maybe_humid = soil.get_relative_humidity();
     if(maybe_temp.has_value()) {
       hal::print<32>(console, "Temp: %f\n", maybe_temp.value());
     }
@@ -101,6 +100,5 @@ hal::status application(application_framework& p_framework)
     hal::delay(clock, 50ms);
   }
 
-  return hal::success();
 }
 }  // namespace sjsu::drivers

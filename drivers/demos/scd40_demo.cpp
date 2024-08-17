@@ -5,7 +5,7 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/units.hpp>
 
-#include "../../platform-implementations/scd40.hpp"
+#include "../include/scd40.hpp"
 #include "../hardware_map.hpp"
 
 using namespace hal::literals;
@@ -25,11 +25,11 @@ void application(application_framework& p_framework)
 
   while(false){
         //get settings test
-        scd40_sensor.stop();
-        auto get = HAL_CHECK(scd40_sensor.get_settings());
-        auto temp = get.temp_offset;
-        auto alt = get.altitude;
-        hal::print<64>(terminal, "%-5.2f\t%-5.2f\n", temp, alt);
+        // scd40_sensor.stop();
+        // auto get = scd40_sensor.get_settings();
+        // auto temp = get.temp_offset;
+        // auto alt = get.altitude;
+        // hal::print<64>(terminal, "%-5.2f\t%-5.2f\n", temp, alt);
   
         // periodic readings are only updated every 5000ms (temperature)
         hal::delay(clock, 5000ms);

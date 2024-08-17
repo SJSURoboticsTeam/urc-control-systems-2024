@@ -26,9 +26,8 @@ struct effect_hardware {
  * @param on_value 
  * @param off_value 
  * @param period 
- * @return hal::status 
  */
-hal::status beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
+void beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
   hal::time_duration half_period = period / 2;
   while(true) {
     hal::light_strip_util::set_all(hardware.lights, on_value);
@@ -44,9 +43,8 @@ hal::status beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness o
  * @brief Each led should each turn on one after each other and then turn off one after each other
  * 
  * @param hardware 
- * @return hal::status 
  */
-hal::status rampup_rampdown(effect_hardware hardware) {
+void rampup_rampdown(effect_hardware hardware) {
   while (true) {
     for(auto i = hardware.lights.begin(); i != hardware.lights.end(); i ++) {
       *i = hal::colors::WHITE;
@@ -62,15 +60,15 @@ hal::status rampup_rampdown(effect_hardware hardware) {
 }
 
 namespace sjsu::drivers {
-hal::status application(application_framework& p_resources)
+void application(application_framework& p_resources)
 {
   using namespace std::literals;
 
   auto& clock = *p_resources.steady_clock;
 //   auto& console = *p_resources.terminal;
 
-  auto clock_pin = HAL_CHECK(hal::lpc40::output_pin::get(1, 15));
-  auto data_pin = HAL_CHECK(hal::lpc40::output_pin::get(1, 23));
+  auto clock_pin = hal::lpc40::output_pin::get(1, 15);
+  auto data_pin = hal::lpc40::output_pin::get(1, 23);
 
   hal::light_strip<35> lights;
   hal::sk9822 driver(clock_pin, data_pin, clock);
@@ -85,8 +83,8 @@ hal::status application(application_framework& p_resources)
   hardware.lights = lights;
   hardware.driver = &driver;
 
-  // HAL_CHECK(beedoo_beedoo_beedoo(hardware, hal::color::red, hal::color::black, 100ms));
-  HAL_CHECK(rampup_rampdown(hardware));
+  // beedoo_beedoo_beedoo(hardware, hal::color::red, hal::color::black, 100ms);
+  rampup_rampdown(hardware);
 
   while (true) {
     // Print message

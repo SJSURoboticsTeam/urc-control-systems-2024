@@ -32,21 +32,20 @@
 
 #include "applications/application.hpp"
 namespace sjsu::science {
-hal::status initialize_processor()
+void initialize_processor()
 {
   hal::cortex_m::initialize_data_section();
   hal::cortex_m::initialize_floating_point_unit();
 
-  return hal::success();
 }
 
-hal::result<application_framework> initialize_platform()
+application_framework initialize_platform()
 {
   using namespace hal::literals;
   using namespace std::chrono_literals;
 
   // Set the MCU to the maximum clock speed
-  HAL_CHECK(hal::lpc40::clock::maximum(12.0_MHz));
+  hal::lpc40::clock::maximum(12.0_MHz);
 
   auto& clock = hal::lpc40::clock::get();
   auto cpu_frequency = clock.get_frequency(hal::lpc40::peripheral::cpu);
@@ -54,36 +53,36 @@ hal::result<application_framework> initialize_platform()
 
   // Serial
   static std::array<hal::byte, 1024> recieve_buffer0{};
-  static auto uart0 = HAL_CHECK((hal::lpc40::uart::get(0,
+  static auto uart0 = (hal::lpc40::uart::get(0,
                                                        recieve_buffer0,
                                                        hal::serial::settings{
                                                          .baud_rate = 38400,
-                                                       })));
+                                                       }));
   // Don't think we need can for the science applications thus far
   //  hal::can::settings can_settings{ .baud_rate = 1.0_MHz };
-  //  auto& can = HAL_CHECK((hal::lpc40::can::get<2>(can_settings)));
+  //  auto& can = (hal::lpc40::can::get<2>(can_settings));
 
   static auto in_pin0 =
-    HAL_CHECK(hal::lpc40::input_pin::get(1, 15, hal::input_pin::settings{}));
+    hal::lpc40::input_pin::get(1, 15, hal::input_pin::settings{});
   static auto in_pin1 =
-    HAL_CHECK(hal::lpc40::input_pin::get(1, 23, hal::input_pin::settings{}));
+    hal::lpc40::input_pin::get(1, 23, hal::input_pin::settings{});
   static auto in_pin2 =
-    HAL_CHECK(hal::lpc40::input_pin::get(1, 22, hal::input_pin::settings{}));
+    hal::lpc40::input_pin::get(1, 22, hal::input_pin::settings{});
 
-  static auto pwm_1_6 = HAL_CHECK((hal::lpc40::pwm::get(1, 6)));
-  static auto pwm_1_5 = HAL_CHECK((hal::lpc40::pwm::get(1, 5)));
+  static auto pwm_1_6 = (hal::lpc40::pwm::get(1, 6));
+  static auto pwm_1_5 = (hal::lpc40::pwm::get(1, 5));
 
-  static auto adc_4 = HAL_CHECK(hal::lpc40::adc::get(4));
-  static auto adc_5 = HAL_CHECK(hal::lpc40::adc::get(5));
+  static auto adc_4 = hal::lpc40::adc::get(4);
+  static auto adc_5 = hal::lpc40::adc::get(5);
 
   std::array<hal::byte, 1024> receive_buffer{};
-  static auto uart1 = HAL_CHECK(hal::lpc40::uart::get(0,
+  static auto uart1 = hal::lpc40::uart::get(0,
                                                       receive_buffer,
                                                       {
                                                         .baud_rate = 115200.0f,
-                                                      }));
+                                                      });
 
-  static auto i2c = HAL_CHECK(hal::lpc40::i2c::get(2));
+  static auto i2c = hal::lpc40::i2c::get(2);
 
   return application_framework{
     .terminal = &uart0,
