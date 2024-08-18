@@ -26,8 +26,8 @@ libhal_build_demos(
 #  led_strip_demo
 
 SOURCES
-    ../platform-implementations/scd40.cpp
-    ./platforms/micromod.cpp
+    src/scd40.cpp
+    platforms/micromod.cpp
     PACKAGES
 #    libhal-__device__
 

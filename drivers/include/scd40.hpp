@@ -7,7 +7,7 @@
 
 //TODO: maybe later add CRC and config for altitude, ambient pressure, temperature offset (or look at setting persistent values)
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 class scd40
 {
 private:
@@ -66,4 +66,4 @@ public:
     void set_settings( settings );
 };
 
-} // namespace science
+} // namespace drivers
