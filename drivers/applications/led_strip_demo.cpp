@@ -67,8 +67,8 @@ void application(application_framework& p_resources)
   auto& clock = *p_resources.steady_clock;
 //   auto& console = *p_resources.terminal;
 
-  auto clock_pin = hal::lpc40::output_pin::get(1, 15);
-  auto data_pin = hal::lpc40::output_pin::get(1, 23);
+  auto& clock_pin = *p_resources.out_pin0;
+  auto& data_pin = *p_resources.out_pin1;
 
   hal::light_strip<35> lights;
   hal::sk9822 driver(clock_pin, data_pin, clock);

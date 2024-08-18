@@ -17,30 +17,29 @@
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
+namespace sjsu::drivers {
 
-using namespace sjsu::drivers{
 
-
-bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) {
-    m_i2c = &p_i2c;
+bme680::bme680(hal::i2c& p_i2c, hal::byte p_address) : m_i2c(p_i2c) {
     m_address = p_address;
-    bme.read_addr();
-    bme.soft_reset();
-    bme.get_calibration_coefficients();
+    read_addr();
+    soft_reset();
+    get_calibration_coefficients();
 }
 
 void bme680::soft_reset() {
   write_register(0xE0, 0xB6);
 }
 
-[[nodiscard]] hal::byte bme680::read_addr() {
+// a nodiscard attribute was removed when updating to libHAL 3.0
+hal::byte bme680::read_addr() {
   std::array<hal::byte, 1> out;
   read_registers(registers::id, out);
   return out[0];
 }
 
 
-voiid bme680::set_filter_coefficient(filter_coeff coeff) {
+void bme680::set_filter_coefficient(filter_coeff coeff) {
   std::array<hal::byte, 1> out;
   read_registers(registers::config, out);
   
@@ -151,7 +150,7 @@ bme680::readings_t bme680::get_data() {
 
   void bme680::write_register(hal::byte register_address, hal::byte value) {
  hal::write(
-    *m_i2c, 
+    m_i2c, 
     m_address,
      std::array<hal::byte,2> { register_address, value }, 
      hal::never_timeout());
@@ -159,7 +158,7 @@ bme680::readings_t bme680::get_data() {
 }
 
 void bme680::read_registers(hal::byte register_address, std::span<hal::byte> out) {
-  hal::write_then_read(*m_i2c,
+  hal::write_then_read(m_i2c,
                                  m_address,
                                  std::array<hal::byte, 1> { register_address },
                                  out,
@@ -217,6 +216,6 @@ void bme680::print_calibration_coefficients(hal::serial& console) {
   hal::print<512>(console, "Temp Coefficients: %10d %10d %10d\n", coefficients.par_t1, coefficients.par_t2, coefficients.par_t3);
   hal::print<512>(console, "Press Coefficients:\n%10d %10d %10d\n%10d %10d %10d\n%10d %10d %10d\n%10d %10d %10d\n%10d\n", coefficients.par_p1, coefficients.par_p2, coefficients.par_p3, coefficients.par_p4, coefficients.par_p5, coefficients.par_p6, coefficients.par_p7, coefficients.par_p8, coefficients.par_p9, coefficients.par_p10);
   hal::print<512>(console, "Humidity Coefficients:\n%10d %10d %10d\n%10d %10d %10d\n%10d\n", coefficients.par_h1, coefficients.par_h2, coefficients.par_h3, coefficients.par_h4, coefficients.par_h5, coefficients.par_h6, coefficients.par_h7);
-  
- }
 }
+
+}; //namespace drivers

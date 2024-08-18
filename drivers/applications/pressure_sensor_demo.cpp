@@ -68,10 +68,10 @@ void application(application_framework& p_framework)
 
   probe_bus(i2c, console);
   
-  auto bme = hal::bme::bme680(i2c, 0x77);
+  auto bme = bme680(i2c, 0x77);
 
-  bme.set_filter_coefficient(hal::bme::bme680::coeff_3);
-  bme.set_oversampling(hal::bme::bme680::oversampling_1, hal::bme::bme680::oversampling_2, hal::bme::bme680::oversampling_16);
+  bme.set_filter_coefficient(bme680::coeff_3);
+  bme.set_oversampling(bme680::oversampling_1, bme680::oversampling_2, bme680::oversampling_16);
   
   auto readings = bme.get_data();
   double average_pressure = 0.0;

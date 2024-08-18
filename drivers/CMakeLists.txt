@@ -19,21 +19,21 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
     DEMOS
   color_sensor_demo
-  #led_strip_demo
-  #pressure_sensor_demo
+  led_strip_demo
+  pressure_sensor_demo
   #pump_manager_demo
-  #soil_sensor_demo
   scd40_demo
+  #soil_sensor_demo
 
 SOURCES
     platforms/micromod.cpp
-    #src/color_sensor_opt4048.cpp
-    #src/methane_sensor_mq4.cpp
-    #src/pressure_sensor_bme680.cpp
+    src/color_sensor_opt4048.cpp
+    src/methane_sensor_mq4.cpp
+    src/pressure_sensor_bme680.cpp
     src/pump_manager.cpp
     src/revolver.cpp
     src/scd40.cpp
-    #src/soil_sensor_sht21.cpp
+    src/soil_sensor_sht21.cpp
 
     PACKAGES
 #    libhal-__device__

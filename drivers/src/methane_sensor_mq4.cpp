@@ -1,5 +1,3 @@
-#pragma once
-
 #include <libhal/input_pin.hpp>
 #include <libhal/adc.hpp>
 #include <cmath>

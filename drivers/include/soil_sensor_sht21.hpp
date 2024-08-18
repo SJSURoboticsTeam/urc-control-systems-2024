@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libhal-util/i2c.hpp>
+#include <libhal/i2c.hpp>
 
 
 namespace sjsu::drivers {
@@ -81,7 +81,7 @@ namespace sjsu::drivers {
       /**
        * @brief I2C Bus
        */
-      hal::i2c* m_i2c;
+      hal::i2c& m_i2c;
 
       /**
        * @brief Device address

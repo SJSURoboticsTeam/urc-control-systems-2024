@@ -23,7 +23,7 @@ public:
         int read_count = 10;
         for (int i = 0; i < read_count; i++)
         {
-            raw_ratio_average += adc_data_.read().sample;
+            raw_ratio_average += adc_data_.read();
         }
         
         raw_ratio_average /= read_count;

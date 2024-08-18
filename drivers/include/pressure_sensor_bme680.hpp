@@ -85,7 +85,7 @@ public:
 
   /// @brief Reads the "Chip Ident" register
   /// @return Should return the address of the chip
-  [[nodiscard]] hal::byte read_addr();
+  hal::byte read_addr();
 
 
   /// @brief Reset the sensor
@@ -134,12 +134,12 @@ public:
   // /// @param format Format to print register as.
   // void print_register(hal::serial& console, hal::byte register_address, format format = format::hex);
 
-private:
   /// @brief Construct a bme680
   /// @param p_i2c bus
   /// @param p_address address
   explicit bme680(hal::i2c& p_i2c, hal::byte p_address);
 
+private:
   /// @brief Write a single byte to a register
   /// @param register_address Address of register
   /// @param value Value to write
@@ -205,7 +205,7 @@ private:
   double compensate_humidity(double temp_comp, double adc_humid);
 
   /// @brief I2C bus the device is on
-  hal::i2c* m_i2c;
+  hal::i2c& m_i2c;
 
   /// @brief I2C address of the bme680
   hal::byte m_address;
