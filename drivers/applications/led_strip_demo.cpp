@@ -11,9 +11,10 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
+namespace sjsu::drivers {
 struct effect_hardware {
-  hal::light_strip_view lights;
-  hal::sk9822 *driver;
+  light_strip_view lights;
+  sk9822 *driver;
   hal::steady_clock *clock;
 };
 
@@ -27,13 +28,13 @@ struct effect_hardware {
  * @param off_value 
  * @param period 
  */
-void beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value, hal::rgb_brightness off_value, hal::time_duration period) {
+void beedoo_beedoo_beedoo(effect_hardware hardware, rgb_brightness on_value, rgb_brightness off_value, hal::time_duration period) {
   hal::time_duration half_period = period / 2;
   while(true) {
-    hal::light_strip_util::set_all(hardware.lights, on_value);
+    light_strip_util::set_all(hardware.lights, on_value);
     hardware.driver->update(hardware.lights);
     hal::delay(*(hardware.clock), half_period);
-    hal::light_strip_util::set_all(hardware.lights, off_value);
+    light_strip_util::set_all(hardware.lights, off_value);
     hardware.driver->update(hardware.lights);
     hal::delay(*(hardware.clock), half_period);
   }
@@ -47,19 +48,18 @@ void beedoo_beedoo_beedoo(effect_hardware hardware, hal::rgb_brightness on_value
 void rampup_rampdown(effect_hardware hardware) {
   while (true) {
     for(auto i = hardware.lights.begin(); i != hardware.lights.end(); i ++) {
-      *i = hal::colors::WHITE;
+      *i = colors::WHITE;
       hardware.driver->update(hardware.lights);
       hal::delay(*hardware.clock, 10ms);
     }
     for(auto i = hardware.lights.rbegin(); i != hardware.lights.rend(); i ++) {
-      *i = hal::colors::BLACK;
+      *i = colors::BLACK;
       hardware.driver->update(hardware.lights);
       hal::delay(*hardware.clock, 10ms);
     }
   }
 }
 
-namespace sjsu::drivers {
 void application(application_framework& p_resources)
 {
   using namespace std::literals;
@@ -70,11 +70,11 @@ void application(application_framework& p_resources)
   auto& clock_pin = *p_resources.out_pin0;
   auto& data_pin = *p_resources.out_pin1;
 
-  hal::light_strip<35> lights;
-  hal::sk9822 driver(clock_pin, data_pin, clock);
-  hal::light_strip_util::set_all(lights, hal::colors::BLACK);
+  light_strip<35> lights;
+  sk9822 driver(clock_pin, data_pin, clock);
+  light_strip_util::set_all(lights, colors::BLACK);
 
-  hal::rgb_brightness ON, OFF;
+  rgb_brightness ON, OFF;
   ON.set(0xff, 0x00, 0x00, 0b11111);
   OFF.set(0, 0, 0, 0);
 

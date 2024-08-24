@@ -34,6 +34,7 @@ SOURCES
     src/revolver.cpp
     src/scd40.cpp
     src/soil_sensor_sht21.cpp
+    src/sk9822.cpp
 
     PACKAGES
 #    libhal-__device__

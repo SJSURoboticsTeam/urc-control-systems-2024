@@ -1,4 +1,3 @@
-#pragma once
 #include <array>
 #include <libhal/units.hpp>
 #include <libhal/steady_clock.hpp>
@@ -11,24 +10,22 @@ using namespace std::chrono_literals;
 
 namespace sjsu::drivers {
 
-namespace light_strip_util {
-    void set_all(light_strip_view lights, const hal::byte r, const hal::byte g, const hal::byte b, const hal::byte brightness) {
-        rgb_brightness setting;
-        setting.r = r;
-        setting.g = g;
-        setting.b = b;
-        setting.brightness = brightness;
-        for(auto i = lights.begin(); i != lights.end(); i ++) {
-            *i = setting;
-        }
+void light_strip_util::set_all(light_strip_view lights, const hal::byte r, const hal::byte g, const hal::byte b, const hal::byte brightness) {
+    rgb_brightness setting;
+    setting.r = r;
+    setting.g = g;
+    setting.b = b;
+    setting.brightness = brightness;
+    for(auto i = lights.begin(); i != lights.end(); i ++) {
+        *i = setting;
     }
+}
 
-    void set_all(light_strip_view lights, const rgb_brightness value) {
-        for(auto i = lights.begin(); i != lights.end(); i ++) {
-            *i = value;
-        }
+void light_strip_util::set_all(light_strip_view lights, const rgb_brightness value) {
+    for(auto i = lights.begin(); i != lights.end(); i ++) {
+        *i = value;
     }
-};
+}
 
 sk9822::sk9822(hal::output_pin& p_clock_pin, hal::output_pin& p_data_pin, hal::steady_clock& p_clock) {
     clock_pin = &p_clock_pin;
