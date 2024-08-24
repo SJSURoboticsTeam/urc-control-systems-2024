@@ -24,6 +24,7 @@ libhal_build_demos(
   #pump_manager_demo
   scd40_demo
   soil_sensor_demo
+  drv8825_demo
 
 SOURCES
     platforms/micromod.cpp
@@ -33,6 +34,7 @@ SOURCES
     src/scd40.cpp
     src/soil_sensor_sht21.cpp
     src/sk9822.cpp
+    src/drv8825.cpp
 
     PACKAGES
 #    libhal-__device__
