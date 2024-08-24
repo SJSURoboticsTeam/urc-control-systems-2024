@@ -8,6 +8,9 @@
 //TODO: maybe later add CRC and config for altitude, ambient pressure, temperature offset (or look at setting persistent values)
 
 namespace sjsu::drivers {
+/**
+ * @brief scd40 is a CO2, temperature, and Relative Humidity sensor
+ */
 class scd40
 {
 private:

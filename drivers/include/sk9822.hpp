@@ -61,6 +61,10 @@ namespace light_strip_util {
     void set_all(light_strip_view lights, const rgb_brightness value);
 };
 
+/**
+ * @brief the sk9822 is a led strip controller
+ * 
+ */
 struct sk9822 {
     public:
         constexpr static auto period = 8ns;

@@ -6,7 +6,9 @@
 
 namespace sjsu::drivers{
 
-/// @brief A Generic ADC Driver. This is designed to be a higher level interface for analog devices.
+/**
+ * @brief the MQ-4 is a Methane Gas sensor
+ */
 class mq4 {
 public:
     /// @brief Builds MQ4 sensor driver object.
