@@ -19,7 +19,7 @@ namespace sjsu::drivers {
         rh_11bit_temp_11bit = 0b10000001,
       };
 
-      sht21(hal::i2c& p_bus, hal::byte p_address);
+      sht21(hal::i2c& p_bus);
       
       /**
        * @brief Soft reset the sensor.
@@ -82,11 +82,6 @@ namespace sjsu::drivers {
        * @brief I2C Bus
        */
       hal::i2c& m_i2c;
-
-      /**
-       * @brief Device address
-       */
-      hal::byte m_address;
   
   };
 };
