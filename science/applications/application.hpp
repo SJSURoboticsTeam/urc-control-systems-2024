@@ -19,25 +19,31 @@
 #include <libhal/functional.hpp>
 #include <libhal/i2c.hpp>
 #include <libhal/input_pin.hpp>
+#include <libhal/output_pin.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 
 // #include <implementations/mission_control.hpp>
-#include "../drivers/include/pump_manager.hpp"
-#include "../drivers/include/revolver.hpp"
+#include "../include/pump_manager.hpp"
+#include "../include/revolver.hpp"
 
 
 namespace sjsu::science {
 struct hardware_map_t
 {
   pump_manager* pump_controller;
-
   hal::servo* mixing_servo;
   revolver* revolver_controller;
 
   hal::steady_clock* steady_clock;
   hal::serial* terminal;
+  
+  hal::output_pin* deionized_water_pump;
+  hal::output_pin* sample_pump;
+  hal::output_pin* molisch_reagent_pump;
+  hal::output_pin* sulfuric_acid_pump;
+  hal::output_pin* biuret_reagent;
   // mission_control* mc;
   hal::callback<void()> reset;
 };

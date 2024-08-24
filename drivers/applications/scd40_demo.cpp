@@ -10,7 +10,7 @@
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
-namespace sjsu::science {
+namespace sjsu::drivers {
 
 void application(application_framework& p_framework)
 {
@@ -19,19 +19,21 @@ void application(application_framework& p_framework)
   auto& clock = *p_framework.steady_clock;
   auto& terminal = *p_framework.terminal;
   
-  auto scd40_sensor = scd40::create(i2c2, clock);
+  auto scd40_sensor = scd40(i2c2, clock);
+  
+  // hal::print<64>(terminal, "Hello World!");
 
-  while(true){
+  while(false){
         //get settings test
         // scd40_sensor.stop();
-        // auto get = HAL_CHECK(scd40_sensor.get_settings());
+        // auto get = scd40_sensor.get_settings();
         // auto temp = get.temp_offset;
         // auto alt = get.altitude;
         // hal::print<64>(terminal, "%-5.2f\t%-5.2f\n", temp, alt);
   
         // periodic readings are only updated every 5000ms (temperature)
         hal::delay(clock, 5000ms);
-        auto rd = HAL_CHECK(scd40_sensor.read());
+        auto rd = scd40_sensor.read();
         auto co2_levels = rd.co2;
         auto temp = rd.temp;
         auto RH_levels = rd.rh;
@@ -45,6 +47,5 @@ void application(application_framework& p_framework)
         hal::print<64>(terminal, "RH Levels: %f\n", RH_levels);
 
     }
-
 }
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

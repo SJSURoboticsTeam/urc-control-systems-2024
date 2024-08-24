@@ -1,9 +1,9 @@
 #pragma once
 
-#include <libhal-util/i2c.hpp>
+#include <libhal/i2c.hpp>
 
 
-namespace sjsu::science {
+namespace sjsu::drivers {
   class sht21 {
     public:
       const static hal::byte sht21_i2c_address = 0x40;
@@ -19,21 +19,10 @@ namespace sjsu::science {
         rh_11bit_temp_11bit = 0b10000001,
       };
 
-      /**
-       * @brief Create a sht21 sensor driver
-       * 
-       * @param p_bus I2C bus the device in on.
-       * @param p_address I2C address of the device
-       * @return hal::result<sht21> 
-       */
-      static sht21 create(hal::i2c& p_bus, hal::byte p_address = sht21_i2c_address);
-
-      sht21(hal::i2c& p_bus, hal::byte p_address);
+      sht21(hal::i2c& p_bus);
       
       /**
        * @brief Soft reset the sensor.
-       * 
-       * @return hal::status 
        */
       void soft_reset();
 
@@ -42,7 +31,6 @@ namespace sjsu::science {
        * (Untested)
        * 
        * @param p_resolution 
-       * @return hal::status 
        */
       void set_resolution(resolution p_resolution);
 
@@ -50,7 +38,7 @@ namespace sjsu::science {
        * @brief Returns true when VDD on the sensor is less than 2.25 V
        * (Untested)
        * 
-       * @return hal::result<bool> 
+       * @return bool 
        */
       bool is_low_battery();
 
@@ -59,21 +47,20 @@ namespace sjsu::science {
        * (Untested)
        * 
        * @param p_enabled Defaults to true (enable)
-       * @return hal::status 
        */
       void enable_heater(bool p_enabled = true);
 
       /**
        * @brief Perform a single relative humidity measurement. This will block until the measurement is ready.
        * 
-       * @return hal::result<double> 
+       * @return double
        */
       double get_relative_humidity();
 
       /**
        * @brief Perform a single relative humidity measurement. This will block until the measurement is ready.
        * 
-       * @return hal::result<double> 
+       * @return double 
        */
       double get_temperature();
 
@@ -94,12 +81,7 @@ namespace sjsu::science {
       /**
        * @brief I2C Bus
        */
-      hal::i2c* m_i2c;
-
-      /**
-       * @brief Device address
-       */
-      hal::byte m_address;
+      hal::i2c& m_i2c;
   
   };
 };

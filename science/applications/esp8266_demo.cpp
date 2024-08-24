@@ -14,7 +14,7 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 namespace sjsu::science {
 
-    hal::status application(application_framework& p_framework)
+    void application(application_framework& p_framework)
     {
        
        auto& clock = *p_framework.steady_clock;

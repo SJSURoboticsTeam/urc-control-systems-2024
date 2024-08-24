@@ -11,7 +11,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-hal::status probe_bus(hal::i2c& i2c, hal::serial& console) {
+void probe_bus(hal::i2c& i2c, hal::serial& console) {
   hal::print(console, "\n\nProbing i2c2\n");
   for(hal::byte addr = 0x08; addr < 0x78; addr++) {
     if (hal::probe(i2c, addr)) {
@@ -24,8 +24,6 @@ hal::status probe_bus(hal::i2c& i2c, hal::serial& console) {
     }
   }
   hal::print(console, "\n");
-
-  return hal::success();
 }
 
 
@@ -59,27 +57,27 @@ void print_binary(hal::serial& console, hal::byte val) {
         get_bit_value(val, 0) + '0');
 }
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 
-hal::status application(application_framework& p_framework)
+void application(application_framework& p_framework)
 {
   // configure drivers
   auto& i2c = *p_framework.i2c;
   auto& clock = *p_framework.steady_clock;
   auto& console = *p_framework.terminal;
 
-  HAL_CHECK(probe_bus(i2c, console));
+  probe_bus(i2c, console);
   
-  auto bme = HAL_CHECK(hal::bme::bme680::create(i2c, 0x77));
+  auto bme = bme680(i2c, 0x77);
 
-  HAL_CHECK(bme.set_filter_coefficient(hal::bme::bme680::coeff_3));
-  HAL_CHECK(bme.set_oversampling(hal::bme::bme680::oversampling_1, hal::bme::bme680::oversampling_2, hal::bme::bme680::oversampling_16));
+  bme.set_filter_coefficient(bme680::coeff_3);
+  bme.set_oversampling(bme680::oversampling_1, bme680::oversampling_2, bme680::oversampling_16);
   
-  auto readings = HAL_CHECK(bme.get_data());
+  auto readings = bme.get_data();
   double average_pressure = 0.0;
   int samples = 100;
   for(int i = 0; i < samples; i ++) {
-    readings = HAL_CHECK(bme.get_data());
+    readings = bme.get_data();
     hal::delay(clock, 10ms);
     average_pressure += readings.pressure;
   }
@@ -88,7 +86,7 @@ hal::status application(application_framework& p_framework)
   average_pressure = 0.0;
   samples = 100;
   for(int i = 0; i < samples; i ++) {
-    readings = HAL_CHECK(bme.get_data());
+    readings = bme.get_data();
     hal::delay(clock, 10ms);
     average_pressure += readings.pressure;
   }
@@ -102,11 +100,11 @@ hal::status application(application_framework& p_framework)
   int i = 0;
   while (true) {
 
-    // HAL_CHECK(led.level(true));
-    readings = HAL_CHECK(bme.get_data());
+    // led.level(true);
+    readings = bme.get_data();
     double height = calculate_height(readings.pressure);
 
-    // HAL_CHECK(led.level(false));
+    // led.level(false);
     hal::delay(clock, 50ms);
     
     i++;
@@ -116,6 +114,5 @@ hal::status application(application_framework& p_framework)
     }
   }
 
-  return hal::success();
 }
-}  // namespace sjsu::science
+}  // namespace sjsu::drivers

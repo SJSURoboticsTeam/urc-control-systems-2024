@@ -10,3 +10,4 @@ class demos(ConanFile):
     def requirements(self):
         bootstrap = self.python_requires["libhal-bootstrap"]
         bootstrap.module.add_demo_requirements(self)
+        self.requires("libhal-canrouter/[^3.0.0]")
