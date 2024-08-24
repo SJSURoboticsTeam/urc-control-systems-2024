@@ -6,6 +6,7 @@ project(application LANGUAGES CXX)
 libhal_build_demos(
     DEMOS
     application
+    pump_manager_demo
 
     PACKAGES
     libhal-util
@@ -23,7 +24,7 @@ libhal_build_demos(
     .
 
     SOURCES
-    ../drivers/src/pump_manager.cpp
-    ../drivers/src/revolver.cpp
+    implementations/pump_manager.cpp
+    implementations/revolver.cpp
     implementations/science_state_machine.cpp
 ) 

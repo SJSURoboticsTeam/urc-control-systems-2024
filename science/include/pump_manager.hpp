@@ -2,7 +2,7 @@
 #include <libhal/output_pin.hpp>
 #include <libhal-util/steady_clock.hpp>
 
-namespace sjsu::drivers {
+namespace sjsu::science {
 
     class pump_manager {
         private:

@@ -6,20 +6,20 @@
 #include <libhal/units.hpp>
 
 #include "../include/pump_manager.hpp"
-#include "../hardware_map.hpp"
+#include "application.hpp"
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-namespace sjsu::drivers {
+namespace sjsu::science {
 
-void application(application_framework& p_framework)
+void application(hardware_map_t& p_framework)
 {
   // configure drivers
   auto& clock = *p_framework.steady_clock;
   auto& terminal = *p_framework.terminal;
-  
-  auto pump_manager = pump_manager(
+  //TODO: replace nullptrs once hardwaremap has been updated
+  auto m_pump_manager = pump_manager(
     clock,
     *p_framework.deionized_water_pump,
     *p_framework.sample_pump,
@@ -30,7 +30,7 @@ void application(application_framework& p_framework)
 
     while(true){
         hal::print<64>(terminal, "hello i am working");
-        pump_manager.pump(pump_manager::pumps::DEIONIZED_WATER, 1000ms);
+        m_pump_manager.pump(pump_manager::pumps::DEIONIZED_WATER, 1000ms);
     }
 }
 }  // namespace sjsu::drivers

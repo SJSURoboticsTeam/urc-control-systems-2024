@@ -1,7 +1,7 @@
 #include "../include/revolver.hpp"
 
 
-namespace sjsu::drivers {
+namespace sjsu::science {
 
     revolver::revolver(hal::servo& p_servo, hal::input_pin& p_input_pin, hal::steady_clock& p_steady_clock, hal::serial& p_terminal)
         : revolver_servo_my(p_servo), input_pin_my(p_input_pin), steady_clock_my(p_steady_clock), terminal_my(p_terminal)

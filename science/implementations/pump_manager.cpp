@@ -1,6 +1,6 @@
 #include "../include/pump_manager.hpp"
 
-namespace sjsu::drivers {
+namespace sjsu::science {
 
     pump_manager::pump_manager(
         hal::steady_clock& p_clock,
