@@ -28,7 +28,7 @@ libhal_build_demos(
 SOURCES
     platforms/micromod.cpp
     src/color_sensor_opt4048.cpp
-    src/methane_sensor_mq4.cpp
+    src/mq4.cpp
     src/pressure_sensor_bme680.cpp
     src/pump_manager.cpp
     src/revolver.cpp
