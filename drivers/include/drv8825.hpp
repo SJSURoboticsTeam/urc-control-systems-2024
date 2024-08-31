@@ -20,6 +20,7 @@ class drv8825 : public hal::servo {
         hal::output_pin& m_direction_pin;
         hal::output_pin& m_step_pin;
         hal::steady_clock& m_clock;
+        hal::time_duration m_step_period;
         std::array<hal::output_pin*,3> m_mode_pins;
 
         long m_partial_steps=0;// total 1/32 steps taken from pos 0 (so reverse directions steps subtract)
@@ -33,6 +34,7 @@ class drv8825 : public hal::servo {
             hal::steady_clock& p_steady_clock, 
             step_factor p_step_factor, 
             int p_steps_per_rotation, 
+            hal::time_duration p_step_period,
             std::array<hal::output_pin*,3> p_mode_pins
         );
         //goes counter-clockwise for negative numbers

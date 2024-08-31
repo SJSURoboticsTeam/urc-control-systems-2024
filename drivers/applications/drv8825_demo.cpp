@@ -21,6 +21,7 @@ void application(application_framework& p_framework)
             *p_framework.steady_clock, 
             drv8825::step_factor::one, 
             2048, 
+            450us,
             {p_framework.out_pin0,p_framework.out_pin1,p_framework.out_pin2}
         );
   

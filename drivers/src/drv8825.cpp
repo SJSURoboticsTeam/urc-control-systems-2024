@@ -11,6 +11,7 @@ drv8825::drv8825(
     hal::steady_clock& p_steady_clock, 
     step_factor p_step_factor, 
     int p_steps_per_rotation, 
+    hal::time_duration p_step_period,
     std::array<hal::output_pin*,3> p_mode_pins) 
     
     : m_direction_pin(p_direction_pin), 
@@ -20,6 +21,7 @@ drv8825::drv8825(
     m_mode_pins = p_mode_pins;
     set_step_factor(p_step_factor);
     m_partial_steps_to_deg = 360/(p_steps_per_rotation/32);
+    m_step_period = p_step_period;
 }
 
 void drv8825::step(long p_steps) {
@@ -33,9 +35,9 @@ void drv8825::step(long p_steps) {
     hal::delay(m_clock, 700ns);
     for (; p_steps > 0; p_steps--) {
         m_step_pin.level(true);
-        hal::delay(m_clock, 450us);
+        hal::delay(m_clock, m_step_period);
         m_step_pin.level(false);
-        hal::delay(m_clock, 450us);
+        hal::delay(m_clock, m_step_period);
     }
 }
 
