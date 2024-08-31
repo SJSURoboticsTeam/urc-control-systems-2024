@@ -26,14 +26,11 @@ void application(application_framework& p_framework)
   
     hal::print<64>(terminal, "starting motor\n");
 
-    int i = 1;
     while (true){
-        m_drv8825.step(i);
-        hal::delay(clock, 500ms);
-        i *= -2;
-        if (i > (1 << 12)) {
-            i = 1;
-        }
+        m_drv8825.step(2048);
+        hal::delay(clock, 1s);
+        m_drv8825.step(-2048);
+        hal::delay(clock, 1s);
     }
 }
 }  // namespace sjsu::drivers

@@ -31,11 +31,11 @@ void drv8825::step(long p_steps) {
         m_direction_pin.level(true);
     }
     hal::delay(m_clock, 700ns);
-    for (; p_steps < 0; p_steps--) {
+    for (; p_steps > 0; p_steps--) {
         m_step_pin.level(true);
-        hal::delay(m_clock, 2us);
+        hal::delay(m_clock, 450us);
         m_step_pin.level(false);
-        hal::delay(m_clock, 2us);
+        hal::delay(m_clock, 450us);
     }
 }
 
