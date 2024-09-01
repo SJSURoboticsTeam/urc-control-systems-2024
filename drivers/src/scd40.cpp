@@ -3,22 +3,19 @@
 #include "../include/scd40.hpp"
 
 using namespace std::chrono_literals;
-using scd40_nm = sjsu::science::scd40;
+namespace sjsu::drivers {
 
-
-scd40_nm::scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock) {
-    m_i2c = p_i2c;
-    m_clock = p_clock;
+scd40::scd40(hal::i2c& p_i2c, hal::steady_clock& p_clock) : m_i2c(p_i2c) ,m_clock(p_clock){
     start();
 }
 
 
-void scd40_nm::start(){
+void scd40::start(){
     std::array<hal::byte, 2> start_address =  { start_periodic_measurement_first_half, start_periodic_measurement_second_half };
     hal::write(m_i2c, addresses::device_address, start_address, hal::never_timeout());
 }
 
-scd40_nm::scd40_read_data scd40_nm::read() {
+scd40::scd40_read_data scd40::read() {
     std::array<hal::byte, 2> read_address = {read_measurement_first_half, read_measurement_second_half };
     std::array<hal::byte, 9> buffer;
 
@@ -26,7 +23,7 @@ scd40_nm::scd40_read_data scd40_nm::read() {
     hal::delay(m_clock, 1ms);
     hal::read(m_i2c, addresses::device_address, buffer, hal::never_timeout());
     
-    scd40_nm::scd40_read_data rd;
+    scd40::scd40_read_data rd;
     rd.co2 = buffer[0] << 8 | buffer[1];
     rd.temp = (-45 + 175.0*(buffer[3] << 8 | buffer[4])/ (1 << 16));
     rd.rh = 100.0 * (buffer[6] << 8 | buffer[7]) / (1 << 16);
@@ -34,12 +31,12 @@ scd40_nm::scd40_read_data scd40_nm::read() {
     return rd;
 }
 
-void scd40_nm::stop() {
+void scd40::stop() {
     std::array<hal::byte, 2> stop_address =  { stop_periodic_measurement_first_half, stop_periodic_measurement_second_half };
     hal::write(m_i2c, addresses::device_address, stop_address, hal::never_timeout());
 }
 
-scd40_nm::scd40_settings scd40_nm::get_settings() {
+scd40::scd40_settings scd40::get_settings() {
     std::array<hal::byte, 2> read_address_temp = {get_temperature_offset_first_half, get_temperature_offset_second_half };
     std::array<hal::byte, 2> read_address_alt = { get_sensor_altitude_first_half, get_sensor_altitude_second_half };
     std::array<hal::byte, 6> buffer;
@@ -48,7 +45,7 @@ scd40_nm::scd40_settings scd40_nm::get_settings() {
     hal::delay(m_clock, 1ms);
     hal::read(m_i2c, addresses::device_address, buffer, hal::never_timeout());
     
-    scd40_nm::scd40_settings get;
+    scd40::scd40_settings get;
      
     get.temp_offset = 175 *(buffer[0] << 8 | buffer[1])/(1 << 16);
 
@@ -60,7 +57,7 @@ scd40_nm::scd40_settings scd40_nm::get_settings() {
     return get;
 }
 
-void scd40_nm::set_settings( struct settings setting) {
+void scd40::set_settings( struct settings setting) {
     if(setting.set_temp != 0){
         int temp = int(((setting.set_temp*(1<<16)) / 175)) ;
         hal::byte temp_first_half = (temp) >> 8;
@@ -87,7 +84,7 @@ void scd40_nm::set_settings( struct settings setting) {
 
 }
 
-hal::byte scd40_nm::generate_crc(std::array<hal::byte, 2> data){
+hal::byte scd40::generate_crc(std::array<hal::byte, 2> data){
     uint16_t current_byte;
     uint8_t crc_bit;
     uint8_t crc = 0xFF;
@@ -105,7 +102,7 @@ hal::byte scd40_nm::generate_crc(std::array<hal::byte, 2> data){
     return crc;
 }
 
-bool scd40_nm::validate_crc(std::array<hal::byte, 3> data) {
+bool scd40::validate_crc(std::array<hal::byte, 3> data) {
     uint16_t current_byte;
     uint8_t crc_bit;
     uint8_t crc = 0xFF;
@@ -122,3 +119,4 @@ bool scd40_nm::validate_crc(std::array<hal::byte, 3> data) {
     }
     return crc == 0;
 }
+};
