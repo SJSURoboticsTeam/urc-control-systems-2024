@@ -62,7 +62,7 @@ private:
   {
     using namespace std::literals;
 
-    // auto dumfuck = HAL_CHECK(m_esp8266->is_connected_to_server(p_timeout));
+    // auto dumfuck = m_esp8266->is_connected_to_server(p_timeout);
     if (m_write_error) {
       hal::print(*m_console, "Reconnecting...\n");
       // Wait 1s before attempting to reconnect

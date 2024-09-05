@@ -39,7 +39,6 @@ public:
     RESET
   };
   // auto sm = science_state_machine()
-  // science_state_machine::create()
 
   // vial2_position current_position= SAMPLE;
   // science_states current_state= GET_SAMPLES;

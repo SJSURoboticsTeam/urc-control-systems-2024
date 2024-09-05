@@ -4,7 +4,7 @@
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 
-namespace sjsu::science {
+namespace sjsu::drivers {
 // functions we ened to make
 class opt4048
 {
@@ -118,4 +118,4 @@ public:
   hal::steady_clock& m_clock;
   hal::serial& m_terminal;
 };
-}  // namespace science
+}  // namespace drivers

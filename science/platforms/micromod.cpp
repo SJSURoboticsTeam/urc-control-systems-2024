@@ -35,8 +35,8 @@
 #include <libhal-util/units.hpp>
 
 // #include <implementations/esp8266_mission_control.cpp>
-#include "../drivers/include/pump_manager.hpp"
-#include "../drivers/include/revolver.hpp"
+#include "../include/pump_manager.hpp"
+#include "../include/revolver.hpp"
 // #include <implementations/helper.hpp>
 
 #include <libhal-micromod/micromod.hpp>
@@ -105,6 +105,13 @@ hardware_map_t initialize_platform()
 
     .steady_clock = &counter,
     .terminal = &terminal,
+    
+    .deionized_water_pump = &hal::micromod::v1::output_g0(),
+    .sample_pump = &hal::micromod::v1::output_g1(),
+    .molisch_reagent_pump = &hal::micromod::v1::output_g2(),
+    .sulfuric_acid_pump = &hal::micromod::v1::output_g3(),
+    .biuret_reagent = &hal::micromod::v1::output_g4(),
+    
     // .mc = test_mc,
     .reset = []() { hal::cortex_m::reset(); },
   }; 
