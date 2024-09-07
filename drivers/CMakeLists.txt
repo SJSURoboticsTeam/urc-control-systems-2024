@@ -26,6 +26,9 @@ libhal_build_demos(
   soil_sensor_demo
   drv8825_demo
 
+  INCLUDES
+  include
+
 SOURCES
     platforms/micromod.cpp
     src/color_sensor_opt4048.cpp
@@ -37,8 +40,13 @@ SOURCES
     src/drv8825.cpp
 
     PACKAGES
-#    libhal-__device__
+    #Template for importing libhal packages is "libhal-__device__"
+    #replace "__device__" with the libhal device you wish to import
+    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal-rmd"
 
     LINK_LIBRARIES
-#    libhal::__device__
+    #Template for linking libhal namespaces is "libhal::__device__"
+    #replace "__device__" with the libhal device you wish to import
+    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
+    
 )
