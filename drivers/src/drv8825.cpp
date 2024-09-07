@@ -1,27 +1,19 @@
-#include "../include/drv8825.hpp"
+#include <drv8825.hpp>
 #include <libhal/output_pin.hpp>
 
 using namespace std::chrono_literals;
 
 
 namespace sjsu::drivers {
-drv8825::drv8825(
-    hal::output_pin& p_direction_pin, 
-    hal::output_pin& p_step_pin, 
-    hal::steady_clock& p_steady_clock, 
-    step_factor p_step_factor, 
-    int p_steps_per_rotation, 
-    hal::time_duration p_step_half_period,
-    std::array<hal::output_pin*,3> p_mode_pins) 
+drv8825::drv8825(ctor_params const& p_params)    
+    : m_direction_pin(p_params.direction_pin), 
+    m_step_pin(p_params.step_pin), 
+    m_clock(p_params.steady_clock) {
     
-    : m_direction_pin(p_direction_pin), 
-    m_step_pin(p_step_pin), 
-    m_clock(p_steady_clock) {
-    
-    m_mode_pins = p_mode_pins;
-    set_step_factor(p_step_factor);
-    m_partial_steps_to_deg = 360/(p_steps_per_rotation/32);
-    m_step_half_period = p_step_half_period;
+    m_mode_pins = p_params.mode_pins;
+    set_step_factor(p_params.motor_step_factor);
+    m_partial_steps_to_deg = 360/(p_params.steps_per_rotation/32);
+    m_step_half_period = p_params.step_half_period;
 }
 
 void drv8825::step(long p_steps) {
@@ -74,4 +66,4 @@ void drv8825::driver_position(hal::degrees p_position){
     long partial_step_difference = p_position/m_partial_steps_to_deg - m_partial_steps;
     step(partial_step_difference * static_cast<int>(m_step_factor));
 }
-};//name space drivers
+};  // namespace sjsu::drivers
