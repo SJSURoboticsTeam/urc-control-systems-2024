@@ -22,21 +22,39 @@ void tla2528::set_channel(hal::byte p_channel) {
 }
 
 void tla2528::set_pin_mode(PinMode p_mode) {
-    std::array<hal::byte, 5> cmd_buffer = {
+    std::array<hal::byte, 7> cmd_buffer = {
         OpCodes::ContinuousRegisterWrite,    // Command to write data to registers
         RegisterAddresses::PIN_CFG,  // Starting config register
-        0x00, 0x00, 0x00
+        0x00, 0x00, 0x00, 0x00, 0x00
     };
     if (p_mode != PinMode::AnalogInput) {
         cmd_buffer[2] = 0x01;
         if (p_mode != PinMode::DigitalInput) {
-            cmd_buffer[3] = 0x01;
+            cmd_buffer[4] = 0x01;
             if (p_mode != PinMode::DigitalOutputOpenDrain) {
-                cmd_buffer[4] = 0x01;
+                cmd_buffer[6] = 0x01;
             }
         }
     }
     hal::write(m_bus, m_i2c_address, cmd_buffer);
+}
+
+uint16_t tla2528::get_analog_in(hal::byte p_channel){
+    
+    std::array<hal::byte, 2> data_buffer;
+    std::array<hal::byte, 3> selection_cmd_buffer = {
+      OpCodes::SingleRegisterWrite,    // Command to write data to a register
+      RegisterAddresses::CHANNEL_SEL,  // Register to select channel
+      p_channel
+    };
+    std::array<hal::byte, 1> read_cmd_buffer = { OpCodes::SingleRegisterRead };
+
+    hal::write(m_bus, m_i2c_address, selection_cmd_buffer);
+    hal::write(m_bus, m_i2c_address, read_cmd_buffer);
+    hal::read(m_bus, m_i2c_address, data_buffer);
+    
+    uint16_t data = (data_buffer[0] << 4) | (data_buffer[1] >> 4);
+    return data;
 }
 
 }  // namespace sjsu::drivers
