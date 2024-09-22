@@ -1,76 +1,19 @@
 #pragma once
-#include <array>
+#include <cstdint>
 #include <libhal-util/i2c.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/i2c.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal/units.hpp>
+#include <sys/types.h>
 
 // debugging purposes
 
-namespace tla {
+namespace sjsu::drivers {
 class tla2528
 {
-public:
-  tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk)
-    : m_bus(p_i2c)
-    , m_clk{ p_clk }
-  {
-  }
-
-  hal::result<uint16_t> read_one(hal::byte channel)
-  {
-    using namespace std::literals;
-
-    if (channel > 7) {
-      return hal::new_error(
-        "Invalid channel\n");  // TODO: switch to an error number,
-                               // strings take up too much space
-    }
-    std::array<hal::byte, 2> data_buffer;
-    std::array<hal::byte, 3> selection_cmd_buffer = {
-      OpCodes::SingleRegisterWrite,    // Command to write data to a register
-      RegisterAddresses::CHANNEL_SEL,  // Register to select channel
-      channel
-    };
-    std::array<hal::byte, 1> read_cmd_buffer = { OpCodes::SingleRegisterRead };
-
-    HAL_CHECK(hal::write(m_bus, m_mux_i2c_id, selection_cmd_buffer));
-    HAL_CHECK(hal::write(m_bus, m_mux_i2c_id, read_cmd_buffer));
-    HAL_CHECK(hal::read(m_bus, m_mux_i2c_id, data_buffer));
-    hal::delay(m_clk, 1ms);
-
-    uint16_t data = (data_buffer[0] << 4) | (data_buffer[1] >> 4);
-
-    // return voltage_to_degree(data, 4096, 360);
-
-    return data;
-    // std::pair<float, float> p_input_range;
-    // std::pair<float, float> p_output_range;
-
-    // p_input_range = std::make_pair<float, float>(0.0, 4000.0);
-    // p_output_range = std::make_pair<float, float>(0,0, 360.0);
-    
-    // auto mapped_data = constexpr float hal::map (
-    //   data, // modifies data directly?
-    //   p_input_range /*something something gotta check*/ ,
-    //   p_output_range /*potentiometer range*/  
-    // ) 
-    // return mapped_data;
-  };
-
-  // TODO: Improve code, more testing
-  hal::result<std::array<int, 8>> read_all()
-  {
-    std::array<int, 8> result = {};
-    for (int i = 0; i < 8; i++) {
-      result[i] = HAL_CHECK(read_one(i));
-    }
-
-    return result;
-  }
-
 private:
-  enum OpCodes
+  enum OpCodes : hal::byte
   {
     // Requests to read data from the mux. (See Figure 29 on datasheet)
     SingleRegisterRead = 0b0001'0000,
@@ -106,7 +49,7 @@ private:
    Table 8 on data sheet)
    *
    */
-  enum RegisterAddresses
+  enum RegisterAddresses : hal::byte
   {
     SYSTEM_STATUS = 0x0,
     GENERAL_CFG = 0x1,
@@ -125,8 +68,33 @@ private:
     CHANNEL_SEL = 0x11,
     AUTO_SEQ_CH_SEL = 0x12
   };
-  const hal::byte m_mux_i2c_id = 0x17;
+
+  enum class PinMode : hal::byte
+  {
+    AnalogInput = 0b000,
+    DigitalInput = 0b100,
+    DigitalOutputOpenDrain = 0b110,
+    DigitalOutputPushPull = 0b111
+  };
+  hal::byte m_i2c_address;
   hal::i2c& m_bus;
   hal::steady_clock& m_clk;
+  // first 3 bits store: PIN_CFG, GPIO_CFG, GPO_DRIVE_CFG in that order
+  // last 3 bits store selected channel
+  hal::byte m_mode;
+
+public:
+  tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address);
+
+  void set_channel(hal::byte channel);
+  void set_pin_mode(PinMode p_mode);
+
+  void set_digital_out(bool level);
+  void set_digital_out(bool level, hal::byte channel);
+  bool get_digital_in();
+  bool get_digital_in(hal::byte channel);
+  uint16_t get_analog_in();
+  uint16_t get_analog_in(hal::byte channel);
+
 };
-}  // namespace tla
+}  // namespace sjsu::drivers
