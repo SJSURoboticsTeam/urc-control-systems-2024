@@ -79,22 +79,24 @@ private:
   hal::byte m_i2c_address;
   hal::i2c& m_bus;
   hal::steady_clock& m_clk;
-  // first 3 bits store: PIN_CFG, GPIO_CFG, GPO_DRIVE_CFG in that order
-  // last 3 bits store selected channel
-  hal::byte m_mode;
+  //store current selected channel to prevent needless i2c messages
+  hal::byte m_channel;
+  //this byte is used a bit feild for if a chanel has a wrapper object
+  //if a wrapper object as been made the pin mode won't change
+  hal::byte m_object_created;//TODO:: make wrapper classes
 
 public:
   tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address);
 
-  void set_channel(hal::byte channel);
+  void set_channel(hal::byte p_channel);
   void set_pin_mode(PinMode p_mode);
 
-  void set_digital_out(bool level);
-  void set_digital_out(bool level, hal::byte channel);
-  bool get_digital_in();
-  bool get_digital_in(hal::byte channel);
-  uint16_t get_analog_in();
-  uint16_t get_analog_in(hal::byte channel);
+  //If channel is not set to correct config then undefined behavior will occur
+  void set_digital_out(hal::byte p_channel, bool level);
+  //If channel is not set to correct config then undefined behavior will occur
+  bool get_digital_in(hal::byte p_channel);
+  //If channel is not set to correct config then undefined behavior will occur
+  uint16_t get_analog_in(hal::byte p_channel);
 
 };
 }  // namespace sjsu::drivers
