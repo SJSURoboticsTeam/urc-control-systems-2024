@@ -39,20 +39,38 @@ void tla2528::set_pin_mode(PinMode p_mode) {
     hal::write(m_bus, m_i2c_address, cmd_buffer);
 }
 
-uint16_t tla2528::get_analog_in(hal::byte p_channel){
-    
-    std::array<hal::byte, 2> data_buffer;
-    std::array<hal::byte, 3> selection_cmd_buffer = {
+
+void tla2528::set_digital_out(hal::byte p_channel, bool level) {
+    set_channel(p_channel);
+    std::array<hal::byte, 3> cmd_buffer = {
       OpCodes::SingleRegisterWrite,    // Command to write data to a register
-      RegisterAddresses::CHANNEL_SEL,  // Register to select channel
-      p_channel
+      RegisterAddresses::GPO_VALUE,  // Register to select channel
+      level
     };
+    hal::write(m_bus, m_i2c_address, cmd_buffer);
+}
+
+bool tla2528::get_digital_in(hal::byte p_channel) {
+    set_channel(p_channel);
+    std::array<hal::byte, 1> data_buffer;
+    std::array<hal::byte, 3> cmd_buffer = {
+      OpCodes::SingleRegisterWrite,    // Command to write data to a register
+      RegisterAddresses::GPI_VALUE,  // Register to select channel
+    };
+    hal::write(m_bus, m_i2c_address, cmd_buffer);
+    hal::read(m_bus, m_i2c_address, data_buffer);
+    return data_buffer[0];
+}
+
+uint16_t tla2528::get_analog_in(hal::byte p_channel){
+    set_channel(p_channel);
+    std::array<hal::byte, 2> data_buffer;
     std::array<hal::byte, 1> read_cmd_buffer = { OpCodes::SingleRegisterRead };
 
-    hal::write(m_bus, m_i2c_address, selection_cmd_buffer);
     hal::write(m_bus, m_i2c_address, read_cmd_buffer);
     hal::read(m_bus, m_i2c_address, data_buffer);
     
+    //TODO: add analog averaging config
     uint16_t data = (data_buffer[0] << 4) | (data_buffer[1] >> 4);
     return data;
 }
