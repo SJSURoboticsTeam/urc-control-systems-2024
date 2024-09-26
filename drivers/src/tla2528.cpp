@@ -49,6 +49,17 @@ void tla2528::set_digital_out(hal::byte p_channel, bool level) {
     };
     hal::write(m_bus, m_i2c_address, cmd_buffer);
 }
+bool tla2528::get_digital_out(hal::byte p_channel) {
+    set_channel(p_channel);
+    std::array<hal::byte, 1> data_buffer;
+    std::array<hal::byte, 2> cmd_buffer = {
+      OpCodes::SingleRegisterRead,    // Command to write data to a register
+      RegisterAddresses::GPO_VALUE,  // Register to select channel
+    };
+    hal::write(m_bus, m_i2c_address, cmd_buffer);
+    hal::read(m_bus, m_i2c_address, data_buffer);
+    return data_buffer[0];
+}
 
 bool tla2528::get_digital_in(hal::byte p_channel) {
     set_channel(p_channel);

@@ -68,14 +68,6 @@ private:
     CHANNEL_SEL = 0x11,
     AUTO_SEQ_CH_SEL = 0x12
   };
-
-  enum class PinMode : hal::byte
-  {
-    AnalogInput = 0b000,
-    DigitalInput = 0b100,
-    DigitalOutputOpenDrain = 0b110,
-    DigitalOutputPushPull = 0b111
-  };
   hal::byte m_i2c_address;
   hal::i2c& m_bus;
   hal::steady_clock& m_clk;
@@ -86,6 +78,14 @@ private:
   hal::byte m_object_created;//TODO:: make wrapper classes
 
 public:
+  enum class PinMode : hal::byte
+  {
+    AnalogInput = 0b000,
+    DigitalInput = 0b100,
+    DigitalOutputOpenDrain = 0b110,
+    DigitalOutputPushPull = 0b111
+  };
+
   tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address);
 
   void set_channel(hal::byte p_channel);
@@ -93,6 +93,7 @@ public:
 
   //If channel is not set to correct config then undefined behavior will occur
   void set_digital_out(hal::byte p_channel, bool level);
+  bool get_digital_out(hal::byte p_channel);
   //If channel is not set to correct config then undefined behavior will occur
   bool get_digital_in(hal::byte p_channel);
   //If channel is not set to correct config then undefined behavior will occur
