@@ -3,10 +3,11 @@
 
 namespace sjsu::drivers {
 
-tla2528::tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address) :
+tla2528::tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address, float p_analog_supply_voltage) :
     m_bus(p_i2c), m_clk(p_clk)
 {
     m_i2c_address = p_i2c_address;
+    m_analog_supply_voltage = p_analog_supply_voltage;
 }
 
 void tla2528::set_channel(hal::byte p_channel) {
@@ -73,17 +74,18 @@ bool tla2528::get_digital_in(hal::byte p_channel) {
     return data_buffer[0];
 }
 
-uint16_t tla2528::get_analog_in(hal::byte p_channel){
+float tla2528::get_analog_in(hal::byte p_channel){
     set_channel(p_channel);
     std::array<hal::byte, 2> data_buffer;
     std::array<hal::byte, 1> read_cmd_buffer = { OpCodes::SingleRegisterRead };
 
     hal::write(m_bus, m_i2c_address, read_cmd_buffer);
     hal::read(m_bus, m_i2c_address, data_buffer);
-    
-    //TODO: add analog averaging config
+
     uint16_t data = (data_buffer[0] << 4) | (data_buffer[1] >> 4);
-    return data;
+    float read_voltage = m_analog_supply_voltage / 4096 * data;
+    
+    return read_voltage;
 }
 
 }  // namespace sjsu::drivers

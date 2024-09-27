@@ -70,7 +70,6 @@ tla2528_adc::~tla2528_adc(){
     m_tla2528->m_object_created = m_tla2528->m_object_created & ~(1 << m_channel);
 }
 float tla2528_adc::driver_read() {
-    //TODO: convert uint to float
     return m_tla2528->get_analog_in(m_channel);
 }
 }

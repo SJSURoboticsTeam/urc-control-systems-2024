@@ -75,9 +75,10 @@ private:
     CHANNEL_SEL = 0x11,
     AUTO_SEQ_CH_SEL = 0x12
   };
-  hal::byte m_i2c_address;
   hal::i2c& m_bus;
   hal::steady_clock& m_clk;
+  hal::byte m_i2c_address;
+  float m_analog_supply_voltage;
   //store current selected channel to prevent needless i2c messages
   hal::byte m_channel;
   //this byte is used a bit feild for if a chanel has a wrapper object
@@ -93,7 +94,7 @@ public:
     DigitalOutputPushPull = 0b111
   };
 
-  tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address);
+  tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address, float p_analog_supply_voltage);
 
   void set_channel(hal::byte p_channel);
   void set_pin_mode(PinMode p_mode);
@@ -104,7 +105,7 @@ public:
   //If channel is not set to correct config then undefined behavior will occur
   bool get_digital_in(hal::byte p_channel);
   //If channel is not set to correct config then undefined behavior will occur
-  uint16_t get_analog_in(hal::byte p_channel);
+  float get_analog_in(hal::byte p_channel);
 
 };
 }  // namespace sjsu::drivers
