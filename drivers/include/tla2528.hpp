@@ -10,8 +10,15 @@
 // debugging purposes
 
 namespace sjsu::drivers {
+
+class tla2528_adc;
+class tla2528_input_pin;
+class tla2528_output_pin;
 class tla2528
 {
+  friend tla2528_adc;
+  friend tla2528_input_pin;
+  friend tla2528_output_pin;
 private:
   enum OpCodes : hal::byte
   {
