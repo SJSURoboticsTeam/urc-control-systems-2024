@@ -23,10 +23,10 @@ tla2528_output_pin make_output_pin(tla2528& p_tla2528, hal::byte p_channel, hal:
 class tla2528_input_pin : public hal::input_pin
 {
 private:
-  tla2528_input_pin(tla2528& p_tla2528, hal::byte p_channel);
+  tla2528_input_pin(tla2528& p_tla2528, hal::byte p_channel, hal::input_pin::settings const& p_settings);
   void driver_configure(settings const& p_settings);
   bool driver_level();
-  friend tla2528_input_pin make_input_pin(tla2528& p_tla2528, hal::byte p_channel);
+  friend tla2528_input_pin make_input_pin(tla2528& p_tla2528, hal::byte p_channel,hal::input_pin::settings const& p_settings);
   tla2528* m_tla2528 = nullptr;
   hal::byte m_channel;
 public:
