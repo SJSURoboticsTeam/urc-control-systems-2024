@@ -4,8 +4,8 @@
 
 namespace sjsu::drivers {
 
-tla2528::tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address, float p_analog_supply_voltage) :
-    m_bus(p_i2c), m_clk(p_clk)
+tla2528::tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address, float p_analog_supply_voltage) :
+    m_bus(p_i2c)
 {
     m_i2c_address = p_i2c_address;
     m_analog_supply_voltage = p_analog_supply_voltage;

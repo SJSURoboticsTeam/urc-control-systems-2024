@@ -71,7 +71,6 @@ private:
     auto_seq_ch_sel = 0x12
   };
   hal::i2c& m_bus;
-  hal::steady_clock& m_clk;
   hal::byte m_i2c_address;
   float m_analog_supply_voltage;
   hal::byte m_channel;// stores selected channel to reduce i2c requests
@@ -86,7 +85,7 @@ public:
     digital_output_push_pull
   };
 
-  tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address, float p_analog_supply_voltage);
+  tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address, float p_analog_supply_voltage);
 
   void set_channel(hal::byte p_channel);
   void set_pin_mode(pin_mode p_mode);
