@@ -1,4 +1,3 @@
-#include <libhal/units.hpp>
 #include <libhal/error.hpp>
 #include <tla2528_adapters.hpp>
 
@@ -22,9 +21,9 @@ void tla2528_output_pin::driver_configure(hal::output_pin::settings const& p_set
     if (p_settings.resistor != hal::pin_resistor::none) throw hal::operation_not_supported(this);
     m_tla2528->set_channel(m_channel);
     if (p_settings.open_drain) {
-        m_tla2528->set_pin_mode(tla2528::PinMode::DigitalOutputOpenDrain);
+        m_tla2528->set_pin_mode(tla2528::pin_mode::digital_output_open_drain);
     } else {
-        m_tla2528->set_pin_mode(tla2528::PinMode::DigitalOutputPushPull);
+        m_tla2528->set_pin_mode(tla2528::pin_mode::digital_output_push_pull);
     }
 }
 void tla2528_output_pin::driver_level(bool p_high) {
@@ -44,7 +43,7 @@ tla2528_input_pin::tla2528_input_pin(tla2528& p_tla2528, hal::byte p_channel) {
     m_tla2528 = &p_tla2528;
     m_channel = p_channel;
     m_tla2528->set_channel(m_channel);
-    m_tla2528->set_pin_mode(tla2528::PinMode::DigitalInput);
+    m_tla2528->set_pin_mode(tla2528::pin_mode::digital_input);
 }
 tla2528_input_pin::~tla2528_input_pin(){
     m_tla2528->m_object_created = m_tla2528->m_object_created & ~(1 << m_channel);
@@ -64,7 +63,7 @@ tla2528_adc::tla2528_adc(tla2528& p_tla2528, hal::byte p_channel) {
     m_tla2528 = &p_tla2528;
     m_channel = p_channel;
     m_tla2528->set_channel(m_channel);
-    m_tla2528->set_pin_mode(tla2528::PinMode::AnalogInput);
+    m_tla2528->set_pin_mode(tla2528::pin_mode::analog_input);
 }
 tla2528_adc::~tla2528_adc(){
     m_tla2528->m_object_created = m_tla2528->m_object_created & ~(1 << m_channel);

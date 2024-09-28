@@ -1,52 +1,47 @@
 #pragma once
-#include <cstdint>
-#include <libhal-util/i2c.hpp>
-#include <libhal-util/steady_clock.hpp>
 #include <libhal/i2c.hpp>
 #include <libhal/steady_clock.hpp>
-#include <libhal/units.hpp>
-#include <sys/types.h>
-
-// debugging purposes
 
 namespace sjsu::drivers {
 
+//adapters
 class tla2528_adc;
 class tla2528_input_pin;
 class tla2528_output_pin;
+
 class tla2528
 {
+private:
   friend tla2528_adc;
   friend tla2528_input_pin;
   friend tla2528_output_pin;
-private:
-  enum OpCodes : hal::byte
+
+  enum op_codes : hal::byte
   {
     // Requests to read data from the mux. (See Figure 29 on datasheet)
-    SingleRegisterRead = 0b0001'0000,
+    single_register_read = 0b0001'0000,
 
-    // Writes data to a register given an address. (See Figure 31 on data
-    // sheet)
-    SingleRegisterWrite = 0b0000'1000,
+    // Writes data to a register given an address. (See Figure 31 on datasheet)
+    single_register_write = 0b0000'1000,
 
     // Sets bits in a given register, requires addr
-    SetBit = 0b0001'1000,
+    set_bit = 0b0001'1000,
 
     // Clears bits in a given register
-    ClearBit = 0b0010'0000,
+    clear_bit = 0b0010'0000,
 
     // Continuously reads data from a group of registers.  Provide the addr of
     // the first to read from, reads happen on clk, if it runs out of valid
     // addresses to read, it returns zeros.
     // Master ACKs to confirm data has
     // gotten through. (See Figure 30 on datasheet)
-    ContinuousRegisterRead = 0b0011'0000,
+    continuous_register_read = 0b0011'0000,
 
     // Continuously writes data to a group of registers. Provide the first
     // address to write to. Then, send data as bytes slave will automatically
     // write the data to the next register in accending order, data is
     // seperated by ACKs (slave ACKs). (See Figure 32 on datasheet)
-    ContinuousRegisterWrite = 0b0010'1000
+    continuous_register_write = 0b0010'1000
   };
 
   /**
@@ -56,55 +51,50 @@ private:
    Table 8 on data sheet)
    *
    */
-  enum RegisterAddresses : hal::byte
+  enum register_addresses : hal::byte
   {
-    SYSTEM_STATUS = 0x0,
-    GENERAL_CFG = 0x1,
-    DATA_CFG = 0x2,
-    OSR_CFG = 0x3,
-    OPMODE_CFG = 0x4,
-    PIN_CFG = 0x5,
-    GPIO_CFG = 0x7,
-    GPO_DRIVE_CFG = 0x9,
-    GPO_VALUE = 0xB,
-    GPI_VALUE = 0xD,
-    SEQUENCE_CFG = 0x10,
+    system_status = 0x0,
+    general_cfg = 0x1,
+    data_cfg = 0x2,
+    osr_cfg = 0x3,
+    opmode_cfg = 0x4,
+    pin_cfg = 0x5,
+    gpio_cfg = 0x7,
+    gpo_drive_cfg = 0x9,
+    gpo_value = 0xB,
+    gpi_value = 0xD,
+    sequence_cfg = 0x10,
 
     // Channel selection register, write the channel number 0-7 that you are
     // trying to read from during the write frame.
-    CHANNEL_SEL = 0x11,
-    AUTO_SEQ_CH_SEL = 0x12
+    channel_sel = 0x11,
+    auto_seq_ch_sel = 0x12
   };
   hal::i2c& m_bus;
   hal::steady_clock& m_clk;
   hal::byte m_i2c_address;
   float m_analog_supply_voltage;
-  //store current selected channel to prevent needless i2c messages
-  hal::byte m_channel;
-  //this byte is used a bit feild for if a chanel has a wrapper object
-  //if a wrapper object as been made the pin mode won't change
-  hal::byte m_object_created;//TODO:: make wrapper classes
+  hal::byte m_channel;// stores selected channel to reduce i2c requests
+  hal::byte m_object_created;// tracks adapter channel reservations
 
 public:
-  enum class PinMode : hal::byte
+  enum class pin_mode : hal::byte
   {
-    AnalogInput = 0b000,
-    DigitalInput = 0b100,
-    DigitalOutputOpenDrain = 0b110,
-    DigitalOutputPushPull = 0b111
+    analog_input,
+    digital_input,
+    digital_output_open_drain,
+    digital_output_push_pull
   };
 
   tla2528(hal::i2c& p_i2c, hal::steady_clock& p_clk, hal::byte p_i2c_address, float p_analog_supply_voltage);
 
   void set_channel(hal::byte p_channel);
-  void set_pin_mode(PinMode p_mode);
+  void set_pin_mode(pin_mode p_mode);
 
   //If channel is not set to correct config then undefined behavior will occur
   void set_digital_out(hal::byte p_channel, bool level);
   bool get_digital_out(hal::byte p_channel);
-  //If channel is not set to correct config then undefined behavior will occur
   bool get_digital_in(hal::byte p_channel);
-  //If channel is not set to correct config then undefined behavior will occur
   float get_analog_in(hal::byte p_channel);
 
 };
