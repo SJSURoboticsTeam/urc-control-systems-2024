@@ -1,6 +1,7 @@
 #pragma once
 #include <libhal/i2c.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal/units.hpp>
 
 namespace sjsu::drivers {
 
@@ -16,8 +17,12 @@ private:
   friend tla2528_input_pin;
   friend tla2528_output_pin;
 
-  enum op_codes : hal::byte
-  {
+  static constexpr hal::byte default_address = 0x10;//address for no resistors
+  //address default reference voltage
+  //TODO: look at volts literal
+  static constexpr float default_reference_voltage = 3.3;
+
+  enum op_codes : hal::byte {
     // Requests to read data from the mux. (See Figure 29 on datasheet)
     single_register_read = 0b0001'0000,
 
@@ -51,8 +56,7 @@ private:
    Table 8 on data sheet)
    *
    */
-  enum register_addresses : hal::byte
-  {
+  enum register_addresses : hal::byte {
     system_status = 0x0,
     general_cfg = 0x1,
     data_cfg = 0x2,
@@ -75,6 +79,13 @@ private:
   float m_analog_supply_voltage;
   hal::byte m_channel;// stores selected channel to reduce i2c requests
   hal::byte m_object_created;// tracks adapter channel reservations
+  hal::byte m_pin_cfg;
+  hal::byte m_gpio_cfg;
+  hal::byte m_gpo_drive_cfg;
+  hal::byte m_gpo_value;
+
+  void set_analog_channel(hal::byte p_channel);
+  void reset();
 
 public:
   enum class pin_mode : hal::byte
@@ -85,15 +96,20 @@ public:
     digital_output_push_pull
   };
 
-  tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address, float p_analog_supply_voltage);
+  tla2528(hal::i2c& p_i2c, 
+    hal::byte p_i2c_address=default_address, 
+    float p_analog_supply_voltage=default_reference_voltage
+  );
 
-  void set_channel(hal::byte p_channel);
-  void set_pin_mode(pin_mode p_mode);
+  void set_pin_mode(pin_mode p_mode,hal::byte p_channel);
 
   //If channel is not set to correct config then undefined behavior will occur
   void set_digital_out(hal::byte p_channel, bool level);
+  void set_digital_out(hal::byte p_values);
   bool get_digital_out(hal::byte p_channel);
   bool get_digital_in(hal::byte p_channel);
+  hal::byte get_digital_in();
+
   float get_analog_in(hal::byte p_channel);
 
 };

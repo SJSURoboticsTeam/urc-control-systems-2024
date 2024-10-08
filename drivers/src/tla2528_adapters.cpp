@@ -13,7 +13,6 @@ tla2528_output_pin::tla2528_output_pin(tla2528& p_tla2528, hal::byte p_channel, 
     p_tla2528.m_object_created = p_tla2528.m_object_created | (1 << p_channel);
     m_tla2528 = &p_tla2528;
     m_channel = p_channel;
-    m_tla2528->set_channel(m_channel);
     driver_configure(p_settings);
 }
 tla2528_output_pin::~tla2528_output_pin(){
@@ -21,11 +20,10 @@ tla2528_output_pin::~tla2528_output_pin(){
 }
 void tla2528_output_pin::driver_configure(hal::output_pin::settings const& p_settings){
     if (p_settings.resistor != hal::pin_resistor::none) throw hal::operation_not_supported(this);
-    m_tla2528->set_channel(m_channel);
     if (p_settings.open_drain) {
-        m_tla2528->set_pin_mode(tla2528::pin_mode::digital_output_open_drain);
+        m_tla2528->set_pin_mode(tla2528::pin_mode::digital_output_open_drain, m_channel);
     } else {
-        m_tla2528->set_pin_mode(tla2528::pin_mode::digital_output_push_pull);
+        m_tla2528->set_pin_mode(tla2528::pin_mode::digital_output_push_pull, m_channel);
     }
 }
 void tla2528_output_pin::driver_level(bool p_high) {
@@ -44,8 +42,7 @@ tla2528_input_pin::tla2528_input_pin(tla2528& p_tla2528, hal::byte p_channel, ha
     p_tla2528.m_object_created = p_tla2528.m_object_created | (1 << p_channel);
     m_tla2528 = &p_tla2528;
     m_channel = p_channel;
-    m_tla2528->set_channel(m_channel);
-    m_tla2528->set_pin_mode(tla2528::pin_mode::digital_input);
+    m_tla2528->set_pin_mode(tla2528::pin_mode::digital_input,p_channel);
     driver_configure(p_settings);
 }
 tla2528_input_pin::~tla2528_input_pin(){
@@ -67,8 +64,7 @@ tla2528_adc::tla2528_adc(tla2528& p_tla2528, hal::byte p_channel) {
     p_tla2528.m_object_created = p_tla2528.m_object_created | (1 << p_channel);
     m_tla2528 = &p_tla2528;
     m_channel = p_channel;
-    m_tla2528->set_channel(m_channel);
-    m_tla2528->set_pin_mode(tla2528::pin_mode::analog_input);
+    m_tla2528->set_pin_mode(tla2528::pin_mode::analog_input, p_channel);
 }
 tla2528_adc::~tla2528_adc(){
     m_tla2528->m_object_created = m_tla2528->m_object_created & ~(1 << m_channel);
