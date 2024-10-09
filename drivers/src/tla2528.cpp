@@ -28,19 +28,20 @@ void tla2528::set_analog_channel(hal::byte p_channel) {
 
 void tla2528::set_pin_mode(pin_mode p_mode, hal::byte p_channel) {
     if (p_channel > 7) throw hal::argument_out_of_domain(this);
+    hal::bit_mask channel_mask = hal::bit_mask::from(p_channel);
     if (hal::bit_extract(hal::bit_mask::from(p_channel),m_object_created)) throw hal::resource_unavailable_try_again(this);
     if (p_mode == pin_mode::analog_input) {
-        hal::bit_modify(m_pin_cfg).clear(hal::bit_mask::from(p_channel));
+        hal::bit_modify(m_pin_cfg).clear(channel_mask);
     } else {
-        hal::bit_modify(m_pin_cfg).set(hal::bit_mask::from(p_channel));
+        hal::bit_modify(m_pin_cfg).set(channel_mask);
         if (p_mode == pin_mode::digital_input) {
-            hal::bit_modify(m_gpio_cfg).clear(hal::bit_mask::from(p_channel));
+            hal::bit_modify(m_gpio_cfg).clear(channel_mask);
         } else {
-            hal::bit_modify(m_gpio_cfg).set(hal::bit_mask::from(p_channel));
+            hal::bit_modify(m_gpio_cfg).set(channel_mask);
             if (p_mode == pin_mode::digital_output_open_drain) {
-                hal::bit_modify(m_gpo_drive_cfg).clear(hal::bit_mask::from(p_channel));
+                hal::bit_modify(m_gpo_drive_cfg).clear(channel_mask);
             } else {
-                hal::bit_modify(m_gpo_drive_cfg).set(hal::bit_mask::from(p_channel));
+                hal::bit_modify(m_gpo_drive_cfg).set(channel_mask);
             }
         }
     }

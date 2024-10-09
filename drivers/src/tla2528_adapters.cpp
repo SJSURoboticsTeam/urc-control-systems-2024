@@ -28,7 +28,7 @@ void tla2528_output_pin::driver_configure(hal::output_pin::settings const& p_set
     }
 }
 void tla2528_output_pin::driver_level(bool p_high) {
-    m_tla2528->set_digital_out(p_high, m_channel);
+    m_tla2528->set_digital_out(m_channel, p_high);
 }
 bool tla2528_output_pin::driver_level() {
     return m_tla2528->get_digital_out(m_channel);

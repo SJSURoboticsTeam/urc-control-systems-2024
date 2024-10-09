@@ -77,12 +77,12 @@ private:
   hal::i2c& m_bus;
   hal::byte m_i2c_address;
   float m_analog_supply_voltage;
-  hal::byte m_channel;// stores selected channel to reduce i2c requests
-  hal::byte m_object_created;// tracks adapter channel reservations
-  hal::byte m_pin_cfg;
-  hal::byte m_gpio_cfg;
-  hal::byte m_gpo_drive_cfg;
-  hal::byte m_gpo_value;
+  hal::byte m_channel = 0x08;// stores selected channel to reduce i2c requests
+  hal::byte m_object_created = 0x00;// tracks adapter channel reservations
+  hal::byte m_pin_cfg = 0x00;
+  hal::byte m_gpio_cfg = 0x00;
+  hal::byte m_gpo_drive_cfg = 0x00;
+  hal::byte m_gpo_value = 0x00;
 
   void set_analog_channel(hal::byte p_channel);
   void reset();
