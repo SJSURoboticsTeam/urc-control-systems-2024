@@ -29,7 +29,7 @@ void tla2528::set_analog_channel(hal::byte p_channel) {
 void tla2528::set_pin_mode(pin_mode p_mode, hal::byte p_channel) {
     if (p_channel > 7) throw hal::argument_out_of_domain(this);
     hal::bit_mask channel_mask = hal::bit_mask::from(p_channel);
-    if (hal::bit_extract(hal::bit_mask::from(p_channel),m_object_created)) throw hal::resource_unavailable_try_again(this);
+    // if (hal::bit_extract(hal::bit_mask::from(p_channel),m_object_created)) throw hal::resource_unavailable_try_again(this);
     if (p_mode == pin_mode::analog_input) {
         hal::bit_modify(m_pin_cfg).clear(channel_mask);
     } else {
@@ -88,7 +88,7 @@ bool tla2528::get_digital_out(hal::byte p_channel) {
 hal::byte tla2528::get_digital_in() {
     std::array<hal::byte, 1> data_buffer;
     std::array<hal::byte, 3> cmd_buffer = {
-      op_codes::single_register_write,
+      op_codes::single_register_read,
       register_addresses::gpi_value,
     };
     hal::write(m_bus, m_i2c_address, cmd_buffer);
