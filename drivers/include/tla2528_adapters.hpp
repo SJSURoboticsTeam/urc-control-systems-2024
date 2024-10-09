@@ -32,7 +32,7 @@ private:
 public:
   ~tla2528_input_pin();
 };
-tla2528_input_pin make_input_pin(tla2528& p_tla2528, hal::byte p_channel);
+tla2528_input_pin make_input_pin(tla2528& p_tla2528, hal::byte p_channel, hal::input_pin::settings const& p_settings);
 
 class tla2528_adc : public hal::adc
 {
