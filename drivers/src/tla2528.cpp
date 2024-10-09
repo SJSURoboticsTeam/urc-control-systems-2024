@@ -28,7 +28,7 @@ void tla2528::set_analog_channel(hal::byte p_channel) {
 
 void tla2528::set_pin_mode(pin_mode p_mode, hal::byte p_channel) {
     if (p_channel > 7) throw hal::argument_out_of_domain(this);
-    //TODO: add adapter safety
+    if (hal::bit_extract(hal::bit_mask::from(p_channel),m_object_created)) throw hal::resource_unavailable_try_again(this);
     if (p_mode == pin_mode::analog_input) {
         hal::bit_modify(m_pin_cfg).clear(hal::bit_mask::from(p_channel));
     } else {
@@ -107,9 +107,11 @@ float tla2528::get_analog_in(hal::byte p_channel){
 
     hal::write(m_bus, m_i2c_address, read_cmd_buffer);
     hal::read(m_bus, m_i2c_address, data_buffer);
-
-    //TODO: function bit ops
-    uint16_t data = (data_buffer[0] << 4) | (data_buffer[1] >> 4);
+    
+    //TODO: look into averaging & CRC
+    uint16_t data = 0;
+    hal::bit_modify(data).insert<hal::bit_mask::from(4,11)>(data_buffer[0]);
+    hal::bit_modify(data).insert<hal::bit_mask::from(0,3)>(hal::bit_extract(hal::bit_mask::from(4,7),data_buffer[1]));
     float read_voltage = m_analog_supply_voltage / 4096 * data;
     
     return read_voltage;
