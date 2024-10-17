@@ -5,7 +5,7 @@
 
 namespace sjsu::drivers {
 
-//adapters
+// adapters
 class tla2528_adc;
 class tla2528_input_pin;
 class tla2528_output_pin;
@@ -17,12 +17,14 @@ private:
   friend tla2528_input_pin;
   friend tla2528_output_pin;
 
-  static constexpr hal::byte default_address = 0x10;//address for no resistors
-  //address default reference voltage
-  //TODO: look at volts literal
+  static constexpr hal::byte default_address = 0x10;  // address for no
+                                                      // resistors
+  // address default reference voltage
+  // TODO: look at volts literal
   static constexpr float default_reference_voltage = 3.3;
 
-  enum op_codes : hal::byte {
+  enum op_codes : hal::byte
+  {
     // Requests to read data from the mux. (See Figure 29 on datasheet)
     single_register_read = 0b0001'0000,
 
@@ -56,7 +58,8 @@ private:
    Table 8 on data sheet)
    *
    */
-  enum register_addresses : hal::byte {
+  enum register_addresses : hal::byte
+  {
     system_status = 0x0,
     general_cfg = 0x1,
     data_cfg = 0x2,
@@ -76,8 +79,8 @@ private:
   };
   hal::i2c& m_bus;
   hal::byte m_i2c_address;
-  hal::byte m_channel = 0x08;// stores selected channel to reduce i2c requests
-  hal::byte m_object_created = 0x00;// tracks adapter channel reservations
+  hal::byte m_channel = 0x08;  // stores selected channel to reduce i2c requests
+  hal::byte m_object_created = 0x00;  // tracks adapter channel reservations
   hal::byte m_pin_cfg = 0x00;
   hal::byte m_gpio_cfg = 0x00;
   hal::byte m_gpo_drive_cfg = 0x00;
@@ -95,13 +98,11 @@ public:
     digital_output_push_pull
   };
 
-  tla2528(hal::i2c& p_i2c, 
-    hal::byte p_i2c_address=default_address
-  );
+  tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address = default_address);
 
-  void set_pin_mode(pin_mode p_mode,hal::byte p_channel);
+  void set_pin_mode(pin_mode p_mode, hal::byte p_channel);
 
-  //If channel is not set to correct config then undefined behavior will occur
+  // If channel is not set to correct config then undefined behavior will occur
   void set_digital_out(hal::byte p_channel, bool level);
   void set_digital_out(hal::byte p_values);
   bool get_digital_out(hal::byte p_channel);
@@ -109,6 +110,5 @@ public:
   hal::byte get_digital_in();
 
   float get_analog_in(hal::byte p_channel);
-
 };
 }  // namespace sjsu::drivers
