@@ -6,11 +6,10 @@
 
 namespace sjsu::drivers {
 
-tla2528::tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address, float p_analog_supply_voltage) :
+tla2528::tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address) :
     m_bus(p_i2c)
 {
     m_i2c_address = p_i2c_address;
-    m_analog_supply_voltage = p_analog_supply_voltage;
     //TODO: reset command
 }
 
@@ -113,9 +112,7 @@ float tla2528::get_analog_in(hal::byte p_channel){
     uint16_t data = 0;
     hal::bit_modify(data).insert<hal::bit_mask::from(4,11)>(data_buffer[0]);
     hal::bit_modify(data).insert<hal::bit_mask::from(0,3)>(hal::bit_extract(hal::bit_mask::from(4,7),data_buffer[1]));
-    float read_voltage = m_analog_supply_voltage / 4096 * data;
-    
-    return read_voltage;
+    return data/4095.0;
 }
 
 }  // namespace sjsu::drivers
