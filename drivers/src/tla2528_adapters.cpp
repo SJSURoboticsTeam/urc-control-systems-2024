@@ -50,7 +50,7 @@ void tla2528_output_pin::driver_level(bool p_high)
 }
 bool tla2528_output_pin::driver_level()
 {
-  return m_tla2528->get_digital_out(m_channel);
+  return m_tla2528->get_digital_in(m_channel);
 }
 
 tla2528_input_pin make_input_pin(tla2528& p_tla2528,
