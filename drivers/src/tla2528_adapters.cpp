@@ -20,11 +20,11 @@ tla2528_output_pin::tla2528_output_pin(
   if (hal::bit_extract(hal::bit_mask::from(p_channel),
                        p_tla2528.m_object_created))
     throw hal::resource_unavailable_try_again(this);
-  hal::bit_modify(p_tla2528.m_object_created)
-    .set(hal::bit_mask::from(p_channel));
   m_tla2528 = &p_tla2528;
   m_channel = p_channel;
   driver_configure(p_settings);
+  hal::bit_modify(p_tla2528.m_object_created)
+    .set(hal::bit_mask::from(p_channel));
 }
 tla2528_output_pin::~tla2528_output_pin()
 {
@@ -66,12 +66,12 @@ tla2528_input_pin::tla2528_input_pin(tla2528& p_tla2528,
   if (hal::bit_extract(hal::bit_mask::from(p_channel),
                        p_tla2528.m_object_created))
     throw hal::resource_unavailable_try_again(this);
-  hal::bit_modify(p_tla2528.m_object_created)
-    .set(hal::bit_mask::from(p_channel));
   m_tla2528 = &p_tla2528;
   m_channel = p_channel;
   m_tla2528->set_pin_mode(tla2528::pin_mode::digital_input, p_channel);
   driver_configure(p_settings);
+  hal::bit_modify(p_tla2528.m_object_created)
+    .set(hal::bit_mask::from(p_channel));
 }
 tla2528_input_pin::~tla2528_input_pin()
 {
@@ -93,22 +93,21 @@ tla2528_adc make_adc(tla2528& p_tla2528, hal::byte p_channel)
 {
   return tla2528_adc(p_tla2528, p_channel);
 }
-
+tla2528_adc::~tla2528_adc()
+{
+  hal::bit_modify(m_tla2528->m_object_created)
+    .set(hal::bit_mask::from(m_channel));
+}
 tla2528_adc::tla2528_adc(tla2528& p_tla2528, hal::byte p_channel)
 {
   if (hal::bit_extract(hal::bit_mask::from(p_channel),
                        p_tla2528.m_object_created))
     throw hal::resource_unavailable_try_again(this);
-  hal::bit_modify(p_tla2528.m_object_created)
-    .set(hal::bit_mask::from(p_channel));
   m_tla2528 = &p_tla2528;
   m_channel = p_channel;
   m_tla2528->set_pin_mode(tla2528::pin_mode::analog_input, p_channel);
-}
-tla2528_adc::~tla2528_adc()
-{
-  hal::bit_modify(m_tla2528->m_object_created)
-    .set(hal::bit_mask::from(m_channel));
+  hal::bit_modify(p_tla2528.m_object_created)
+    .set(hal::bit_mask::from(p_channel));
 }
 float tla2528_adc::driver_read()
 {
