@@ -32,14 +32,19 @@ public:
   };
 
   tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address = default_address);
+
   /**
    * @brief set what service a pin will provide
+   *
+   * @param p_channel if out of range (>7) an exception will be thrown
    */
   void set_pin_mode(pin_mode p_mode, hal::byte p_channel);
 
   // If channel is not set to correct config then undefined behavior will occur
   /**
    * @brief set output level pin
+   *
+   * @param p_channel if out of range (>7) an exception will be thrown
    *
    * If the pin is not an output pin the level will be used once it changes to
    * an output pin.
@@ -48,15 +53,17 @@ public:
   /**
    * @brief set output levels on pins
    *
-   * @param p_value The byte is used as a bit feild of bool values. i.e the 0th
+   * @param p_value The byte is used as a bit field of bool values. i.e the 0th
    * bit in the byte will set the 0 pin.
    *
    * If the pin is not an output pin the level will be used once it changes to
    * an output pin output.
    */
-  void set_digital_out(hal::byte p_values);
+  void set_digital_bus_out(hal::byte p_values);
   /**
    * @brief read output state of an output pin
+   *
+   * @param p_channel if out of range (>7) an exception will be thrown
    *
    * If the pin is not an output pin the returned state will be used once it
    * changes to an output pin.
@@ -69,13 +76,17 @@ public:
   /**
    * @brief read the level of a pin
    *
-   * @return The byte is used as a bit feild of bool values. i.e the 0th bit in
+   * @return The byte is used as a bit field of bool values. i.e the 0th bit in
    * the byte will be the 0 pin's level.
    */
-  hal::byte get_digital_in();
+  hal::byte get_digital_bus_in();
 
   /**
    * @brief read the adc output of a pin.
+   *
+   * @param p_channel if out of range (>7) an exception will be thrown
+   *
+   * if the pin is not set to adc
    */
   float get_analog_in(hal::byte p_channel);
 
@@ -123,7 +134,7 @@ private:
   void set_analog_channel(hal::byte p_channel);
   void reset();
 
-  hal::i2c& m_bus;
+  hal::i2c& m_i2c_bus;
   hal::byte m_i2c_address;
   hal::byte m_channel = 0x08;  // stores selected channel to reduce i2c requests
   hal::byte m_object_created = 0x00;  // tracks adapter channel reservations

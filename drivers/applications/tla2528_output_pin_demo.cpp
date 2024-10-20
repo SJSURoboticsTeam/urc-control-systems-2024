@@ -17,7 +17,7 @@ namespace sjsu::drivers {
 void application(application_framework& p_framework)
 {
 
-  bool demo_open_drain = false;
+  constexpr bool demo_open_drain = false;
   hal::byte i2c_address = 0x10;  // 0x10 is the tla address for no resistors
 
   auto& terminal = *p_framework.terminal;
@@ -38,13 +38,15 @@ void application(application_framework& p_framework)
     make_output_pin(gpo_expander, 7, output_pin_config)
   };
 
-  hal::byte counter = 0;
+  hal::byte counter =
+    0;  // output counts in binary to go though all out put combinations
+  hal::print(terminal, "Starting Binary Count\n");
   while (true) {
     counter++;
     for (int i = 0; i < 8; i++) {
       gpos[i].level(hal::bit_extract(hal::bit_mask::from(i), counter));
     }
-    hal::print<16>(terminal, "value:%x\n", counter);
+    hal::print<16>(terminal, "count:%x\n", counter);
     hal::delay(steady_clock, 200ms);
   }
 }
