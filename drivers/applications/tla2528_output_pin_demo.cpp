@@ -24,7 +24,7 @@ void application(application_framework& p_framework)
   auto& i2c = *p_framework.i2c;
   auto& steady_clock = *p_framework.steady_clock;
   tla2528 gpo_expander = tla2528(i2c, i2c_address);
-  hal::output_pin::settings output_pin_config = {
+  constexpr hal::output_pin::settings output_pin_config = {
     .resistor = hal::pin_resistor::none, .open_drain = demo_open_drain
   };
   std::array<tla2528_output_pin, 8> gpos{

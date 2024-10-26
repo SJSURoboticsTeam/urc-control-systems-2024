@@ -132,15 +132,13 @@ private:
   };
 
   void set_analog_channel(hal::byte p_channel);
+  void throw_if_invalid_channel(hal::byte p_channel);
   void reset();
 
   hal::i2c& m_i2c_bus;
   hal::byte m_i2c_address;
   hal::byte m_channel = 0x08;  // stores selected channel to reduce i2c requests
   hal::byte m_object_created = 0x00;  // tracks adapter channel reservations
-  hal::byte m_pin_cfg = 0x00;
-  hal::byte m_gpio_cfg = 0x00;
-  hal::byte m_gpo_drive_cfg = 0x00;
   hal::byte m_gpo_value = 0x00;
 };
 }  // namespace sjsu::drivers

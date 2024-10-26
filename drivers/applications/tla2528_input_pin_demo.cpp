@@ -23,7 +23,7 @@ void application(application_framework& p_framework)
   auto& i2c = *p_framework.i2c;
   auto& steady_clock = *p_framework.steady_clock;
   tla2528 gpi_expander = tla2528(i2c, i2c_address);
-  hal::input_pin::settings input_pin_config = { .resistor =
+  constexpr hal::input_pin::settings input_pin_config = { .resistor =
                                                   hal::pin_resistor::none };
   std::array<tla2528_input_pin, 8> gpis{
     make_input_pin(gpi_expander, 0, input_pin_config),
