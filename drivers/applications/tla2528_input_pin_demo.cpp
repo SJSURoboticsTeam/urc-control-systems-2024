@@ -16,13 +16,10 @@ namespace sjsu::drivers {
 
 void application(application_framework& p_framework)
 {
-
-  hal::byte i2c_address = 0x10;  // 0x10 is the tla address for no resistors
-
   auto& terminal = *p_framework.terminal;
   auto& i2c = *p_framework.i2c;
   auto& steady_clock = *p_framework.steady_clock;
-  tla2528 gpi_expander = tla2528(i2c, i2c_address);
+  tla2528 gpi_expander = tla2528(i2c);
   constexpr hal::input_pin::settings input_pin_config = { .resistor =
                                                   hal::pin_resistor::none };
   std::array<tla2528_input_pin, 8> gpis{

@@ -131,15 +131,14 @@ bool tla2528::get_digital_in(hal::byte p_channel)
 float tla2528::get_analog_in(hal::byte p_channel)
 {
   set_analog_channel(p_channel);
+  // TODO: look into averaging & CRC
   std::array<hal::byte, 2> data_buffer;
   std::array<hal::byte, 1> cmd_buffer = { op_codes::single_register_read };
   hal::write_then_read(m_i2c_bus, m_i2c_address, cmd_buffer, data_buffer);
 
-  // TODO: look into averaging & CRC
-  uint16_t data = 0;
-  hal::bit_modify(data).insert<hal::bit_mask::from(4, 11)>(data_buffer[0]);
-  hal::bit_modify(data).insert<hal::bit_mask::from(0, 3)>(
-    hal::bit_extract(hal::bit_mask::from(4, 7), data_buffer[1]));
+  // Take 12 bit number stored in first 12 bits of 2 bytes and converting to 16
+  // bit num by shifting 4 bit right (See Figure 25 on datasheet)
+  uint16_t data = data_buffer[0] << 4 | data_buffer[1] >> 4;
   return data / 4095.0;
 }
 
