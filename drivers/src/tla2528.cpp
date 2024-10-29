@@ -97,13 +97,18 @@ void tla2528::set_digital_out(hal::byte p_channel, bool level)
 bool tla2528::get_digital_out(hal::byte p_channel)
 {
   throw_if_invalid_channel(p_channel);
+  return hal::bit_extract(hal::bit_mask::from(p_channel),
+                          get_digital_bus_out());
+}
+hal::byte tla2528::get_digital_bus_out()
+{
   std::array<hal::byte, 1> data_buffer;
   std::array<hal::byte, 2> cmd_buffer = {
     op_codes::single_register_read,
     register_addresses::gpo_value,
   };
   hal::write_then_read(m_i2c_bus, m_i2c_address, cmd_buffer, data_buffer);
-  return hal::bit_extract(hal::bit_mask::from(p_channel), data_buffer[0]);
+  return data_buffer[0];
 }
 
 hal::byte tla2528::get_digital_bus_in()
