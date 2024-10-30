@@ -122,39 +122,6 @@ private:
   // i2c address for no resistors
   static constexpr hal::byte default_address = 0x10;
 
-  enum op_codes : hal::byte
-  {
-    single_register_read = 0b0001'0000,
-    single_register_write = 0b0000'1000,
-    set_bit = 0b0001'1000,
-    clear_bit = 0b0010'0000,
-    // Continuously reads data from a group of registers. Provide the first
-    // address to read from, if it runs out of valid addresses to read, it
-    // returns zeros. (See Figure 30 on datasheet)
-    continuous_register_read = 0b0011'0000,
-    // Continuously writes data to a group of registers. Provide the first
-    // address to write to.The data sent will automatically write the data to
-    // the next register in ascending order. (See Figure 32 on datasheet)
-    continuous_register_write = 0b0010'1000
-  };
-
-  enum register_addresses : hal::byte
-  {
-    system_status = 0x0,
-    general_cfg = 0x1,
-    data_cfg = 0x2,
-    osr_cfg = 0x3,
-    opmode_cfg = 0x4,
-    pin_cfg = 0x5,
-    gpio_cfg = 0x7,
-    gpo_drive_cfg = 0x9,
-    gpo_value = 0xB,
-    gpi_value = 0xD,
-    sequence_cfg = 0x10,
-    channel_sel = 0x11,
-    auto_seq_ch_sel = 0x12
-  };
-
   void set_analog_channel(hal::byte p_channel);
   void throw_if_invalid_channel(hal::byte p_channel);
   void reset();
