@@ -6,39 +6,39 @@
 #include <tla2528.hpp>
 
 namespace {
-  enum op_codes : hal::byte
-  {
-    single_register_read = 0b0001'0000,
-    single_register_write = 0b0000'1000,
-    set_bit = 0b0001'1000,
-    clear_bit = 0b0010'0000,
-    // Continuously reads data from a group of registers. Provide the first
-    // address to read from, if it runs out of valid addresses to read, it
-    // returns zeros. (See Figure 30 on datasheet)
-    continuous_register_read = 0b0011'0000,
-    // Continuously writes data to a group of registers. Provide the first
-    // address to write to.The data sent will automatically write the data to
-    // the next register in ascending order. (See Figure 32 on datasheet)
-    continuous_register_write = 0b0010'1000
-  };
+enum op_codes : hal::byte
+{
+  single_register_read = 0b0001'0000,
+  single_register_write = 0b0000'1000,
+  set_bit = 0b0001'1000,
+  clear_bit = 0b0010'0000,
+  // Continuously reads data from a group of registers. Provide the first
+  // address to read from, if it runs out of valid addresses to read, it
+  // returns zeros. (See Figure 30 on datasheet)
+  continuous_register_read = 0b0011'0000,
+  // Continuously writes data to a group of registers. Provide the first
+  // address to write to.The data sent will automatically write the data to
+  // the next register in ascending order. (See Figure 32 on datasheet)
+  continuous_register_write = 0b0010'1000
+};
 
-  enum register_addresses : hal::byte
-  {
-    system_status = 0x0,
-    general_cfg = 0x1,
-    data_cfg = 0x2,
-    osr_cfg = 0x3,
-    opmode_cfg = 0x4,
-    pin_cfg = 0x5,
-    gpio_cfg = 0x7,
-    gpo_drive_cfg = 0x9,
-    gpo_value = 0xB,
-    gpi_value = 0xD,
-    sequence_cfg = 0x10,
-    channel_sel = 0x11,
-    auto_seq_ch_sel = 0x12
-  };
-}
+enum register_addresses : hal::byte
+{
+  system_status = 0x0,
+  general_cfg = 0x1,
+  data_cfg = 0x2,
+  osr_cfg = 0x3,
+  opmode_cfg = 0x4,
+  pin_cfg = 0x5,
+  gpio_cfg = 0x7,
+  gpo_drive_cfg = 0x9,
+  gpo_value = 0xB,
+  gpi_value = 0xD,
+  sequence_cfg = 0x10,
+  channel_sel = 0x11,
+  auto_seq_ch_sel = 0x12
+};
+}  // namespace
 namespace sjsu::drivers {
 
 tla2528::tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address)
@@ -117,10 +117,10 @@ void tla2528::set_digital_bus_out(hal::byte p_values)
   hal::write(m_i2c_bus, m_i2c_address, cmd_buffer);
 }
 
-void tla2528::set_digital_out(hal::byte p_channel, bool level)
+void tla2528::set_digital_out(hal::byte p_channel, bool p_high)
 {
   throw_if_invalid_channel(p_channel);
-  if (level) {
+  if (p_high) {
     hal::bit_modify(m_gpo_value).set(hal::bit_mask::from(p_channel));
   } else {
     hal::bit_modify(m_gpo_value).clear(hal::bit_mask::from(p_channel));
