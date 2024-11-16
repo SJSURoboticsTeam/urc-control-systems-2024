@@ -165,7 +165,7 @@ bool tla2528::get_digital_in(hal::byte p_channel)
 float tla2528::get_analog_in(hal::byte p_channel)
 {
   set_analog_channel(p_channel);
-  // TODO: look into averaging & CRC
+  // TODO: look into averaging & channel validation
   std::array<hal::byte, 2> data_buffer;
   std::array<hal::byte, 1> cmd_buffer = { op_codes::single_register_read };
   hal::write_then_read(m_i2c_bus, m_i2c_address, cmd_buffer, data_buffer);
