@@ -32,5 +32,6 @@ namespace sjsu::science {
         public:
             revolver(hal::servo& p_servo, hal::input_pin& p_input_pin, hal::steady_clock& p_steady_clock, hal::serial& p_terminal);
             void revolverMoveVials(int vial);
+            
     };
 }

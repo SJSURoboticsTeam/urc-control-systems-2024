@@ -19,7 +19,7 @@ scd40::scd40_read_data scd40::read() {
     std::array<hal::byte, 2> read_address = {read_measurement_first_half, read_measurement_second_half };
     std::array<hal::byte, 9> buffer;
 
-    hal::write(m_i2c,addresses::device_address, read_address);
+    hal::write(m_i2c, addresses::device_address, read_address);
     hal::delay(m_clock, 1ms);
     hal::read(m_i2c, addresses::device_address, buffer, hal::never_timeout());
     

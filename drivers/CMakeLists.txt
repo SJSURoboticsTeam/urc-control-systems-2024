@@ -24,6 +24,7 @@ libhal_build_demos(
   #pump_manager_demo
   scd40_demo
   soil_sensor_demo
+#   tmag_demo
 
 SOURCES
     platforms/micromod.cpp
