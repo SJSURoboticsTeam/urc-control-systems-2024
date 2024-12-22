@@ -11,13 +11,14 @@ tmag5273::tmag5273(hal::i2c& p_i2c, hal::steady_clock& p_clock)
 
 void tmag5273::defualt_config()
 {
-  hal::byte dev_config_1 = 0xC;
-  hal::byte dev_config_2 = 0x2;
+  hal::byte dev_config_1 = 0x0C; //00001100
+  hal::byte dev_config_2 = 0x0A;//00001010
   tmag5273::config_device(dev_config_1, dev_config_2);
 
-  hal::byte sens_config_1 = 0xC;
-  hal::byte sens_config_2 = 0x2;
-  tmag5273::config_device(sens_config_1, sens_config_2);
+  hal::byte sens_config_1 = 0x70; //01110000
+  hal::byte sens_config_2 = 0x08; // 00001000
+
+  tmag5273::config_sensor(sens_config_1, sens_config_2);
 }
 
 void tmag5273::config_device(hal::byte config_1, hal::byte config_2)
@@ -25,15 +26,17 @@ void tmag5273::config_device(hal::byte config_1, hal::byte config_2)
   std::array<hal::byte, 3> write_buff = { device_addresses::DEVICE_CONFIG_1,
                                           config_1,
                                           config_2 };
-  hal::write(m_i2c, device_addresses::i2c_address, write_buff);
+hal::
+  write(m_i2c, device_addresses::i2c_address, write_buff);
 }
 
 void tmag5273::config_sensor(hal::byte config_1, hal::byte config_2)
 {
   std::array<hal::byte, 3> write_buff = { device_addresses::SENSOR_CONFIG_1,
-                                          config_1,
-                                          config_2 };
-  hal::write(m_i2c, device_addresses::i2c_address, write_buff);
+                                          config_1, config_2
+ };
+hal::
+  write(m_i2c, device_addresses::i2c_address, write_buff);
 }
 
 tmag5273::data tmag5273::read()
@@ -49,8 +52,14 @@ tmag5273::data tmag5273::read()
   ret.x_field = buffer[2] << 8 | buffer[3];
   ret.y_field = buffer[4] << 8 | buffer[5];
   ret.z_field = buffer[6] << 8 | buffer[7];
-  ret.angle = buffer[8] << 8 | buffer[9];
-  ret.magnitude = buffer[10] << 8 | buffer[11];
+
+  adresses_write_to = {
+    device_addresses::ANGLE_RESULT_MSB
+  };
+  hal::write_then_read(
+    m_i2c, device_addresses::i2c_address, adresses_write_to, buffer);
+  ret.angle = buffer[0] << 8 | buffer[1];
+  ret.magnitude = buffer[2] << 8 | buffer[3];
 
   return ret;
 }

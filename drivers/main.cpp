@@ -11,21 +11,28 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <libhal/error.hpp>
 #include "hardware_map.hpp"
+#include <libhal/error.hpp>
 
+#include <libhal-util/serial.hpp>
 int main()
 {
   auto hardware_map = sjsu::drivers::initialize_platform();
-  
-  application(hardware_map);
+  try {
+
+    hal::print<1024>(*hardware_map.terminal, "huh?");
+    application(hardware_map);
+  } catch (...) {
+    hal::print<1024>(*hardware_map.terminal,
+                     "DSFAFDSAFDSAFDSAFDSAFDASFEWijewfjijfwe");
+  }
 
   return 0;
 }
 
-namespace boost {
-void throw_exception(std::exception const&)
-{
-  hal::halt();
-}
-}  // namespace boost
+// namespace boost {
+// void throw_exception(std::exception const&)
+// {
+//   hal::halt();
+// }
+// }  // namespace boost

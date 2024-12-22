@@ -28,18 +28,18 @@ namespace sjsu::drivers {
 struct application_framework
 {
   hal::serial* terminal;
-  hal::can* can;
-  hal::input_pin* in_pin0;
-  hal::input_pin* in_pin1;
-  hal::input_pin* in_pin2;
-  hal::output_pin* led;
-  hal::output_pin* out_pin0;
-  hal::output_pin* out_pin1;
-  hal::output_pin* out_pin2;
-  hal::pwm* pwm0;
-  hal::pwm* pwm1;
-  hal::adc* adc0;
-  hal::adc* adc1;
+  // hal::can* can;
+  // hal::input_pin* in_pin0;
+  // hal::input_pin* in_pin1;
+  // hal::input_pin* in_pin2;
+  // hal::output_pin* led;
+  // hal::output_pin* out_pin0;
+  // hal::output_pin* out_pin1;
+  // hal::output_pin* out_pin2;
+  // hal::pwm* pwm0;
+  // hal::pwm* pwm1;
+  // hal::adc* adc0;
+  // hal::adc* adc1;
   // hal::serial* esp;
   hal::i2c* i2c;
   hal::steady_clock* steady_clock;
