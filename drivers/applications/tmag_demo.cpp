@@ -38,9 +38,9 @@ void application(application_framework& p_framework)
   
   tmag5273 tmag(i2c2, clock);
 
-  hal::print<64>(terminal, "TMAG Intialized!");
+  hal::print<64>(terminal, "Tmag Instantiated!");
   tmag.defualt_config();
-  hal::print<64>(terminal, "TMAG Configured!");
+  hal::print<64>(terminal, "Default config sent!");
 
   while (true) {
     tmag5273::data rd = tmag.read();

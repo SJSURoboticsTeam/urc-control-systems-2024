@@ -24,7 +24,7 @@ int main()
     application(hardware_map);
   } catch (...) {
     hal::print<1024>(*hardware_map.terminal,
-                     "Resource not found");
+                     "A resource was not found");
   }
 
   return 0;

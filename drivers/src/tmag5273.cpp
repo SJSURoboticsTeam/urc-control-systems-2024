@@ -59,8 +59,16 @@ tmag5273::data tmag5273::read()
   ret.x_field = buffer[2] << 8 | buffer[3];
   ret.y_field = buffer[4] << 8 | buffer[5];
   ret.z_field = buffer[6] << 8 | buffer[7];
-  ret.angle = (buffer[9] << 8 | buffer[10])/16;
+
+  // adresses_write_to = {
+  //   device_addresses::ANGLE_RESULT_MSB
+  // };
+  // hal::write_then_read(
+  //   m_i2c, device_addresses::i2c_address, adresses_write_to, buffer);
+  ret.angle = buffer[9] << 8 | buffer[10];
   ret.magnitude = buffer[11];
+
+  
 
   return ret;
 }
