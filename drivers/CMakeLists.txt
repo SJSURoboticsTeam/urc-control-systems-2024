@@ -25,6 +25,10 @@ libhal_build_demos(
   scd40_demo
   soil_sensor_demo
   drv8825_demo
+  tla2528_output_pin_demo
+  tla2528_input_pin_demo
+  tla2528_analog_input_demo
+
 
   INCLUDES
   include
@@ -38,6 +42,8 @@ SOURCES
     src/soil_sensor_sht21.cpp
     src/sk9822.cpp
     src/drv8825.cpp
+    src/tla2528.cpp
+    src/tla2528_adapters.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
