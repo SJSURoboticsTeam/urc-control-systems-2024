@@ -48,12 +48,21 @@ namespace sjsu::drivers{
 
     public:
         struct data{
-            float temperature;
-            float x_field;
-            float y_field;
-            float z_field;
-            float angle;
-            float magnitude;
+            uint16_t temperature;
+            uint16_t x_field;
+            uint16_t y_field;
+            uint16_t z_field;
+            uint16_t angle;
+            uint8_t magnitude;
+        };
+
+        struct data_mT{
+            uint16_t temperature;
+            uint16_t x_field;
+            uint16_t y_field;
+            uint16_t z_field;
+            uint16_t angle;
+            uint8_t magnitude;
         };
 
         tmag5273(hal::i2c& p_i2c,  hal::steady_clock&  p_clock);

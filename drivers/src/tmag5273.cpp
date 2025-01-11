@@ -19,6 +19,13 @@ void tmag5273::defualt_config()
   hal::byte sens_config_2 = 0x08; // 00001000
 
   tmag5273::config_sensor(sens_config_1, sens_config_2);
+
+
+  //temp sens 
+  std::array<hal::byte, 3> write_buff = { device_addresses::T_CONFIG,
+                                          0x01};
+  hal::write(m_i2c, device_addresses::i2c_address, write_buff);
+
 }
 
 void tmag5273::config_device(hal::byte config_1, hal::byte config_2)
@@ -52,14 +59,8 @@ tmag5273::data tmag5273::read()
   ret.x_field = buffer[2] << 8 | buffer[3];
   ret.y_field = buffer[4] << 8 | buffer[5];
   ret.z_field = buffer[6] << 8 | buffer[7];
-
-  adresses_write_to = {
-    device_addresses::ANGLE_RESULT_MSB
-  };
-  hal::write_then_read(
-    m_i2c, device_addresses::i2c_address, adresses_write_to, buffer);
-  ret.angle = buffer[0] << 8 | buffer[1];
-  ret.magnitude = buffer[2] << 8 | buffer[3];
+  ret.angle = (buffer[9] << 8 | buffer[10])/16;
+  ret.magnitude = buffer[11];
 
   return ret;
 }

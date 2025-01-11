@@ -38,9 +38,9 @@ void application(application_framework& p_framework)
   
   tmag5273 tmag(i2c2, clock);
 
-  hal::print<64>(terminal, "Hello ljkljlj!");
+  hal::print<64>(terminal, "TMAG Intialized!");
   tmag.defualt_config();
-  hal::print<64>(terminal, "Hello ggjhgjhgj!");
+  hal::print<64>(terminal, "TMAG Configured!");
 
   while (true) {
     tmag5273::data rd = tmag.read();
@@ -49,8 +49,8 @@ void application(application_framework& p_framework)
     hal::print<64>(terminal, "X_field: %f\n", rd.x_field);
     hal::print<64>(terminal, "Y_field: %f\n", rd.y_field);
     hal::print<64>(terminal, "Z_field: %f\n", rd.z_field);
-    hal::print<64>(terminal, "Angle: %f\n", rd.angle);
-    hal::print<64>(terminal, "Magnitude: %f\n", rd.magnitude);
+    hal::print<64>(terminal, "Angle: %d\n", rd.angle);
+    hal::print<64>(terminal, "Magnitude: %d\n", rd.magnitude);
     hal::delay(clock, 500ms);
   }
 }
