@@ -72,7 +72,7 @@ void drv8825::driver_position(hal::degrees p_position)
 {
   float rotations = p_position / 360.f;
   float full_steps = rotations * static_cast<float>(m_full_steps_per_rotation);
-  float target_partial_steps = full_steps / 32.0f;
+  float target_partial_steps = full_steps * 32.0f;
   long difference = target_partial_steps - static_cast<long>(m_partial_steps);
   step(difference);
 }
