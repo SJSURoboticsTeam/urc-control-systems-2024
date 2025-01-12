@@ -71,9 +71,9 @@ hal::degrees drv8825::get_position()
 void drv8825::driver_position(hal::degrees p_position)
 {
   float rotations = p_position / 360.f;
-  long full_steps = static_cast<long>(rotations) * m_full_steps_per_rotation;
-  long target_partial_steps = full_steps / 32;
-  long difference = target_partial_steps - m_partial_steps;
+  float full_steps = rotations * static_cast<float>(m_full_steps_per_rotation);
+  float target_partial_steps = full_steps / 32.0f;
+  long difference = target_partial_steps - static_cast<long>(m_partial_steps);
   step(difference);
 }
 };  // namespace sjsu::drivers
