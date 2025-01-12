@@ -22,7 +22,7 @@ class drv8825 : public hal::servo {
             hal::output_pin& step_pin;
             hal::steady_clock& steady_clock;
             step_factor motor_step_factor;
-            int steps_per_rotation;
+            int full_steps_per_rotation;
             hal::time_duration step_half_period;
             std::array<hal::output_pin*,3> mode_pins;
         };
@@ -47,8 +47,9 @@ class drv8825 : public hal::servo {
         hal::time_duration m_step_half_period;
         std::array<hal::output_pin*,3> m_mode_pins;
 
-        long m_partial_steps=0;// total 1/32 steps taken from pos 0 (so reverse directions steps subtract)
-        double m_partial_steps_to_deg=1;
+        // total 1/32 steps taken from pos 0 (so reverse directions steps subtract)
+        long m_partial_steps=0;
+        int m_full_steps_per_rotation=1;
         step_factor m_step_factor = step_factor::one;
 };
 }
