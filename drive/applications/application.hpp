@@ -23,6 +23,7 @@
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 
 #include "wheel_router.hpp"
 #include "ackermann_steering.hpp"
@@ -36,8 +37,12 @@ struct hardware_map_t
 {
   std::optional<hal::steady_clock*> clock;
   std::optional<hal::serial*> terminal;
-  wheel_router* router;
-  ackermann_steering* steering;
+  // wheel_router* router;
+  // ackermann_steering* steering;
+  std::optional<hal::can*> can;
+  std::optional<hal::can_transceiver*> can_transceiver;
+  std::optional<hal::can_bus_manager*> can_bus_manager;
+  std::optional<hal::can_identifier_filter*> can_identifier_filter;
   hal::callback<void()> reset;
 };
 
@@ -45,5 +50,6 @@ struct hardware_map_t
 // (.cpp) files.
 hardware_map_t initialize_platform();
 void application(hardware_map_t& p_framework);
+constexpr bool use_can_v1 = false;
 
 }  // namespace sjsu::science

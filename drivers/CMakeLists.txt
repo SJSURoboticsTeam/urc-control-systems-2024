@@ -22,11 +22,12 @@ libhal_build_demos(
   #led_strip_demo
   #pressure_sensor_demo
   #pump_manager_demo
-  scd40_demo
-  soil_sensor_demo
-  tla2528_output_pin_demo
-  tla2528_input_pin_demo
-  tla2528_analog_input_demo
+  #scd40_demo
+  #soil_sensor_demo
+  #tla2528_output_pin_demo
+  #tla2528_input_pin_demo
+  #tla2528_analog_input_demo
+  tmag_demo
 
   INCLUDES
   include
@@ -41,10 +42,12 @@ SOURCES
     src/sk9822.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
+    src/tmag5273.cpp
 
     PACKAGES
-#    libhal-__device__
+    libhal-actuator
 
     LINK_LIBRARIES
-#    libhal::__device__
+    libhal::actuator
+
 )

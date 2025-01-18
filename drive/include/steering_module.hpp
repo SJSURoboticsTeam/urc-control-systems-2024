@@ -2,7 +2,7 @@
 
 #include <libhal/servo.hpp>
 #include <libhal/motor.hpp>
-
+#include "../../drivers/include/tmag5273.hpp"
 namespace sjsu::drive {
 /**
  * @brief A struct that holds the steering and drive motors.
@@ -10,8 +10,9 @@ namespace sjsu::drive {
  */
 struct steering_module
 {
-    hal::servo* steer;
+    hal::servo* steer; //might change thsi to rmd_mcx_v2
     hal::motor* propulsion;
+    drivers::tmag5273* tmag;
 };
 
 
