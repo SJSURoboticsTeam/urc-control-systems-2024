@@ -55,17 +55,21 @@ tmag5273::data tmag5273::read()
   };
   hal::write_then_read(
     m_i2c, device_addresses::i2c_address, adresses_write_to, buffer);
-  ret.temperature = buffer[0] << 8 | buffer[1];
-  ret.x_field = buffer[2] << 8 | buffer[3];
-  ret.y_field = buffer[4] << 8 | buffer[5];
-  ret.z_field = buffer[6] << 8 | buffer[7];
+  int16_t range = 40;
+  // int16_t temp = buffer[0] << 8 | buffer[1];
+  // ret.temperature = ;
 
-  // adresses_write_to = {
-  //   device_addresses::ANGLE_RESULT_MSB
-  // };
-  // hal::write_then_read(
-  //   m_i2c, device_addresses::i2c_address, adresses_write_to, buffer);
-  ret.angle = buffer[9] << 8 | buffer[10];
+  int16_t x = buffer[2] << 8 | buffer[3];
+  ret.x_field = (x * range) / 32768.0;
+  int16_t y = buffer[4] << 8 | buffer[5];
+  ret.y_field = (y * range) / 32768.0;
+  int16_t z = buffer[6] << 8 | buffer[7];
+  ret.z_field = (z * range) / 32768.0;
+  
+  int16_t angle_val = (buffer[9] << 8 | buffer[10]) >> 4;
+  float angle_dec = (buffer[10] & 0b0001111) / 16.0;
+  ret.angle = angle_val + angle_dec;
+
   ret.magnitude = buffer[11];
 
   

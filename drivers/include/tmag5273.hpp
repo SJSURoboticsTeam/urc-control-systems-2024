@@ -11,7 +11,7 @@ namespace sjsu::drivers{
         hal::steady_clock& m_clock;
 
         enum device_addresses{
-            i2c_address = 0x35,
+            i2c_address = 0x22,
             write_address = 0x6A,
             read_address = 0x6B,
             DEVICE_CONFIG_1 = 0x0,
@@ -48,31 +48,19 @@ namespace sjsu::drivers{
 
     public:
         struct data{
-            uint16_t temperature;
-            uint16_t x_field;
-            uint16_t y_field;
-            uint16_t z_field;
-            uint16_t angle;
-            uint8_t magnitude;
-        };
-
-        struct data_mT{
-            uint16_t temperature;
-            uint16_t x_field;
-            uint16_t y_field;
-            uint16_t z_field;
-            uint16_t angle;
-            uint8_t magnitude;
+            float temperature;
+            float x_field;
+            float y_field;
+            float z_field;
+            float angle;
+            float magnitude;
         };
 
         tmag5273(hal::i2c& p_i2c,  hal::steady_clock&  p_clock);
         
         void defualt_config();
-        // void config_device(std::array<hal::byte, 2> configurations);
         void config_device(hal::byte config_1, hal::byte config_2);
-        // void config_sensor(std::array<hal::byte, 2> configurations);
         void config_sensor(hal::byte config_1, hal::byte config_2);
-        // void config_threshold(std::array<hal::byte, 4> configurations);
         // void change_i2c_address(hal::byte new_address);
         // void config_temp_sensor(hal::byte configurations);
         // void config_device_offset();
