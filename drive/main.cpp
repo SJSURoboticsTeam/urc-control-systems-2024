@@ -21,6 +21,7 @@
 #include <cstring>
 
 #include "applications/application.hpp"
+
 #include <libhal/error.hpp>
 sjsu::drive::hardware_map_t hardware_map{};
 

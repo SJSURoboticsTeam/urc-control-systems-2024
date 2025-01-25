@@ -99,17 +99,20 @@ void application(hardware_map_t& hardware_map)
       auto motor = mc_x.acquire_motor(20.0_rpm);
       auto servo = mc_x.acquire_servo(20.0_rpm);
       auto temperature_sensor = mc_x.acquire_temperature_sensor();
+      auto current_sensor = mc_x.acquire_current_sensor();
       auto rotation_sensor = mc_x.acquire_rotation_sensor();
 
       auto print_feedback =
-        [&console, &temperature_sensor, &rotation_sensor]() {
+        [&console, &temperature_sensor, &rotation_sensor, &current_sensor]() {
           hal::print<2048>(console,
                            "[%u] =================================\n"
                            "shaft angle = %f deg\n"
                            "temperature = %f C\n"
+                           "current = %f Amps\n"
                            "\n\n",
                            temperature_sensor.read(),
-                           rotation_sensor.read());
+                           rotation_sensor.read(),
+                           current_sensor.read());
         };
 
       hal::delay(clock, 500ms);
@@ -158,8 +161,7 @@ void application(hardware_map_t& hardware_map)
         hal::print(
           console,
           "\n"
-          "The CAN peripheral has received no acknowledgements from any other "
-          "device on the bus. It appears as if the peripheral is not connected "
+           "device on the bus. It appears as if the peripheral is not connected "
           "to a can network. This can happen if the baud rate is incorrect, "
           "the CAN transceiver is not functioning, or the devices on the bus "
           "are not responding."
