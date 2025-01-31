@@ -24,41 +24,19 @@ libhal_build_demos(
   #pump_manager_demo
   #scd40_demo
   #soil_sensor_demo
-<<<<<<< Updated upstream
   tmag_demo
-
-SOURCES
-    # platforms/micromod.cpp
-=======
-  #tla2528_output_pin_demo
-  #tla2528_input_pin_demo
-  #tla2528_analog_input_demo
-  tmag_demo
-
-
-
-  INCLUDES
-  include
 
 SOURCES
     platforms/micromod.cpp
->>>>>>> Stashed changes
     # src/color_sensor_opt4048.cpp
     # src/mq4.cpp
     # src/pressure_sensor_bme680.cpp
     # src/scd40.cpp
     # src/soil_sensor_sht21.cpp
     # src/sk9822.cpp
-<<<<<<< Updated upstream
-=======
-    # src/tla2528.cpp
-    # src/tla2528_adapters.cpp
->>>>>>> Stashed changes
     src/tmag5273.cpp
 
     PACKAGES
-#    libhal-__device__
 
     LINK_LIBRARIES
-#    libhal::__device__
 )
