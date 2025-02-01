@@ -20,6 +20,8 @@ application_framework initialize_platform()
     .out_pin0 = &hal::micromod::v1::output_g0(),
     .out_pin1 = &hal::micromod::v1::output_g1(),
     .out_pin2 = &hal::micromod::v1::output_g2(),
+    .out_pin3 = &hal::micromod::v1::output_g3(),
+    .out_pin4 = &hal::micromod::v1::output_g4(),
     .pwm0 = &hal::micromod::v1::pwm0(),
     .pwm1 = &hal::micromod::v1::pwm1(),
     .adc0 = &hal::micromod::v1::a0(),

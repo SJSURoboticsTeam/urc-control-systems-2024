@@ -36,6 +36,8 @@ struct application_framework
   hal::output_pin* out_pin0;
   hal::output_pin* out_pin1;
   hal::output_pin* out_pin2;
+  hal::output_pin* out_pin3;
+  hal::output_pin* out_pin4;
   hal::pwm* pwm0;
   hal::pwm* pwm1;
   hal::adc* adc0;
