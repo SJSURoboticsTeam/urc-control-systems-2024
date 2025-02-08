@@ -1,21 +1,66 @@
 #include "homing.hpp"
 
+using namespace std::chrono_literals;
+using namespace hal::literals;
 namespace sjsu::drive {
-
-void home(std::span<steering_module> legs)
+void send_custom_message(hal::u32 p_id,
+                         hal::can_transceiver& p_can,
+                         hal::u8 p_length,
+                         std::array<hal::byte, 8>&& p_payload)
 {
-  // get the current rotation of the steering wheel
-  
-  // go left until magnet seen
-     // if turned more than 360 then send error message and hope 
-  // get current rotatoin of the steering wheel (left rot)
+  const hal::can_message message = { .id = p_id,
+                                     .length = p_length,
+                                     .payload = p_payload };
+  p_can.send(message);
+}
 
-  // go right until magnet seen.
 
-  // get current rotation (right rot)
+void home(std::span<steering_module> legs,
+          std::span<start_wheel_setting> setting_span,
+          hal::can_transceiver& can,
+          hal::steady_clock& clock,
+          hal::serial& terminal)
+{
+  for (size_t i = 0; i < legs.size(); i++) {
+    
+    auto current_sensor = legs[i].steer->acquire_current_sensor();
+    auto motor = legs[i].steer->acquire_motor(5.0_rpm);
+    auto servo = legs[i].steer->acquire_servo(5.0_rpm);
+    auto rotation_sensor = legs[i].steer->acquire_rotation_sensor();
+    auto curr = current_sensor.read();
+    auto print_feedback =
+      [&terminal, &rotation_sensor, &current_sensor]() {
+        hal::print<2048>(terminal,
+                         "[%u] =================================\n"
+                         "shaft angle = %f deg\n"
+                         "temperature = %f C\n"
+                         "current = %f Amps\n"
+                         "\n\n",
+                         rotation_sensor.read().angle,
+                         current_sensor.read());
+      };
+    while (std::abs(curr) > 10) {
+      if (setting_span[i].reversed) {
+        motor.power(-0.1);
+        hal::delay(clock, 10ms);
+      } else {
+        motor.power(0.1);
+        hal::delay(clock, 10ms);
+      }
+      // hal::print<1028>(terminal, "current = %f Amps\n", curr);
+      print_feedback();
+      curr = current_sensor.read();
+    }
+    // can message
 
-  // subtract right_rot - left_rot
-
-  // if degrees is 
+    auto position = rotation_sensor.read().angle;
+    servo.position(position + setting_span[i].offset);
+    send_custom_message(
+      setting_span[i].steer_id, can, 8, { encoder_zero_command });
+    hal::delay(clock, 500ms);
+    send_custom_message(setting_span[i].steer_id, can, 8, { reset_command });
+    hal::delay(clock, 500ms);
+    send_custom_message(0x205, can, 8, { reset_command });
+  }
 }
 }  // namespace sjsu::drive

@@ -57,15 +57,15 @@ hardware_map_t initialize_platform()
   // static std::array<steering_module, 1> modules;
 
   hal::can* can = nullptr;
-  hal::can_transceiver* ct;
-  hal::can_bus_manager* bm;
+  hal::can_transceiver* can_transceiver;
+  hal::can_bus_manager* bus_man;
   hal::can_identifier_filter* idf;
   if constexpr (use_can_v1) {
     can = &hal::micromod::v1::can();
   } else {
     static std::array<hal::can_message, 8> receive_buffer{};
-    ct = &hal::micromod::v1::can_transceiver(receive_buffer);
-    bm = &hal::micromod::v1::can_bus_manager();
+    can_transceiver = &hal::micromod::v1::can_transceiver(receive_buffer);
+    bus_man = &hal::micromod::v1::can_bus_manager();
     idf = &hal::micromod::v1::can_identifier_filter0();
   }
 
@@ -75,9 +75,11 @@ hardware_map_t initialize_platform()
     back_left_wheel_setting,
     back_right_wheel_setting
   };
+  
+  static std::span<start_wheel_setting,4> start_wheel_setting_span = start_wheel_setting_arr;
 
   static hal::actuator::rmd_mc_x_v2 mc_x_front_left_prop(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[0].geer_ratio,
@@ -85,7 +87,7 @@ hardware_map_t initialize_platform()
   static auto front_left_prop =
     mc_x_front_left_prop.acquire_motor(start_wheel_setting_arr[0].max_speed);
   static hal::actuator::rmd_mc_x_v2 mc_x_front_left_steer(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[0].geer_ratio,
@@ -96,7 +98,7 @@ hardware_map_t initialize_platform()
   };
 
   static hal::actuator::rmd_mc_x_v2 mc_x_front_right_prop(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[1].geer_ratio,
@@ -104,7 +106,7 @@ hardware_map_t initialize_platform()
   static auto front_right_prop =
     mc_x_front_right_prop.acquire_motor(start_wheel_setting_arr[1].max_speed);
   static hal::actuator::rmd_mc_x_v2 mc_x_front_right_steer(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[1].geer_ratio,
@@ -115,7 +117,7 @@ hardware_map_t initialize_platform()
   };
 
   static hal::actuator::rmd_mc_x_v2 mc_x_back_left_prop(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[2].geer_ratio,
@@ -123,7 +125,7 @@ hardware_map_t initialize_platform()
   static auto back_left_prop =
     mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[2].max_speed);
   static hal::actuator::rmd_mc_x_v2 mc_x_back_left_steer(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[2].geer_ratio,
@@ -134,7 +136,7 @@ hardware_map_t initialize_platform()
   };
 
   static hal::actuator::rmd_mc_x_v2 mc_x_back_right_prop(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[3].geer_ratio,
@@ -142,7 +144,7 @@ hardware_map_t initialize_platform()
   static auto back_right_prop =
     mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[3].max_speed);
   static hal::actuator::rmd_mc_x_v2 mc_x_back_right_steer(
-    *ct,
+    *can_transceiver,
     *idf,
     counter,
     start_wheel_setting_arr[3].geer_ratio,
@@ -162,11 +164,11 @@ hardware_map_t initialize_platform()
     .clock = &counter,
     .terminal = &terminal,
     .can = can,
-    .can_transceiver = ct,
-    .can_bus_manager = bm,
+    .can_transceiver = can_transceiver,
+    .can_bus_manager = bus_man,
     .can_identifier_filter = idf,
     .steering_modules = &steering_modules_span,
-    .wheel_start_settings_arr = &start_wheel_setting_arr,
+    .start_wheel_setting_span = &start_wheel_setting_span,
     .reset = []() { hal::cortex_m::reset(); }
     //   // .steering = &steering,
     //   .reset = []() { hal::cortex_m::reset(); },

@@ -25,4 +25,5 @@ libhal_build_demos(
     implementations/ackermann_steering.cpp
     implementations/drive_configuration_updater.cpp
     implementations/wheel_router.cpp
+    implementations/homing.cpp
 ) 
