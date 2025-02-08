@@ -5,7 +5,7 @@ namespace sjsu::drive {
 void home(std::span<steering_module> legs)
 {
   // get the current rotation of the steering wheel
-    
+  
   // go left until magnet seen
      // if turned more than 360 then send error message and hope 
   // get current rotatoin of the steering wheel (left rot)

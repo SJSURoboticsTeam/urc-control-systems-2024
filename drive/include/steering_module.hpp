@@ -2,6 +2,8 @@
 
 #include <libhal/servo.hpp>
 #include <libhal/motor.hpp>
+#include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
+
 #include "../../drivers/include/tmag5273.hpp"
 namespace sjsu::drive {
 /**
@@ -10,9 +12,9 @@ namespace sjsu::drive {
  */
 struct steering_module
 {
-    hal::servo* steer; //might change thsi to rmd_mcx_v2
+    hal::actuator::rmd_mc_x_v2* steer; //might change thsi to rmd_mcx_v2
     hal::motor* propulsion;
-    drivers::tmag5273* tmag;
+    // drivers::tmag5273* tmag;
 };
 
 
@@ -32,6 +34,15 @@ struct wheel_setting {
      * 
      */
     hal::rpm wheel_speed;
+};
+
+struct start_wheel_setting{
+    std::uint16_t steer_id;
+    std::uint16_t prop_id;
+    float geer_ratio;
+    bool reversed;
+    int offset;
+    hal::rpm max_speed;
 };
 
 

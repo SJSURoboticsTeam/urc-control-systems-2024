@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <array>
 #include <libhal/adc.hpp>
 #include <libhal/can.hpp>
 #include <libhal/functional.hpp>
@@ -25,14 +26,18 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 
+#include "steering_module.hpp"
 #include "wheel_router.hpp"
 #include "ackermann_steering.hpp"
+#include "settings.hpp"
+
 
 
 #include <optional>
 
 
 namespace sjsu::drive {
+  
 struct hardware_map_t
 {
   std::optional<hal::steady_clock*> clock;
@@ -43,6 +48,8 @@ struct hardware_map_t
   std::optional<hal::can_transceiver*> can_transceiver;
   std::optional<hal::can_bus_manager*> can_bus_manager;
   std::optional<hal::can_identifier_filter*> can_identifier_filter;
+  std::optional<std::span<steering_module, 4>*> steering_modules;
+  std::optional<std::array<start_wheel_setting, 4>*> wheel_start_settings_arr;
   hal::callback<void()> reset;
 };
 

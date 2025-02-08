@@ -18,12 +18,11 @@ void application(hardware_map_t& hardware_map)
   auto& can_transceiver = *hardware_map.can_transceiver.value();
   auto& can_bus_manager = *hardware_map.can_bus_manager.value();
   auto& can_identifier_filter = *hardware_map.can_identifier_filter.value();
-
   can_bus_manager.baud_rate(1.0_MHz);
 
   hal::print(console, "RMD MC-X Smart Servo Application Starting...\n\n");
 
-  constexpr std::uint16_t starting_device_address = 0x140;
+  constexpr std::uint16_t starting_device_address = 0x145;
   std::uint16_t address_offset = 0;
   // using namespace std::chrono_literals;
   // using namespace hal::literals;
@@ -96,12 +95,11 @@ void application(hardware_map_t& hardware_map)
       hal::actuator::rmd_mc_x_v2 mc_x(
         can_transceiver, can_identifier_filter, clock, 36.0f, address);
 
-      auto motor = mc_x.acquire_motor(20.0_rpm);
-      auto servo = mc_x.acquire_servo(20.0_rpm);
+      auto motor = mc_x.acquire_motor(5.0_rpm);
+      auto servo = mc_x.acquire_servo(5.0_rpm);
       auto temperature_sensor = mc_x.acquire_temperature_sensor();
       auto current_sensor = mc_x.acquire_current_sensor();
       auto rotation_sensor = mc_x.acquire_rotation_sensor();
-
       auto print_feedback =
         [&console, &temperature_sensor, &rotation_sensor, &current_sensor]() {
           hal::print<2048>(console,
@@ -110,45 +108,84 @@ void application(hardware_map_t& hardware_map)
                            "temperature = %f C\n"
                            "current = %f Amps\n"
                            "\n\n",
+                           rotation_sensor.read().angle,
                            temperature_sensor.read(),
-                           rotation_sensor.read(),
                            current_sensor.read());
         };
 
-      hal::delay(clock, 500ms);
+      // print_feedback();
+      // servo.position(0);
+      motor.power(0.5f);
+      hal::delay(clock, 50ms);
+      print_feedback();
 
-      while (true) {
-        motor.power(0.5f);
-        hal::delay(clock, 5000ms);
+      motor.power(-0.5f);
+      hal::delay(clock, 50ms);
+      print_feedback();
+
+
+      auto pos = rotation_sensor.read().angle;
+      auto curr = current_sensor.read();
+      hal::print<128>(console, "init angle shaft: %f", pos);
+
+      while (curr < 10 && curr > -10) {
+        servo.position(pos);
+        pos--;
+        // hal::delay(clock, 1000ms);
+        // mc_x.position_control(50, 1);
+        hal::delay(clock, 1000ms);
+        curr = current_sensor.read();
         print_feedback();
 
-        motor.power(-0.5f);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // print_feedback();
 
-        servo.position(0.0_deg);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // servo.position(40.0_deg);
+        // hal::delay(clock, 1000ms);
+        // print_feedback();
 
-        servo.position(-45.0_deg);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // servo.position(40.0_deg);
+        // hal::delay(clock, 1000ms);
+        // print_feedback();
 
-        servo.position(90.0_deg);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // servo.position(20.0_deg);
+        // hal::delay(clock, 1000ms);
+        // print_feedback();
 
-        servo.position(180.0_deg);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // servo.position(0.0_deg);
+        // hal::delay(clock, 1000ms);
+        // print_feedback();
 
-        servo.position(-360.0_deg);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // motor.power(0.5f);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
 
-        servo.position(0.0_deg);
-        hal::delay(clock, 5000ms);
-        print_feedback();
+        // motor.power(-0.5f);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
+
+        // servo.position(0.0_deg);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
+
+        // servo.position(-45.0_deg);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
+
+        // servo.position(90.0_deg);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
+
+        // servo.position(180.0_deg);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
+
+        // servo.position(-360.0_deg);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
+
+        // servo.position(0.0_deg);
+        // hal::delay(clock, 5000ms);
+        // print_feedback();
       }
     } catch (hal::timed_out const&) {
       hal::print(
@@ -161,7 +198,7 @@ void application(hardware_map_t& hardware_map)
         hal::print(
           console,
           "\n"
-           "device on the bus. It appears as if the peripheral is not connected "
+          "device on the bus. It appears as if the peripheral is not connected "
           "to a can network. This can happen if the baud rate is incorrect, "
           "the CAN transceiver is not functioning, or the devices on the bus "
           "are not responding."
@@ -183,5 +220,4 @@ void application(hardware_map_t& hardware_map)
   }
 }
 
-
-}  // namespace sjsu::science
+}  // namespace sjsu::drive
