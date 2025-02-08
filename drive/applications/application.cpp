@@ -1,12 +1,18 @@
 #include "./application.hpp"
 
 #include "drive_configuration_updater.hpp"
+#include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 
 #include "settings.hpp"
 
 namespace sjsu::drive {
+// write a function to send can motor stop message
+
+// drive home address: 0x106. respond with 0x206 done homing
+// 
+// drive bearing and heading probably needs to be a seperate
 
 void application(hardware_map_t& hardware_map)
 {
@@ -18,9 +24,14 @@ void application(hardware_map_t& hardware_map)
   auto& can_transceiver = *hardware_map.can_transceiver.value();
   auto& can_bus_manager = *hardware_map.can_bus_manager.value();
   auto& can_identifier_filter = *hardware_map.can_identifier_filter.value();
-  can_bus_manager.baud_rate(1.0_MHz);
 
-  hal::print(console, "RMD MC-X Smart Servo Application Starting...\n\n");
+  can_bus_manager.baud_rate(1.0_MHz);
+  
+  hal::can_message_finder spin_reader(can_transceiver, 0x101);
+  hal::can_message_finder drive_reader(can_transceiver, 0x102);
+  hal::can_message_finder translate_reader(can_transceiver, 0x103);
+  hal::can_message_finder speed_reader(can_transceiver, 0x104);
+  hal::can_message_finder homing_reader(can_transceiver, 0x105);
 
   constexpr std::uint16_t starting_device_address = 0x145;
   std::uint16_t address_offset = 0;
@@ -137,55 +148,6 @@ void application(hardware_map_t& hardware_map)
         curr = current_sensor.read();
         print_feedback();
 
-        // print_feedback();
-
-        // servo.position(40.0_deg);
-        // hal::delay(clock, 1000ms);
-        // print_feedback();
-
-        // servo.position(40.0_deg);
-        // hal::delay(clock, 1000ms);
-        // print_feedback();
-
-        // servo.position(20.0_deg);
-        // hal::delay(clock, 1000ms);
-        // print_feedback();
-
-        // servo.position(0.0_deg);
-        // hal::delay(clock, 1000ms);
-        // print_feedback();
-
-        // motor.power(0.5f);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // motor.power(-0.5f);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // servo.position(0.0_deg);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // servo.position(-45.0_deg);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // servo.position(90.0_deg);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // servo.position(180.0_deg);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // servo.position(-360.0_deg);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
-
-        // servo.position(0.0_deg);
-        // hal::delay(clock, 5000ms);
-        // print_feedback();
       }
     } catch (hal::timed_out const&) {
       hal::print(

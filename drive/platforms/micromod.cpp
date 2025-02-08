@@ -63,7 +63,7 @@ hardware_map_t initialize_platform()
   if constexpr (use_can_v1) {
     can = &hal::micromod::v1::can();
   } else {
-    static std::array<hal::can_message, 4> receive_buffer{};
+    static std::array<hal::can_message, 8> receive_buffer{};
     ct = &hal::micromod::v1::can_transceiver(receive_buffer);
     bm = &hal::micromod::v1::can_bus_manager();
     idf = &hal::micromod::v1::can_identifier_filter0();
@@ -133,27 +133,27 @@ hardware_map_t initialize_platform()
     .propulsion = &back_left_prop,
   };
 
-  static hal::actuator::rmd_mc_x_v2 mc_x_back_rigth_prop(
+  static hal::actuator::rmd_mc_x_v2 mc_x_back_right_prop(
     *ct,
     *idf,
     counter,
     start_wheel_setting_arr[3].geer_ratio,
     start_wheel_setting_arr[3].prop_id);
-  static auto back_rigth_prop =
+  static auto back_right_prop =
     mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[3].max_speed);
-  static hal::actuator::rmd_mc_x_v2 mc_x_back_rigth_steer(
+  static hal::actuator::rmd_mc_x_v2 mc_x_back_right_steer(
     *ct,
     *idf,
     counter,
     start_wheel_setting_arr[3].geer_ratio,
     start_wheel_setting_arr[3].steer_id);
-  static steering_module back_rigth_leg = {
-    .steer = &mc_x_back_rigth_steer,
-    .propulsion = &back_rigth_prop,
+  static steering_module back_right_leg = {
+    .steer = &mc_x_back_right_steer,
+    .propulsion = &back_right_prop,
   };
 
   static std::array<steering_module, 4> steering_modules_arr = {
-    front_left_leg, front_right_leg, back_left_leg, back_rigth_leg
+    front_left_leg, front_right_leg, back_left_leg, back_right_leg
   };
   static std::span<steering_module, 4> steering_modules_span =
     steering_modules_arr;
