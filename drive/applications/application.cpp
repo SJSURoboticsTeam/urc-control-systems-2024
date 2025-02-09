@@ -21,7 +21,7 @@ void application(hardware_map_t& hardware_map)
   // auto& can_identifier_filter = *hardware_map.can_identifier_filter.value();
 
   can_bus_manager.baud_rate(1.0_MHz);
-  
+  hal::print(console, "breaking after buildin a bus manger\n");
   hal::can_message_finder spin_reader(can_transceiver, 0x101);
   hal::can_message_finder drive_reader(can_transceiver, 0x102);
   hal::can_message_finder translate_reader(can_transceiver, 0x103);
@@ -95,6 +95,7 @@ void application(hardware_map_t& hardware_map)
   //   router.move(wheel_settings);
   while (true) {
     try {
+      hal::print(console, "homing\n");
       home(steering_modules, start_wheel_settings, can_transceiver, clock, console);
     } catch (hal::timed_out const&) {
       hal::print(
