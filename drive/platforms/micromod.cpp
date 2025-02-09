@@ -82,7 +82,7 @@ hardware_map_t initialize_platform()
   // start_wheel_setting_arr;
 
   static std::array<start_wheel_setting, 1> start_wheel_setting_arr = {
-    back_left_wheel_setting,
+    front_right_wheel_setting
   };
 
   static std::span<start_wheel_setting, 1> start_wheel_setting_span =
@@ -118,40 +118,42 @@ hardware_map_t initialize_platform()
   //   start_wheel_setting_arr[1].prop_id);
   // static auto front_right_prop =
   //   mc_x_front_right_prop.acquire_motor(start_wheel_setting_arr[1].max_speed);
+
   // static hal::actuator::rmd_mc_x_v2 mc_x_front_right_steer(
   //   *can_transceiver,
   //   *idf,
   //   counter,
-  //   start_wheel_setting_arr[1].geer_ratio,
-  //   start_wheel_setting_arr[1].steer_id);
+  //   start_wheel_setting_arr[0].geer_ratio,
+  //   start_wheel_setting_arr[0].steer_id);
   // static steering_module front_right_leg = {
   //   .steer = &mc_x_front_right_steer,
-  //   .propulsion = &front_right_prop,
+  //   .propulsion = nullptr
+  //   // .propulsion = &front_right_prop,
   // };
 
   // static hal::actuator::rmd_mc_x_v2 mc_x_back_left_prop(
   //   *can_transceiver,
   //   *idf,
   //   counter,
-  //   start_wheel_setting_arr[0].geer_ratio,
-  //   start_wheel_setting_arr[0].prop_id);
+  //   start_wheel_setting_arr[2].geer_ratio,
+  //   start_wheel_setting_arr[2].prop_id);
   // static auto back_left_prop =
   //   mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[0].max_speed);
 
-  static hal::actuator::rmd_mc_x_v2 mc_x_back_left_steer(
-    *can_transceiver,
-    *idf,
-    counter,
-    36.0f,
-    0x14e);
+  // static hal::actuator::rmd_mc_x_v2 mc_x_back_left_steer(
+  //   *can_transceiver,
+  //   *idf,
+  //   counter,
+  //   start_wheel_setting_arr[2].geer_ratio,
+  //   start_wheel_setting_arr[2].steer_id);
 
-  hal::print<1028>(terminal, "RMD created\n");
+  // hal::print<1028>(terminal, "RMD created\n");
   
-  static steering_module back_left_leg = {
-    .steer = &mc_x_back_left_steer,
-    .propulsion = nullptr,
-    // .propulsion = &back_left_prop,
-  };
+  // static steering_module back_left_leg = {
+  //   .steer = &mc_x_back_left_steer,
+  //   .propulsion = nullptr,
+  //   // .propulsion = &back_left_prop,
+  // };
 
   hal::print<1028>(terminal, "Steer rmd intialized\n");
 
@@ -180,11 +182,7 @@ hardware_map_t initialize_platform()
   // static std::span<steering_module, 4> steering_modules_span =
   //   steering_modules_arr;
 
-  static std::array<steering_module, 1> steering_modules_arr = {
-    back_left_leg
-  };
-  static std::span<steering_module, 1> steering_modules_span =
-    steering_modules_arr;
+  
 
   return hardware_map_t{
     .clock = &counter,
@@ -193,7 +191,7 @@ hardware_map_t initialize_platform()
     .can_transceiver = can_transceiver,
     .can_bus_manager = bus_man,
     .can_identifier_filter = idf,
-    .steering_modules = &steering_modules_span,
+    // .steering_modules = &steering_modules_span,
     .start_wheel_setting_span = &start_wheel_setting_span,
     .reset = []() { hal::cortex_m::reset(); }
     //   // .steering = &steering,

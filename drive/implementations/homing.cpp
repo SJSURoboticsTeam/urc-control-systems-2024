@@ -33,18 +33,18 @@ void home(std::span<steering_module> legs,
         hal::print<2048>(terminal,
                          "[%u] =================================\n"
                          "shaft angle = %f deg\n"
-                         "temperature = %f C\n"
                          "current = %f Amps\n"
                          "\n\n",
                          rotation_sensor.read().angle,
                          current_sensor.read());
       };
-    while (std::abs(curr) > 10) {
+    while (std::abs(curr) < 12) {
       if (setting_span[i].reversed) {
-        motor.power(-0.1);
+        motor.power(0.3);
         hal::delay(clock, 10ms);
       } else {
-        motor.power(0.1);
+        hal::print(terminal, "here");
+        motor.power(-0.3);
         hal::delay(clock, 10ms);
       }
       // hal::print<1028>(terminal, "current = %f Amps\n", curr);
@@ -52,9 +52,19 @@ void home(std::span<steering_module> legs,
       curr = current_sensor.read();
     }
     // can message
+    hal::delay(clock, 500ms);
 
-    auto position = rotation_sensor.read().angle;
-    servo.position(position + setting_span[i].offset);
+    auto position = rotation_sensor.read();
+
+    hal::print<1024>(terminal, "Current position feedback: %f\n", position);
+    
+    hal::delay(clock, 500ms);
+
+    servo.position(position.angle + setting_span[i].offset);
+    position = rotation_sensor.read();
+    hal::print<1024>(terminal, "After offset position feedback: %f\n", position);
+
+    
     send_custom_message(
       setting_span[i].steer_id, can, 8, { encoder_zero_command });
     hal::delay(clock, 500ms);

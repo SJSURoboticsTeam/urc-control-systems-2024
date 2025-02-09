@@ -50,7 +50,7 @@ struct hardware_map_t
   std::optional<hal::can_identifier_filter*> can_identifier_filter;
   // std::optional<std::span<steering_module, 4>*> steering_modules;
   // std::optional<std::span<start_wheel_setting, 4>*> start_wheel_setting_span;
-  std::optional<std::span<steering_module, 1>*> steering_modules;
+  // std::optional<std::span<steering_module, 1>*> steering_modules;
   std::optional<std::span<start_wheel_setting, 1>*> start_wheel_setting_span;
   hal::callback<void()> reset;
 };

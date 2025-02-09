@@ -4,7 +4,13 @@
 
 #include <array>
 #include <cstddef>
+
+using namespace std::chrono_literals;
+using namespace hal::literals;
+
+
 namespace sjsu::drive {
+
 // Multiply this with the desired angle to get the correct angle to steer the
 // motors.
 /**
