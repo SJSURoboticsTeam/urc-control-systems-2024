@@ -18,7 +18,7 @@ void application(hardware_map_t& hardware_map)
   auto& console = *hardware_map.terminal.value();
   auto& can_transceiver = *hardware_map.can_transceiver.value();
   auto& can_bus_manager = *hardware_map.can_bus_manager.value();
-  auto& can_identifier_filter = *hardware_map.can_identifier_filter.value();
+  // auto& can_identifier_filter = *hardware_map.can_identifier_filter.value();
 
   can_bus_manager.baud_rate(1.0_MHz);
   hal::print(console, "breaking after buildin a bus manger\n");
@@ -27,8 +27,8 @@ void application(hardware_map_t& hardware_map)
   hal::can_message_finder translate_reader(can_transceiver, 0x103);
   hal::can_message_finder speed_reader(can_transceiver, 0x104);
   hal::can_message_finder homing_reader(can_transceiver, 0x105);
-  // auto& steering_modules = *(*hardware_map.steering_modules);
-  auto& start_wheel_settings = *(*hardware_map.start_wheel_setting_span);
+  auto& steering_modules = *hardware_map.steering_modules;
+  auto& start_wheel_settings = *hardware_map.start_wheel_setting_span;
   // using namespace std::chrono_literals;
   // using namespace hal::literals;
 
@@ -93,34 +93,37 @@ void application(hardware_map_t& hardware_map)
 
   //   // Move all the wheels
   //   router.move(wheel_settings);
-  static hal::actuator::rmd_mc_x_v2 mc_x_front_right_steer(
-    can_transceiver,
-    can_identifier_filter,
-    clock,
-    start_wheel_settings[0].geer_ratio,
-    start_wheel_settings[0].steer_id);
-  hal::print(console, "rmd\n");
 
-  static steering_module front_right_leg = {
-    .steer = &mc_x_front_right_steer,
-    .propulsion = nullptr
-    // .propulsion = &front_right_prop,
-  };
 
-  static std::array<steering_module, 1> steering_modules_arr = {
-    front_right_leg
-  };
+  // static hal::actuator::rmd_mc_x_v2 mc_x_front_right_steer(
+  //   can_transceiver,
+  //   can_identifier_filter,
+  //   clock,
+  //   start_wheel_settings[0].geer_ratio,
+  //   start_wheel_settings[0].steer_id);
+  // hal::print(console, "rmd\n");
+
+  // static steering_module front_right_leg = {
+  //   .steer = &mc_x_front_right_steer,
+  //   .propulsion = nullptr
+  //   // .propulsion = &front_right_prop,
+  // };
+
+  // static std::array<steering_module, 1> steering_modules_arr = {
+  //   front_right_leg
+  // };
   
-  static std::span<steering_module, 1> steering_modules_span =
-    steering_modules_arr;
+  // static std::span<steering_module, 1> steering_modules_span =
+  //   steering_modules_arr;
   
-   hal::print(console, "homing\n");
-    home(steering_modules_span, start_wheel_settings, can_transceiver, clock, console);
-    hal::delay(clock, 1000ms);
+  //  hal::print(console, "homing\n");
+    // home(steering_modules, start_wheel_settings, can_transceiver, clock, console);
+    // hal::delay(clock, 1000ms);
 
   while (true) {
     try {
       hal::print(console, "Done homing");
+      home(steering_modules, start_wheel_settings, can_transceiver, clock, console); 
     } catch (hal::timed_out const&) {
       hal::print(
         console,

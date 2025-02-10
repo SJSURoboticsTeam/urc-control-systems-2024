@@ -38,9 +38,9 @@ hardware_map_t initialize_platform()
   using namespace hal::literals;
   using namespace std::chrono_literals;
 
-  auto& counter = hal::micromod::v1::uptime_clock();
+  static auto& counter = hal::micromod::v1::uptime_clock();
 
-  auto& terminal = hal::micromod::v1::console(hal::buffer<1024>);
+  static auto& terminal = hal::micromod::v1::console(hal::buffer<1024>);
 
   // static std::array<vector2, 3> wheel_locations = {
   //   vector2::from_bearing(1, -60 * std::numbers::pi / 180),
@@ -56,20 +56,16 @@ hardware_map_t initialize_platform()
   // WARINING: THESE MODULES HAVE NOT BEEN INITIALIZED
   // static std::array<steering_module, 1> modules;
 
-  static hal::can* can = nullptr;
   static hal::can_transceiver* can_transceiver;
   static hal::can_bus_manager* bus_man;
   static hal::can_identifier_filter* idf;
-  if constexpr (use_can_v1) {
-    can = &hal::micromod::v1::can();
-  } else {
-    static std::array<hal::can_message, 8> receive_buffer{};
-    can_transceiver = &hal::micromod::v1::can_transceiver(receive_buffer);
-    bus_man = &hal::micromod::v1::can_bus_manager();
-    idf = &hal::micromod::v1::can_identifier_filter0();
-    hal::print<1028>(terminal, "can initialized\n");
 
-  }
+  static std::array<hal::can_message, 8> receive_buffer{};
+  can_transceiver = &hal::micromod::v1::can_transceiver(receive_buffer);
+  bus_man = &hal::micromod::v1::can_bus_manager();
+  idf = &hal::micromod::v1::can_identifier_filter0();
+  hal::print<1028>(terminal, "can initialized\n");
+  bus_man->baud_rate(1.0_MHz);
 
   // static std::array<start_wheel_setting, 4> start_wheel_setting_arr = {
   //   front_left_wheel_setting,
@@ -82,14 +78,13 @@ hardware_map_t initialize_platform()
   // start_wheel_setting_arr;
 
   static std::array<start_wheel_setting, 1> start_wheel_setting_arr = {
-    front_right_wheel_setting
+    back_left_wheel_setting
   };
 
   static std::span<start_wheel_setting, 1> start_wheel_setting_span =
     start_wheel_setting_arr;
 
   hal::print<1028>(terminal, "Stetting struct intialized\n");
-
 
   // static hal::actuator::rmd_mc_x_v2 mc_x_front_left_prop(
   //   *can_transceiver,
@@ -140,20 +135,19 @@ hardware_map_t initialize_platform()
   // static auto back_left_prop =
   //   mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[0].max_speed);
 
-  // static hal::actuator::rmd_mc_x_v2 mc_x_back_left_steer(
-  //   *can_transceiver,
-  //   *idf,
-  //   counter,
-  //   start_wheel_setting_arr[2].geer_ratio,
-  //   start_wheel_setting_arr[2].steer_id);
+  static hal::actuator::rmd_mc_x_v2 mc_x_back_left_steer(
+    *can_transceiver,
+    *idf,
+    counter,
+    start_wheel_setting_arr[0].geer_ratio,
+    start_wheel_setting_arr[0].steer_id);
 
-  // hal::print<1028>(terminal, "RMD created\n");
-  
-  // static steering_module back_left_leg = {
-  //   .steer = &mc_x_back_left_steer,
-  //   .propulsion = nullptr,
-  //   // .propulsion = &back_left_prop,
-  // };
+  hal::print<1028>(terminal, "RMD created\n");
+
+  static steering_module back_left_leg = {
+    .steer = &mc_x_back_left_steer, .propulsion = nullptr,
+    // .propulsion = &back_left_prop,
+  };
 
   hal::print<1028>(terminal, "Steer rmd intialized\n");
 
@@ -182,21 +176,19 @@ hardware_map_t initialize_platform()
   // static std::span<steering_module, 4> steering_modules_span =
   //   steering_modules_arr;
 
-  
-
-  return hardware_map_t{
-    .clock = &counter,
-    .terminal = &terminal,
-    .can = can,
-    .can_transceiver = can_transceiver,
-    .can_bus_manager = bus_man,
-    .can_identifier_filter = idf,
-    // .steering_modules = &steering_modules_span,
-    .start_wheel_setting_span = &start_wheel_setting_span,
-    .reset = []() { hal::cortex_m::reset(); }
-    //   // .steering = &steering,
-    //   .reset = []() { hal::cortex_m::reset(); },
-    // };
+  static std::array<steering_module, 1> steering_modules_arr = {
+    back_left_leg
   };
+  static std::span<steering_module, 1> steering_modules_span =
+    steering_modules_arr;
+
+  return hardware_map_t{ .clock = &counter,
+                         .terminal = &terminal,
+                         .can_transceiver = can_transceiver,
+                         .can_bus_manager = bus_man,
+                         .can_identifier_filter = idf,
+                         .steering_modules = steering_modules_span,
+                         .start_wheel_setting_span = start_wheel_setting_span,
+                         .reset = []() { hal::cortex_m::reset(); } };
 }
 }  // namespace sjsu::drive
