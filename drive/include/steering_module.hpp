@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libhal/input_pin.hpp>
 #include <libhal/servo.hpp>
 #include <libhal/motor.hpp>
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
@@ -14,6 +15,7 @@ struct steering_module
 {
     hal::actuator::rmd_mc_x_v2* steer; //might change thsi to rmd_mcx_v2
     std::optional<hal::motor*> propulsion;
+    std::optional<hal::input_pin*> limit_switch;
     // drivers::tmag5273* tmag;
 };
 

@@ -79,10 +79,10 @@ constexpr start_wheel_setting front_right_wheel_setting  = {
 };
 
 constexpr start_wheel_setting back_left_wheel_setting  = {
-  .steer_id = 0x14e,
+  .steer_id = 0x148,
   .prop_id = 0x152,
   .geer_ratio = 36.0f,
-  .reversed = false,
+  .reversed = true,
   .offset = 90,
   .max_speed = 5,
 };

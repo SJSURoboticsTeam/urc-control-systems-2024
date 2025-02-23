@@ -42,6 +42,11 @@ hardware_map_t initialize_platform()
 
   static auto& terminal = hal::micromod::v1::console(hal::buffer<1024>);
 
+  // static auto& fl_pin_1 = hal::micromod::v1::input_g0();
+  // static auto& fr_pin_2 = hal::micromod::v1::input_g1();
+  static auto& bl_pin_3 = hal::micromod::v1::input_g0();
+  // static auto& br_pin_4 = hal::micromod::v1::input_g3();
+
   // static std::array<vector2, 3> wheel_locations = {
   //   vector2::from_bearing(1, -60 * std::numbers::pi / 180),
   //   vector2::from_bearing(1, 60 * std::numbers::pi / 180),
@@ -66,7 +71,7 @@ hardware_map_t initialize_platform()
   idf = &hal::micromod::v1::can_identifier_filter0();
   hal::print<1028>(terminal, "can initialized\n");
   bus_man->baud_rate(1.0_MHz);
-
+  idf->allow(248);
   // static std::array<start_wheel_setting, 4> start_wheel_setting_arr = {
   //   front_left_wheel_setting,
   //   front_right_wheel_setting,
@@ -103,6 +108,7 @@ hardware_map_t initialize_platform()
   // static steering_module front_left_leg = {
   //   .steer = &mc_x_front_left_steer,
   //   .propulsion = &front_left_prop,
+  //   .limit_switch = &fl_pin_1,
   // };
 
   // static hal::actuator::rmd_mc_x_v2 mc_x_front_right_prop(
@@ -113,17 +119,17 @@ hardware_map_t initialize_platform()
   //   start_wheel_setting_arr[1].prop_id);
   // static auto front_right_prop =
   //   mc_x_front_right_prop.acquire_motor(start_wheel_setting_arr[1].max_speed);
-
   // static hal::actuator::rmd_mc_x_v2 mc_x_front_right_steer(
   //   *can_transceiver,
   //   *idf,
   //   counter,
-  //   start_wheel_setting_arr[0].geer_ratio,
-  //   start_wheel_setting_arr[0].steer_id);
+  //   start_wheel_setting_arr[1].geer_ratio,
+  //   start_wheel_setting_arr[1].steer_id);
   // static steering_module front_right_leg = {
   //   .steer = &mc_x_front_right_steer,
-  //   .propulsion = nullptr
-  //   // .propulsion = &front_right_prop,
+  //   // .propulsion = nullptr
+  //   .propulsion = &front_right_prop,
+  //   .limit_switch= &fr_pin_2,
   // };
 
   // static hal::actuator::rmd_mc_x_v2 mc_x_back_left_prop(
@@ -132,8 +138,9 @@ hardware_map_t initialize_platform()
   //   counter,
   //   start_wheel_setting_arr[2].geer_ratio,
   //   start_wheel_setting_arr[2].prop_id);
+
   // static auto back_left_prop =
-  //   mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[0].max_speed);
+  //   mc_x_back_left_prop.acquire_motor(start_wheel_setting_arr[2].max_speed);
 
   static hal::actuator::rmd_mc_x_v2 mc_x_back_left_steer(
     *can_transceiver,
@@ -145,8 +152,10 @@ hardware_map_t initialize_platform()
   hal::print<1028>(terminal, "RMD created\n");
 
   static steering_module back_left_leg = {
-    .steer = &mc_x_back_left_steer, .propulsion = nullptr,
+    .steer = &mc_x_back_left_steer, 
     // .propulsion = &back_left_prop,
+    .propulsion = nullptr,
+    .limit_switch = &bl_pin_3,
   };
 
   hal::print<1028>(terminal, "Steer rmd intialized\n");
@@ -168,6 +177,7 @@ hardware_map_t initialize_platform()
   // static steering_module back_right_leg = {
   //   .steer = &mc_x_back_right_steer,
   //   .propulsion = &back_right_prop,
+  //   .limit_switch = &br_pin_4,
   // };
 
   // static std::array<steering_module, 4> steering_modules_arr = {

@@ -119,11 +119,13 @@ void application(hardware_map_t& hardware_map)
   //  hal::print(console, "homing\n");
     // home(steering_modules, start_wheel_settings, can_transceiver, clock, console);
     // hal::delay(clock, 1000ms);
-
+  home(steering_modules, start_wheel_settings, can_transceiver, clock, console); 
+/**
+* 101,102,103, 104, 105, 148+16^2..steer id + 16^2
+ */
   while (true) {
     try {
       hal::print(console, "Done homing");
-      home(steering_modules, start_wheel_settings, can_transceiver, clock, console); 
     } catch (hal::timed_out const&) {
       hal::print(
         console,
