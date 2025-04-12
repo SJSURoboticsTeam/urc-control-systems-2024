@@ -38,10 +38,10 @@ struct application_framework
   hal::output_pin* out_pin2;
   hal::output_pin* out_pin3;
   hal::output_pin* out_pin4;
-  hal::pwm* pwm0;
-  hal::pwm* pwm1;
-  hal::adc* adc0;
-  hal::adc* adc1;
+  hal::pwm16_channel* pwm0;
+  hal::pwm16_channel* pwm1;
+  // hal::adc* adc0;
+  // hal::adc* adc1;
   // hal::serial* esp;
   hal::i2c* i2c;
   hal::steady_clock* steady_clock;
