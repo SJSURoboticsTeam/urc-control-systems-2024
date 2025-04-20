@@ -2,6 +2,8 @@
 #include "settings.hpp"
 
 #include <libhal/error.hpp>
+#include <optional>
+
 
 namespace sjsu::drive {
   wheel_router::wheel_router(std::span<steering_module> p_steering_modules) : m_steering_modules(p_steering_modules) {}
@@ -15,7 +17,7 @@ namespace sjsu::drive {
     for(size_t i = 0; i < m_steering_modules.size(); i ++) {
         //changed but probably should fix later
         m_steering_modules[i].steer->acquire_servo(5).position(p_settings[i].angle * angle_correction_factor);
-        m_steering_modules[i].propulsion->power(p_settings[i].wheel_speed);
+        m_steering_modules[i].propulsion.value()->power(p_settings[i].wheel_speed);
     }
     
   }

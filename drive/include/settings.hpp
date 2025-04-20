@@ -4,7 +4,12 @@
 
 #include <array>
 #include <cstddef>
+
+using namespace std::chrono_literals;
+using namespace hal::literals;
+
 namespace sjsu::drive {
+
 // Multiply this with the desired angle to get the correct angle to steer the
 // motors.
 /**
@@ -54,39 +59,43 @@ constexpr drive_configuration_rate config_max_delta = {
   .wheel_speed_rate = 50,     // units/sec
 };
 
-constexpr start_wheel_setting front_left_wheel_setting  = {
+constexpr start_wheel_setting front_left_wheel_setting = {
   .steer_id = 0x14c,
   .prop_id = 0x150,
   .geer_ratio = 36.0f,
   .reversed = false,
-  .offset = 90,
+  .homing_offset = 90,
+  .homing_angle = 0,
   .max_speed = 5,
 };
 
-constexpr start_wheel_setting front_right_wheel_setting  = {
-  .steer_id = 0x14d,
+constexpr start_wheel_setting front_right_wheel_setting = {
+  .steer_id = 0x143,
   .prop_id = 0x151,
   .geer_ratio = 36.0f,
   .reversed = false,
-  .offset = 90,
+  .homing_offset = 90,
+  .homing_angle = 0,
   .max_speed = 5,
 };
 
-constexpr start_wheel_setting back_left_wheel_setting  = {
-  .steer_id = 0x14e,
+constexpr start_wheel_setting back_left_wheel_setting = {
+  .steer_id = 0x148,
   .prop_id = 0x152,
   .geer_ratio = 36.0f,
-  .reversed = false,
-  .offset = 90,
+  .reversed = true,
+  .homing_offset = 90,
+  .homing_angle = 0,
   .max_speed = 5,
 };
 
-constexpr start_wheel_setting back_right_wheel_setting  = {
+constexpr start_wheel_setting back_right_wheel_setting = {
   .steer_id = 0x14f,
   .prop_id = 0x153,
   .geer_ratio = 36.0f,
-  .reversed = false,
-  .offset = 90,
+  .reversed = true,
+  .homing_offset = 90,
+  .homing_angle = 0,
   .max_speed = 5,
 };
 
