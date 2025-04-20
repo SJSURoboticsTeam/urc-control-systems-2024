@@ -1,6 +1,8 @@
 #include <libhal-micromod/micromod.hpp>
 
 #include "../hardware_map.hpp"
+#include <libhal-util/bit_bang_i2c.hpp>
+#include <libhal-util/serial.hpp>
 
 namespace sjsu::drivers {
 
@@ -9,6 +11,16 @@ application_framework initialize_platform()
   using namespace hal::literals;
 
   hal::micromod::v1::initialize_platform();
+  // static auto i2c = hal::lpc40::i2c(2);
+  // static auto& counter = hal::micromod::v1::uptime_clock();
+  // static auto& terminal = hal::micromod::v1::console(hal::buffer<1024>);
+
+  // static auto& scl = hal::micromod::v1::output_g1();
+  // static auto& sda = hal::micromod::v1::output_g0();
+  // hal::print(terminal, "created g0 and g1\n");
+
+  // static hal::bit_bang_i2c i2c({ .sda = &sda, .scl = &scl }, counter);
+  // hal::print(terminal, "created i2c\n");
 
   return {
     .terminal = &hal::micromod::v1::console(hal::buffer<128>),
@@ -32,4 +44,4 @@ application_framework initialize_platform()
     .reset = +[]() { hal::micromod::v1::reset(); },
   };
 }
-}
+}  // namespace sjsu::drivers
