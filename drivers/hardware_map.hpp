@@ -80,6 +80,8 @@ hal::v5::strong_ptr<hal::output_pin> status_led();
 hal::v5::strong_ptr<hal::output_pin> output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> output_pin_1();
 hal::v5::strong_ptr<hal::output_pin> output_pin_2();
+hal::v5::strong_ptr<hal::output_pin> output_pin_3();
+hal::v5::strong_ptr<hal::output_pin> output_pin_4();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 hal::v5::strong_ptr<hal::adc> adc_0();

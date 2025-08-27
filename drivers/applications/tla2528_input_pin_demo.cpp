@@ -14,14 +14,15 @@ using namespace std::chrono_literals;
 
 namespace sjsu::drivers {
 
-void application(application_framework& p_framework)
+void application()
 {
-  auto& terminal = *p_framework.terminal;
-  auto& i2c = *p_framework.i2c;
-  auto& steady_clock = *p_framework.steady_clock;
-  tla2528 gpi_expander = tla2528(i2c);
-  constexpr hal::input_pin::settings input_pin_config = { .resistor =
-                                                  hal::pin_resistor::none };
+  auto i2c = resources::i2c();
+  auto clock = resources::clock();
+  auto console = resources::console();
+  tla2528 gpi_expander = tla2528(*i2c);
+  constexpr hal::input_pin::settings input_pin_config = {
+    .resistor = hal::pin_resistor::none
+  };
   std::array<tla2528_input_pin, 8> gpis{
     make_input_pin(gpi_expander, 0, input_pin_config),
     make_input_pin(gpi_expander, 1, input_pin_config),
@@ -34,11 +35,11 @@ void application(application_framework& p_framework)
   };
 
   while (true) {
-    hal::print(terminal, "\nvalues:");
+    hal::print(*console, "\nvalues:");
     for (int i = 0; i < 8; i++) {
-      hal::print<4>(terminal, "%x", gpis[i].level());
+      hal::print<4>(*console, "%x", gpis[i].level());
     }
-    hal::delay(steady_clock, 500ms);
+    hal::delay(*clock, 500ms);
   }
 }
 }  // namespace sjsu::drivers
