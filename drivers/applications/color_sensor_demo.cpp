@@ -28,23 +28,23 @@ void probe_bus(hal::i2c& i2c, hal::serial& console) {
 
 namespace sjsu::drivers {
 
-void application(application_framework& p_framework)
+void application()
 {
   // configure drivers
-  auto& i2c2 = *p_framework.i2c;
-  auto& clock = *p_framework.steady_clock;
-  auto& terminal = *p_framework.terminal;
+  auto i2c2 = resources::i2c();
+  auto clock = resources::clock();
+  auto terminal = resources::console();
 
-  hal::print(terminal, "hi\n");
-  probe_bus(i2c2, terminal);
+  hal::print(*terminal, "hi\n");
+  probe_bus(*i2c2, *terminal);
 
   //create the stuff here
-  auto color_sensor = drivers::opt4048(i2c2, clock, terminal);
+  auto color_sensor = drivers::opt4048(*i2c2, *clock, *terminal);
   while(true){
-    hal::print(terminal, "\nnew measurement\n");
+    hal::print(*terminal, "\nnew measurement\n");
     auto readings = color_sensor.get_data();
-    hal::print<40>(terminal, "R: %f\t G: %f\t B: %f\n", readings.r, readings.g, readings.b);
-    hal::delay(clock, 50ms);
+    hal::print<40>(*terminal, "R: %f\t G: %f\t B: %f\n", readings.r, readings.g, readings.b);
+    hal::delay(*clock, 50ms);
   }
 }
 }  // namespace sjsu::drivers
