@@ -20,7 +20,7 @@ void application(application_framework& p_framework)
             .step_pin = *p_framework.out_pin4,
             .steady_clock = *p_framework.steady_clock,
             .motor_step_factor = drv8825::step_factor::one, 
-            .steps_per_rotation = 2048, 
+            .full_steps_per_rotation = 2048, 
             .step_half_period = 450us,
             .mode_pins = {p_framework.out_pin0,p_framework.out_pin1,p_framework.out_pin2}
         });

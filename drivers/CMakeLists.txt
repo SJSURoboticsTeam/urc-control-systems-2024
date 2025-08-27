@@ -21,13 +21,14 @@ libhal_build_demos(
   color_sensor_demo
   led_strip_demo
   pressure_sensor_demo
-  #pump_manager_demo
+  # pump_manager_demo
   scd40_demo
   soil_sensor_demo
   drv8825_demo
   tla2528_output_pin_demo
   tla2528_input_pin_demo
   tla2528_analog_input_demo
+  h_bridge_demo
 
 
   INCLUDES
@@ -44,6 +45,7 @@ SOURCES
     src/drv8825.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
+    src/h_bridge.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
