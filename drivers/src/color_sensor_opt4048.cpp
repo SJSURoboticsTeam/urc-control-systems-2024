@@ -6,9 +6,9 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 
 namespace sjsu::drivers {
-opt4048::opt4048(hal::i2c& p_i2c,
-                 hal::steady_clock& p_clock,
-                 hal::serial& p_terminal)
+opt4048::opt4048(hal::v5::strong_ptr<hal::i2c> p_i2c,
+                 hal::v5::strong_ptr<hal::steady_clock> p_clock,
+                 hal::v5::strong_ptr<hal::serial> p_terminal)
   : m_i2c(p_i2c)
   , m_clock(p_clock)
   , m_terminal(p_terminal)
@@ -17,12 +17,13 @@ opt4048::opt4048(hal::i2c& p_i2c,
 };
 
 // whyy not working
-static void print_byte_array(hal::serial& console, std::span<hal::byte> arr)
+static void print_byte_array(hal::v5::strong_ptr<hal::serial> console,
+                             std::span<hal::byte> arr)
 {
   for (auto& i : arr) {
-    hal::print<16>(console, "0x%02x ", i);
+    hal::print<16>(*console, "0x%02x ", i);
   }
-  hal::print(console, "\n");
+  hal::print(*console, "\n");
 }
 
 void opt4048::adjust_settings()
@@ -41,12 +42,12 @@ void opt4048::adjust_settings()
   std::array<hal::byte, 3> configA = { register_addresses::settings,
                                        write1,
                                        write2 };
-  hal::write(m_i2c, opt4048::device_address, configA, hal::never_timeout());
+  hal::write(*m_i2c, opt4048::device_address, configA, hal::never_timeout());
   // hal::delay(m_clock, 50ms);
   std::array<hal::byte, 3> configB = {
     register_addresses::threshold_channel_select, write3, write4
   };
-  hal::write(m_i2c, opt4048::device_address, configB, hal::never_timeout());
+  hal::write(*m_i2c, opt4048::device_address, configB, hal::never_timeout());
   print_byte_array(m_terminal, configA);  // should output: 0x0A, 0x30, 0xB3
 }
 
@@ -54,9 +55,9 @@ void opt4048::read_channel(hal::byte address, std::span<hal::byte> output)
 {
   std::array<hal::byte, 1> address_out = { address };
 
-  hal::write_then_read(m_i2c, opt4048::device_address, address_out, output);
+  hal::write_then_read(*m_i2c, opt4048::device_address, address_out, output);
   // print<30>(m_terminal, "0x%02x: \t", address);
-  // print_byte_array(m_terminal, output);
+  // print_byte_*array(m_terminal, output);
 }
 
 opt4048::adc_codes opt4048::get_adc_codes()
@@ -79,39 +80,39 @@ opt4048::adc_codes opt4048::get_adc_codes()
     channel_0_msb;  // 0 has exponent (4 bits), and 1 has the msb (12bits)
   get_msb_exp(register_addresses::channel0_msb, channel_0_msb);
 
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
   // do this for channel 1, 2, and 3
   std::array<uint16_t, 2> channel_1_msb;
   get_msb_exp(register_addresses::channel1_msb, channel_1_msb);
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   std::array<uint16_t, 2> channel_2_msb;
   get_msb_exp(register_addresses::channel2_msb, channel_2_msb);
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   std::array<uint16_t, 2> channel_3_msb;
   get_msb_exp(register_addresses::channel3_msb, channel_3_msb);
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   std::array<hal::byte, 2> channel_0_lsb;
   read_channel(register_addresses::channel0_lsb, channel_0_lsb);
   uint8_t lsb0 = channel_0_lsb[0];
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   std::array<hal::byte, 2> channel_1_lsb;
   read_channel(register_addresses::channel1_lsb, channel_1_lsb);
   uint8_t lsb1 = channel_1_lsb[0];
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   std::array<hal::byte, 2> channel_2_lsb;
   read_channel(register_addresses::channel2_lsb, channel_2_lsb);
   uint8_t lsb2 = channel_2_lsb[0];
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   std::array<hal::byte, 2> channel_3_lsb;
   read_channel(register_addresses::channel3_lsb, channel_3_lsb);
   uint8_t lsb3 = channel_3_lsb[0];
-  hal::delay(m_clock, 50ms);
+  hal::delay(*m_clock, 50ms);
 
   uint32_t mantissa0 = (channel_0_msb[1] << 8) + lsb0;
   uint32_t adc_codes0 = mantissa0 << channel_0_msb[0];
@@ -174,14 +175,14 @@ opt4048::xyz_values opt4048::adc_codes_to_xyz(adc_codes adc)
              adc.ch2 * ADC_to_XYZ[2][2] + adc.ch3 * ADC_to_XYZ[3][2];
   values.lux = adc.ch0 * ADC_to_XYZ[0][3] + adc.ch1 * ADC_to_XYZ[1][3] +
                adc.ch2 * ADC_to_XYZ[2][3] + adc.ch3 * ADC_to_XYZ[3][3];
-  print<30>(m_terminal, "ADC CODES: %d \t", adc.ch0);
-  print<30>(m_terminal, "%d \t", adc.ch1);
-  print<30>(m_terminal, "%d \t", adc.ch2);
-  print<30>(m_terminal, "%d \n", adc.ch3);
-  print<30>(m_terminal, "XYZ VALUES: %f \t", values.x);
-  print<30>(m_terminal, "%f \t", values.y);
-  print<30>(m_terminal, "%f \t", values.z);
-  print<30>(m_terminal, "%f \n", values.lux);
+  print<30>(*m_terminal, "ADC CODES: %d \t", adc.ch0);
+  print<30>(*m_terminal, "%d \t", adc.ch1);
+  print<30>(*m_terminal, "%d \t", adc.ch2);
+  print<30>(*m_terminal, "%d \n", adc.ch3);
+  print<30>(*m_terminal, "XYZ VALUES: %f \t", values.x);
+  print<30>(*m_terminal, "%f \t", values.y);
+  print<30>(*m_terminal, "%f \t", values.z);
+  print<30>(*m_terminal, "%f \n", values.lux);
   return values;
 }
 float opt4048::sRGBCompandingFunction(

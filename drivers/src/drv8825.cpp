@@ -20,17 +20,17 @@ void drv8825::step(long p_steps)
   m_partial_steps += p_steps * (32 >> static_cast<int>(m_step_factor));
   if (p_steps < 0) {
     p_steps *= -1;
-    m_direction_pin.level(false);
+    m_direction_pin->level(false);
   } else {
-    m_direction_pin.level(true);
+    m_direction_pin->level(true);
   }
   // 650ns delay for direction change on datasheet (extra 50ns for tolerance)
-  hal::delay(m_clock, 700ns);
+  hal::delay(*m_clock, 700ns);
   for (; p_steps > 0; p_steps--) {
-    m_step_pin.level(true);
-    hal::delay(m_clock, m_step_half_period);
-    m_step_pin.level(false);
-    hal::delay(m_clock, m_step_half_period);
+    m_step_pin->level(true);
+    hal::delay(*m_clock, m_step_half_period);
+    m_step_pin->level(false);
+    hal::delay(*m_clock, m_step_half_period);
   }
 }
 

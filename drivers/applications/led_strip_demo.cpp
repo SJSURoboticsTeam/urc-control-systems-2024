@@ -79,7 +79,7 @@ void application()
   auto data_pin = resources::output_pin_1();
 
   light_strip<35> lights;
-  sk9822 driver(*clock_pin, *data_pin, *clock);
+  sk9822 driver(clock_pin, data_pin, clock);
   light_strip_util::set_all(lights, colors::BLACK);
 
   rgb_brightness ON, OFF;
@@ -88,7 +88,7 @@ void application()
 
   effect_hardware hardware{ .lights = lights,
                             .driver = &driver,
-                            .clock = std::move(clock) };
+                            .clock = clock };
 
   // beedoo_beedoo_beedoo(hardware, hal::color::red, hal::color::black, 100ms);
   rampup_rampdown(hardware);

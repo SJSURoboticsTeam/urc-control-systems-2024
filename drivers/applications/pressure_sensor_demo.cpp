@@ -11,11 +11,11 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
-void probe_bus(hal::i2c& i2c, hal::serial& console)
+void probe_bus(hal::v5::strong_ptr<hal::i2c> i2c, hal::serial& console)
 {
   hal::print(console, "\n\nProbing i2c2\n");
   for (hal::byte addr = 0x08; addr < 0x78; addr++) {
-    if (hal::probe(i2c, addr)) {
+    if (hal::probe(*i2c, addr)) {
       hal::print<8>(console, "0x%02X  ", addr);
     } else {
       hal::print(console, " --   ");
@@ -47,9 +47,9 @@ double calculate_height(double pressure)
            (pow(pressure / press_sea, -R * std_tmp_lapse / (g * M)) - 1);
 }
 
-void print_binary(hal::serial& console, hal::byte val)
+void print_binary(hal::v5::strong_ptr<hal::serial> console, hal::byte val)
 {
-  hal::print<11>(console,
+  hal::print<11>(*console,
                  "0b%c%c%c%c%c%c%c%c",
                  get_bit_value(val, 7) +
                    '0',  // '1' if the bit is set, '0' if its not
@@ -71,9 +71,9 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-  probe_bus(*i2c, *console);
+  probe_bus(i2c, *console);
 
-  auto bme = bme680(*i2c, 0x77);
+  auto bme = bme680(i2c, 0x77);
 
   bme.set_filter_coefficient(bme680::coeff_3);
   bme.set_oversampling(

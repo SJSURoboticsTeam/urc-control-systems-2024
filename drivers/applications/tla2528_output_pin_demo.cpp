@@ -20,7 +20,7 @@ void application()
   auto i2c = resources::i2c();
   auto clock = resources::clock();
   auto console = resources::console();
-  tla2528 gpo_expander = tla2528(*i2c);
+  tla2528 gpo_expander = tla2528(i2c);
   constexpr hal::output_pin::settings output_pin_config = {
     .resistor = hal::pin_resistor::none, .open_drain = demo_open_drain
   };

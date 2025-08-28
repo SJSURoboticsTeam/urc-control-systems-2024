@@ -23,7 +23,7 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-  sht21 m_sht21 = sht21(*i2c);
+  sht21 m_sht21 = sht21(i2c);
 
   while (true) {
     hal::print<32>(*console, "Temp: %f\n", m_sht21.get_temperature());

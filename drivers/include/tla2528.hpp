@@ -2,6 +2,7 @@
 #include <libhal/i2c.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
+#include <libhal/pointers.hpp>
 
 namespace sjsu::drivers {
 
@@ -37,7 +38,8 @@ public:
    * @param p_i2c_address i2c address configured on the tla, by default is set
    * to the i2c address of no resistors attached to address config pins.
    */
-  tla2528(hal::i2c& p_i2c, hal::byte p_i2c_address = default_address);
+  tla2528(hal::v5::strong_ptr<hal::i2c> p_i2c,
+          hal::byte p_i2c_address = default_address);
 
   /**
    * @brief set what service a pin will provide
@@ -169,7 +171,7 @@ private:
   void throw_if_invalid_channel(hal::byte p_channel);
   void reset();
 
-  hal::i2c& m_i2c_bus;
+  hal::v5::strong_ptr<hal::i2c> m_i2c_bus;
   hal::byte m_i2c_address;
   hal::byte m_channel = 0x08;  // stores selected channel to reduce i2c requests
   hal::byte m_object_created = 0x00;  // tracks adapter channel reservations

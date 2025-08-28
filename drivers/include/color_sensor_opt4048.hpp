@@ -3,6 +3,9 @@
 #include <libhal-util/i2c.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/i2c.hpp>
+#include <libhal/pointers.hpp>
+#include <libhal/serial.hpp>
 
 namespace sjsu::drivers {
 // functions we ened to make
@@ -81,7 +84,9 @@ public:
                              { 0.0556434, -0.2040259, 1.0572252 } };
   int device_address = 0x44;  // not sure check this
 
-  opt4048(hal::i2c& p_i2c, hal::steady_clock& p_clock, hal::serial& p_terminal);
+  opt4048(hal::v5::strong_ptr<hal::i2c> p_i2c,
+          hal::v5::strong_ptr<hal::steady_clock> p_clock,
+          hal::v5::strong_ptr<hal::serial> p_terminal);
 
   // select light range
   // select conversiokn time
@@ -117,8 +122,8 @@ public:
   // set to conversion mode
   // M^-1 for sRGB @ D65 from www.brucelindbloom.com
 
-  hal::i2c& m_i2c;
-  hal::steady_clock& m_clock;
-  hal::serial& m_terminal;
+  hal::v5::strong_ptr<hal::i2c> m_i2c;
+  hal::v5::strong_ptr<hal::steady_clock> m_clock;
+  hal::v5::strong_ptr<hal::serial> m_terminal;
 };
 }  // namespace sjsu::drivers

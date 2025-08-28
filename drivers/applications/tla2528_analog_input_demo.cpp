@@ -19,7 +19,7 @@ void application()
   auto i2c = resources::i2c();
   auto clock = resources::clock();
   auto console = resources::console();
-  tla2528 adc_mux = tla2528(*i2c);
+  tla2528 adc_mux = tla2528(i2c);
   std::array<tla2528_adc, 8> adcs{ make_adc(adc_mux, 0), make_adc(adc_mux, 1),
                                    make_adc(adc_mux, 2), make_adc(adc_mux, 3),
                                    make_adc(adc_mux, 4), make_adc(adc_mux, 5),

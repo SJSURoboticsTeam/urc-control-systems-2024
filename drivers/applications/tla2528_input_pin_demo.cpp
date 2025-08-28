@@ -19,7 +19,7 @@ void application()
   auto i2c = resources::i2c();
   auto clock = resources::clock();
   auto console = resources::console();
-  tla2528 gpi_expander = tla2528(*i2c);
+  tla2528 gpi_expander = tla2528(i2c);
   constexpr hal::input_pin::settings input_pin_config = {
     .resistor = hal::pin_resistor::none
   };

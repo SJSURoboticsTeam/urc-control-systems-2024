@@ -12,7 +12,7 @@ void application()
   auto b_low = resources::pwm_channel_1();
   auto clock = resources::clock();
   // auto& terminal = *p_resources.terminal;
-  auto m_h_bridge = h_bridge(*a_low, *b_low, *a_high, *b_high);
+  auto m_h_bridge = h_bridge(a_low, b_low, a_high, b_high);
 
   while (true) {
     m_h_bridge.power(0.1);
