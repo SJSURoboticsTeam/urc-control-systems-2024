@@ -14,13 +14,12 @@ using namespace std::chrono_literals;
 
 namespace sjsu::drivers {
 
-void application(application_framework& p_framework)
+void application()
 {
   constexpr bool demo_open_drain = false;
-
-  auto& terminal = *p_framework.terminal;
-  auto& i2c = *p_framework.i2c;
-  auto& steady_clock = *p_framework.steady_clock;
+  auto i2c = resources::i2c();
+  auto clock = resources::clock();
+  auto console = resources::console();
   tla2528 gpo_expander = tla2528(i2c);
   constexpr hal::output_pin::settings output_pin_config = {
     .resistor = hal::pin_resistor::none, .open_drain = demo_open_drain
@@ -38,14 +37,14 @@ void application(application_framework& p_framework)
 
   hal::byte counter =
     0;  // output counts in binary to go though all out put combinations
-  hal::print(terminal, "Starting Binary Count\n");
+  hal::print(*console, "Starting Binary Count\n");
   while (true) {
     counter++;
     for (int i = 0; i < 8; i++) {
       gpos[i].level(hal::bit_extract(hal::bit_mask::from(i), counter));
     }
-    hal::print<16>(terminal, "count:%x\n", counter);
-    hal::delay(steady_clock, 200ms);
+    hal::print<16>(*console, "count:%x\n", counter);
+    hal::delay(*clock, 200ms);
   }
 }
 }  // namespace sjsu::drivers

@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,47 +11,95 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #pragma once
 
+#include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/steady_clock.hpp>
 #include <libhal/adc.hpp>
 #include <libhal/can.hpp>
+#include <libhal/dac.hpp>
 #include <libhal/functional.hpp>
 #include <libhal/i2c.hpp>
 #include <libhal/input_pin.hpp>
+#include <libhal/interrupt_pin.hpp>
 #include <libhal/output_pin.hpp>
+#include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
+#include <libhal/spi.hpp>
 #include <libhal/steady_clock.hpp>
-
+#include <libhal/stream_dac.hpp>
+#include <libhal/timer.hpp>
+#include <libhal/zero_copy_serial.hpp>
 namespace sjsu::drivers {
-struct application_framework
+namespace custom {
+/**
+ * @brief A stand in interface until libhal supports an official watchdog
+ * interface.
+ *
+ */
+class watchdog
 {
-  hal::serial* terminal;
-  hal::can* can;
-  hal::input_pin* in_pin0;
-  hal::input_pin* in_pin1;
-  hal::input_pin* in_pin2;
-  hal::output_pin* led;
-  hal::output_pin* out_pin0;
-  hal::output_pin* out_pin1;
-  hal::output_pin* out_pin2;
-  hal::output_pin* out_pin3;
-  hal::output_pin* out_pin4;
-  hal::pwm16_channel* pwm0;
-  hal::pwm16_channel* pwm1;
-  // hal::adc* adc0;
-  // hal::adc* adc1;
-  // hal::serial* esp;
-  hal::i2c* i2c;
-  hal::steady_clock* steady_clock;
-  hal::callback<void()> reset;
+public:
+  watchdog() = default;
+  virtual void start() = 0;
+  virtual void reset() = 0;
+  virtual void set_countdown_time(hal::time_duration p_wait_time) = 0;
+  virtual bool check_flag() = 0;
+  virtual void clear_flag() = 0;
+  virtual ~watchdog() = default;
 };
+}  // namespace custom
+namespace resources {
+// =======================================================
+// Defined by each platform file
+// =======================================================
+/**
+ * @brief Allocator for driver memory
+ *
+ * The expectation is that the implementation of this allocator is a
+ * std::pmr::monotonic_buffer_resource with static memory storage, meaning the
+ * memory is fixed in size and memory cannot be deallocated. This is fine for
+ * the demos.
+ *
+ * @return std::pmr::polymorphic_allocator<>
+ */
+std::pmr::polymorphic_allocator<> driver_allocator();
+/**
+ * @brief Steady clock that provides the current uptime
+ *
+ * @return hal::v5::strong_ptr<hal::steady_clock>
+ */
+hal::v5::strong_ptr<hal::steady_clock> clock();
+hal::v5::strong_ptr<hal::serial> console();
+hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
+hal::v5::strong_ptr<hal::input_pin> input_pin_0();
+hal::v5::strong_ptr<hal::input_pin> input_pin_1();
+hal::v5::strong_ptr<hal::input_pin> input_pin_2();
+hal::v5::strong_ptr<hal::output_pin> status_led();
+hal::v5::strong_ptr<hal::output_pin> output_pin_0();
+hal::v5::strong_ptr<hal::output_pin> output_pin_1();
+hal::v5::strong_ptr<hal::output_pin> output_pin_2();
+hal::v5::strong_ptr<hal::output_pin> output_pin_3();
+hal::v5::strong_ptr<hal::output_pin> output_pin_4();
+hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
+hal::v5::strong_ptr<hal::adc> adc_0();
+hal::v5::strong_ptr<hal::adc> adc_1();
+hal::v5::strong_ptr<hal::i2c> i2c();
 
-// Application function must be implemented by one of the compilation units
-// (.cpp) files.
-void initialize_processor();
-application_framework initialize_platform();
-void application(application_framework& p_framework);
+inline void reset()
+{
+  hal::cortex_m::reset();
+}
+inline void sleep(hal::time_duration p_duration)
+{
+  auto delay_clock = resources::clock();
+  hal::delay(*delay_clock, p_duration);
+}
+}  // namespace resources
 
+// Application function is implemented by one of the .cpp files.
+void initialize_platform();
+void application();
 }  // namespace sjsu::drivers
