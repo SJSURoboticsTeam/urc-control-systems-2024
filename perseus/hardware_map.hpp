@@ -14,23 +14,17 @@
 #pragma once
 
 #include <libhal-arm-mcu/system_control.hpp>
-#include <libhal-util/steady_clock.hpp>
-#include <libhal/adc.hpp>
 #include <libhal/can.hpp>
-#include <libhal/dac.hpp>
 #include <libhal/functional.hpp>
-#include <libhal/i2c.hpp>
 #include <libhal/input_pin.hpp>
 #include <libhal/interrupt_pin.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
-#include <libhal/spi.hpp>
 #include <libhal/steady_clock.hpp>
-#include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
-#include <libhal/zero_copy_serial.hpp>
+
 namespace sjsu::drivers {
 namespace custom {
 /**

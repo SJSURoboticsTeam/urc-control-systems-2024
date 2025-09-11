@@ -22,7 +22,6 @@
 #include <libhal-arm-mcu/stm32f1/uart.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
-#include <libhal/units.hpp>
 
 #include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
