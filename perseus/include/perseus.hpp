@@ -38,16 +38,16 @@ public:
   
   
   void set_encoder_position(hal::degrees position);
-  void set_percent_voltage(float percent);
+  void set_percent_voltage(hal::degrees percent);
   void set_pid_position(const PidSettings& p_settings);
   void set_pid_velocity(const PidSettings& p_settings);
   float get_position();
   float get_velocity();
-  void set_position(float degrees);
-  void set_velocity(float rpm);
+  void set_position(hal::degrees degrees);
+  void set_velocity(hal::degrees rpm);
   void set_feedforward();
   void reset_factor();
-  void set_gear_ratio(float p_ratio);
+  void set_gear_ratio(hal::degrees p_ratio);
 
 private:
   hal::v5::optional_ptr<hal::pwm16_channel> m_pin_a_low;

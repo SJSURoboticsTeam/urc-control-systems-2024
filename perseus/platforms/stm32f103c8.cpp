@@ -1,5 +1,3 @@
-// copied from drivers/platforms/stm32f103c8.cpp
-
 // Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,28 +14,14 @@
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
-#include <libhal-arm-mcu/stm32f1/adc.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
-#include <libhal-arm-mcu/stm32f1/independent_watchdog.hpp>
-#include <libhal-arm-mcu/stm32f1/input_pin.hpp>
-#include <libhal-arm-mcu/stm32f1/output_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/pin.hpp>
-#include <libhal-arm-mcu/stm32f1/spi.hpp>
 #include <libhal-arm-mcu/stm32f1/timer.hpp>
 #include <libhal-arm-mcu/stm32f1/uart.hpp>
-#include <libhal-arm-mcu/stm32f1/usart.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
-#include <libhal-util/atomic_spin_lock.hpp>
-#include <libhal-util/bit_bang_i2c.hpp>
-#include <libhal-util/bit_bang_spi.hpp>
-#include <libhal-util/inert_drivers/inert_adc.hpp>
-#include <libhal-util/serial.hpp>
-#include <libhal-util/steady_clock.hpp>
-#include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
 #include "../hardware_map.hpp"
