@@ -14,36 +14,14 @@
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
-<<<<<<< HEAD
-#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
-=======
->>>>>>> upstream/main
-#include <libhal-arm-mcu/stm32f1/adc.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
-#include <libhal-arm-mcu/stm32f1/independent_watchdog.hpp>
-#include <libhal-arm-mcu/stm32f1/input_pin.hpp>
-#include <libhal-arm-mcu/stm32f1/output_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/pin.hpp>
-#include <libhal-arm-mcu/stm32f1/spi.hpp>
 #include <libhal-arm-mcu/stm32f1/timer.hpp>
 #include <libhal-arm-mcu/stm32f1/uart.hpp>
-#include <libhal-arm-mcu/stm32f1/usart.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
-#include <libhal-util/atomic_spin_lock.hpp>
-#include <libhal-util/bit_bang_i2c.hpp>
-#include <libhal-util/bit_bang_spi.hpp>
-#include <libhal-util/inert_drivers/inert_adc.hpp>
-#include <libhal-util/serial.hpp>
-#include <libhal-util/steady_clock.hpp>
-#include <libhal/can.hpp>
-#include <libhal/pwm.hpp>
-#include <libhal/rotation_sensor.hpp>
-#include <libhal/steady_clock.hpp>
-#include <libhal/units.hpp>
 
 #include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
@@ -113,42 +91,7 @@ hal::v5::strong_ptr<hal::adc> adc_0()
   return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
 }
 
-hal::v5::strong_ptr<hal::adc> adc_1()
-{
-  static hal::atomic_spin_lock adc_lock;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb1);
-}
-hal::v5::strong_ptr<hal::i2c> i2c()
-{
-  static auto sda_output_pin = gpio_b().acquire_output_pin(7);
-  static auto scl_output_pin = gpio_b().acquire_output_pin(6);
-  auto clock = resources::clock();
-  return hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
-                                                     hal::bit_bang_i2c::pins{
-                                                       .sda = &sda_output_pin,
-                                                       .scl = &scl_output_pin,
-                                                     },
-                                                     *clock);
-}
 
-hal::v5::strong_ptr<hal::input_pin> input_pin_0()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
-    driver_allocator(), gpio_a().acquire_input_pin(0));
-}
-
-hal::v5::strong_ptr<hal::input_pin> input_pin_1()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(15))>(
-    driver_allocator(), gpio_a().acquire_input_pin(15));
-}
-
-hal::v5::strong_ptr<hal::input_pin> input_pin_2()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(3))>(
-    driver_allocator(), gpio_b().acquire_input_pin(3));
-}
 
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
@@ -162,24 +105,6 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_1()
     driver_allocator(), gpio_a().acquire_output_pin(15));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_2()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
-    driver_allocator(), gpio_b().acquire_output_pin(3));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_3()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
-    driver_allocator(), gpio_b().acquire_output_pin(4));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_4()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
-    driver_allocator(), gpio_b().acquire_output_pin(12));
-}
-
 auto& timer1()
 {
   static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
@@ -190,12 +115,6 @@ auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
-}
-
-auto& timer4()
-{
-  static hal::stm32f1::general_purpose_timer<st_peripheral::timer4> timer4{};
-  return timer4;
 }
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
@@ -213,21 +132,32 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency()
+
+
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
-  auto timer_pwm_frequency = timer1().acquire_pwm_group_frequency();
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
-    driver_allocator(), std::move(timer_pwm_frequency));
+  throw hal::operation_not_supported(nullptr);
+  // CAN is commented out in original due to potential stalling issues
+  // TODO(#125): Initializing the can peripheral without it connected to a can
+  // transceiver causes it to stall on occasion.
 }
 
-hal::v5::strong_ptr<hal::rotation_sensor> encoder()
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  return timer4().acquire_quadrature_encoder(
-    driver_allocator(),
-    { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb6),
-      static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb7) },
-    5281);
+  throw hal::operation_not_supported(nullptr);
 }
+
+hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
+{
+  throw hal::operation_not_supported(nullptr);
+}
+
+hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
+{
+  throw hal::operation_not_supported(nullptr);
+}
+
+// add one for quadrature encoder
 
 [[noreturn]] void terminate_handler() noexcept
 {
