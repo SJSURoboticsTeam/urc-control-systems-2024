@@ -14,6 +14,7 @@
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
+#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
 #include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
@@ -35,7 +36,10 @@
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/can.hpp>
 #include <libhal/pwm.hpp>
+#include <libhal/rotation_sensor.hpp>
+#include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 
 #include "../hardware_map.hpp"
@@ -184,6 +188,12 @@ auto& timer2()
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
+
+auto& timer4()
+{
+  static hal::stm32f1::general_purpose_timer<st_peripheral::timer4> timer4{};
+  return timer4;
+}
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   auto timer_pwm_channel =
@@ -207,27 +217,13 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency()
     driver_allocator(), std::move(timer_pwm_frequency));
 }
 
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
+hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 {
-  throw hal::operation_not_supported(nullptr);
-  // CAN is commented out in original due to potential stalling issues
-  // TODO(#125): Initializing the can peripheral without it connected to a can
-  // transceiver causes it to stall on occasion.
-}
-
-hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
-{
-  throw hal::operation_not_supported(nullptr);
-}
-
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
-{
-  throw hal::operation_not_supported(nullptr);
-}
-
-hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
-{
-  throw hal::operation_not_supported(nullptr);
+  return timer4().acquire_quadrature_encoder(
+    driver_allocator(),
+    { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb6),
+      static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb7) },
+    5281);
 }
 
 [[noreturn]] void terminate_handler() noexcept

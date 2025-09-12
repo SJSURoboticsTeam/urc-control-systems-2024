@@ -32,7 +32,7 @@
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
-namespace sjsu::drivers {
+namespace sjsu::arm {
 namespace custom {
 /**
  * @brief A stand in interface until libhal supports an official watchdog
@@ -74,23 +74,11 @@ std::pmr::polymorphic_allocator<> driver_allocator();
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
-hal::v5::strong_ptr<hal::input_pin> input_pin_0();
-hal::v5::strong_ptr<hal::input_pin> input_pin_1();
-hal::v5::strong_ptr<hal::input_pin> input_pin_2();
 hal::v5::strong_ptr<hal::output_pin> status_led();
-hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> output_pin_1();
-hal::v5::strong_ptr<hal::output_pin> output_pin_2();
-hal::v5::strong_ptr<hal::output_pin> output_pin_3();
-hal::v5::strong_ptr<hal::output_pin> output_pin_4();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-hal::v5::strong_ptr<hal::adc> adc_0();
-hal::v5::strong_ptr<hal::adc> adc_1();
-hal::v5::strong_ptr<hal::i2c> i2c();
-hal::v5::strong_ptr<hal::rotation_sensor> encoder();
-
-
+hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel();
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
 
 inline void reset()
 {
@@ -106,4 +94,4 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
-}  // namespace sjsu::drivers
+}  // namespace sjsu::arm
