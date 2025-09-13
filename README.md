@@ -1,6 +1,5 @@
 # urc-control-systems-2024
 This Repository will host the code for the new SJSU Robotics Rover.
-To build: 
 To build the project:
 ### Note: the LPC4078 and stm32f1 platforms are not included, simply the micromod in the arm subsystem. 
 ```bash
