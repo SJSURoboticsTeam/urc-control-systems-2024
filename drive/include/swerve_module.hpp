@@ -37,6 +37,10 @@ public:
                 hal::actuator::rmd_mc_x_v2& p_propulsion_motor,
                 swerve_module_settings p_settings);
   /**
+   * @brief stops the motors of the module
+   */
+   void stop();
+  /**
    * @brief sets the target module state the module will try to set
    *
    * @param p_target_state the target module state
