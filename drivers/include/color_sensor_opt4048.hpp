@@ -115,8 +115,7 @@ public:
 
   rgb_values xyz_to_rgb(xyz_values xyz);
 
-  rgb_values
-  get_data();  // will do all the conversions and return required data
+  rgb_values get_data();  // will do all the conversions and return required data
 
   void get_msb_exp(hal::byte register_A, std::span<uint16_t> data);
   // set to conversion mode
