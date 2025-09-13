@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include "perseus_bldc.hpp"
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/adc.hpp>
@@ -76,9 +77,20 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel();
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
+  std::span<hal::can_message> receive_buffer);
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> track_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> shoulder_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> elbow_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_pitch_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_roll_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
 
 inline void reset()
 {

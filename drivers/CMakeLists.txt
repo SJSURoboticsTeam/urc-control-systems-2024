@@ -23,12 +23,12 @@ libhal_build_demos(
     h_bridge_demo
     pressure_sensor_demo
     scd40_demo
-  soil_sensor_demo
-  tla2528_output_pin_demo
-  tla2528_input_pin_demo
-  tla2528_analog_input_demo
-  quadrature_encoder_demo
-  rmd_demo
+    soil_sensor_demo
+    tla2528_output_pin_demo
+    tla2528_input_pin_demo
+    tla2528_analog_input_demo
+    quadrature_encoder_demo
+    # rmd_demo
 
   INCLUDES
   include

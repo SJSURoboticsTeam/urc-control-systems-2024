@@ -1,3 +1,4 @@
+#include "../hardware_map.hpp"
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/can.hpp>
@@ -16,10 +17,8 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 #include <libhal/pointers.hpp>
-#include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
-
-#include "../hardware_map.hpp"
+#include <perseus_bldc.hpp>
 
 namespace sjsu::arm::resources {
 using namespace hal::literals;
@@ -92,9 +91,9 @@ auto& get_can_peripheral()
   return can;
 }
 
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
+  std::span<hal::can_message> receive_buffer)
 {
-  static std::span<hal::can_message> receive_buffer;
   auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
   return hal::v5::make_strong_ptr<decltype(transceiver)>(
     driver_allocator(), std::move(transceiver));
@@ -113,31 +112,66 @@ auto& get_identifier_filter_set()
   return filter_set;
 }
 
-// std::array<hal::v5::strong_ptr<hal::can_identifier_filter>, 5>
-// get_identifier_filters()
-// {
-//   static auto& idf1 = get_identifier_filter_set<0>().filter[0];
-//   auto i1 = hal::v5::make_strong_ptr<decltype(idf1)>(driver_allocator(),
-//   idf1);
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> track_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+{
+  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    driver_allocator(),
+    transceiver,  // this will allow the class to send messages to the actual
+                  // perseus controller
+    get_identifier_filter_set<0>().filter[0],
+    clock(),
+    100,
+    0x120);
+}
 
-//   static auto& idf2 = get_identifier_filter_set<0>().filter[1];
-//   auto i2 = hal::v5::make_strong_ptr<decltype(idf2)>(driver_allocator(),
-//   idf2);
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> shoulder_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+{
+  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    driver_allocator(),
+    transceiver,
+    get_identifier_filter_set<0>().filter[1],
+    clock(),
+    100,
+    0x121);
+}
 
-//   static auto& idf3 = get_identifier_filter_set<0>().filter[2];
-//   auto i3 = hal::v5::make_strong_ptr<decltype(idf3)>(driver_allocator(),
-//   idf3);
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> elbow_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+{
+  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    driver_allocator(),
+    transceiver,
+    get_identifier_filter_set<0>().filter[2],
+    clock(),
+    100,
+    0x122);
+}
 
-//   static auto& idf4 = get_identifier_filter_set<1>().filter[0];
-//   auto i4 = hal::v5::make_strong_ptr<decltype(idf4)>(driver_allocator(),
-//   idf4);
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_pitch_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+{
+  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    driver_allocator(),
+    transceiver,
+    get_identifier_filter_set<1>().filter[0],
+    clock(),
+    100,
+    0x123);
+}
 
-//   static auto& idf5 = get_identifier_filter_set<1>().filter[1];
-//   auto i5 = hal::v5::make_strong_ptr<decltype(idf5)>(driver_allocator(),
-//   idf5);
-
-//   return { i1, i2, i3, i4, i5 };
-// }
+hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_roll_servo(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+{
+  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    driver_allocator(),
+    transceiver,
+    get_identifier_filter_set<1>().filter[1],
+    clock(),
+    100,
+    0x124);
+}
 
 [[noreturn]] void terminate_handler() noexcept
 {
@@ -147,7 +181,6 @@ auto& get_identifier_filter_set()
       continue;
     }
   }
-
   // Otherwise, blink the led in a pattern
   auto status_led = resources::status_led();
   auto clock = resources::clock();

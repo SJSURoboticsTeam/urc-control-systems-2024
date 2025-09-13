@@ -14,10 +14,7 @@
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
-<<<<<<< HEAD
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
-=======
->>>>>>> upstream/main
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
 #include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
