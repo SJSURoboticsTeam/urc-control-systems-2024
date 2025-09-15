@@ -21,7 +21,7 @@ libhal_build_demos(
   application
 
   INCLUDES
-  include
+  ../drivers/include
 
 SOURCES
     # platforms/micromod.cpp

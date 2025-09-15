@@ -24,8 +24,11 @@
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
+#include <libhal/rotation_sensor.hpp>
+#include <libhal-util/steady_clock.hpp>
 
-namespace sjsu::drivers {
+
+namespace sjsu::perseus {
 namespace custom {
 /**
  * @brief A stand in interface until libhal supports an official watchdog
@@ -73,12 +76,10 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> output_pin_1();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-
 // current sensing
-hal::v5::strong_ptr<hal::adc> adc_0();
-
 // quadrature encoder
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+
 
 inline void reset()
 {

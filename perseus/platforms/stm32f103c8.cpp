@@ -14,6 +14,7 @@
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
+#include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -26,7 +27,7 @@
 #include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
 
-namespace sjsu::drivers::resources {
+namespace sjsu::perseus::resources {
 using namespace hal::literals;
 using st_peripheral = hal::stm32f1::peripheral;
 
@@ -84,15 +85,6 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::strong_ptr<hal::adc> adc_0()
-{
-  static hal::atomic_spin_lock adc_lock;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
-}
-
-
-
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
@@ -132,19 +124,32 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-
-
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
+auto& get_can_peripheral()
 {
-  throw hal::operation_not_supported(nullptr);
-  // CAN is commented out in original due to potential stalling issues
-  // TODO(#125): Initializing the can peripheral without it connected to a can
-  // transceiver causes it to stall on occasion.
+  using namespace std::chrono_literals;
+  auto clock = resources::clock();
+  static hal::stm32f1::can_peripheral_manager can(
+    100_kHz,
+    *clock,
+    1ms,
+    hal::stm32f1::can_pins::pb9_pb8);  // this needs to be static because we are
+                                       // returning a non strong pointer type
+  return can;
+}
+
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
+  std::span<hal::can_message> receive_buffer)
+{
+  auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
+  return hal::v5::make_strong_ptr<decltype(transceiver)>(
+    driver_allocator(), std::move(transceiver));
 }
 
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  throw hal::operation_not_supported(nullptr);
+  auto bus_man = get_can_peripheral().acquire_bus_manager();
+  return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
+                                                     std::move(bus_man));
 }
 
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
@@ -186,11 +191,11 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 }
 
 }  // namespace sjsu::drivers::resources
-namespace sjsu::drivers {
+namespace sjsu::perseus {
 void initialize_platform()
 {
   using namespace hal::literals;
-  hal::set_terminate(sjsu::drivers::resources::terminate_handler);
+  hal::set_terminate(sjsu::perseus::resources::terminate_handler);
   // Set the MCU to the maximum clock speed
 
   hal::stm32f1::configure_clocks(hal::stm32f1::clock_tree{
