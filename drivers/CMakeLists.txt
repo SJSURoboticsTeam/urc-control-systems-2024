@@ -28,6 +28,7 @@ libhal_build_demos(
     tla2528_input_pin_demo
     tla2528_analog_input_demo
     quadrature_encoder_demo
+    drv8825_demo
     # rmd_demo
 
   INCLUDES
@@ -45,6 +46,7 @@ SOURCES
     src/h_bridge.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
+    src/drv8825.cpp
 
     PACKAGES
     libhal-actuator

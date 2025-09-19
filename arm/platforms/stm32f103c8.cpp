@@ -105,6 +105,7 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
                                                      std::move(bus_man));
 }
+
 template<hal::u8 set_number>
 auto& get_identifier_filter_set()
 {
@@ -112,67 +113,79 @@ auto& get_identifier_filter_set()
   return filter_set;
 }
 
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> track_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+// hal::v5::strong_ptr<hal::can_message_finder> can_finder(
+//   hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16
+//   servo_address)
+// {
+//   return hal::v5::make_strong_ptr<hal::can_message_finder>(
+//     driver_allocator(),
+//     *transceiver, servo_address);
+// }
+
+arm_can_finders can_finders(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver,
+  hal::u16 home,
+  hal::u16 arm,
+  hal::u16 endeffector)
 {
-  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
-    driver_allocator(),
-    transceiver,  // this will allow the class to send messages to the actual
-                  // perseus controller
-    get_identifier_filter_set<0>().filter[0],
-    clock(),
-    100,
-    0x120);
+  return { .home_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
+             driver_allocator(), *transceiver, home),
+           .arm_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
+             driver_allocator(), *transceiver, arm),
+           .endeffector_finder =
+             hal::v5::make_strong_ptr<hal::can_message_finder>(
+               driver_allocator(), *transceiver, endeffector) };
 }
 
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> shoulder_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
 {
-  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
-    driver_allocator(),
-    transceiver,
-    get_identifier_filter_set<0>().filter[1],
-    clock(),
-    100,
-    0x121);
+  return
+  {
+    .track_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+      driver_allocator(),
+      transceiver,  // this will allow the class to send messages to the actual
+                    // perseus controller
+      get_identifier_filter_set<0>().filter[0],
+      clock(),
+      100,
+      0x120),
+    .shoulder_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+      driver_allocator(),
+      transceiver,
+      get_identifier_filter_set<0>().filter[1],
+      clock(),
+      100,
+      0x121),
+    .elbow_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+      driver_allocator(),
+      transceiver,
+      get_identifier_filter_set<0>().filter[2],
+      clock(),
+      100,
+      0x122),
+    .wrist_pitch_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+      driver_allocator(),
+      transceiver,
+      get_identifier_filter_set<1>().filter[0],
+      clock(),
+      100,
+      0x123),
+    .wrist_roll_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+      driver_allocator(),
+      transceiver,
+      get_identifier_filter_set<1>().filter[1],
+      clock(),
+      100,
+      0x124),
+    .clamp_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+      driver_allocator(),
+      transceiver,
+      get_identifier_filter_set<1>().filter[1],
+      clock(),
+      100,
+      0x125)
+  };
 }
-
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> elbow_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
-{
-  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
-    driver_allocator(),
-    transceiver,
-    get_identifier_filter_set<0>().filter[2],
-    clock(),
-    100,
-    0x122);
-}
-
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_pitch_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
-{
-  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
-    driver_allocator(),
-    transceiver,
-    get_identifier_filter_set<1>().filter[0],
-    clock(),
-    100,
-    0x123);
-}
-
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_roll_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
-{
-  return hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
-    driver_allocator(),
-    transceiver,
-    get_identifier_filter_set<1>().filter[1],
-    clock(),
-    100,
-    0x124);
-}
-
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {

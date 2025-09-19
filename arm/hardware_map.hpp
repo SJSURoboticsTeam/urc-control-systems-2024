@@ -72,6 +72,23 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  *
  * @return hal::v5::strong_ptr<hal::steady_clock>
  */
+struct arm_can_finders
+{
+  hal::v5::strong_ptr<hal::can_message_finder> home_finder;
+  hal::v5::strong_ptr<hal::can_message_finder> arm_finder;
+  hal::v5::strong_ptr<hal::can_message_finder> endeffector_finder;
+};
+
+struct arm_joints
+{
+  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> track_servo;
+  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> shoulder_servo;
+  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> elbow_servo;
+  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_pitch_servo;
+  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_roll_servo;
+  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> clamp_servo;
+};
+
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
@@ -81,16 +98,14 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
   std::span<hal::can_message> receive_buffer);
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> track_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> shoulder_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> elbow_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_pitch_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
-hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_roll_servo(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver);  // base
+
+arm_can_finders can_finders(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver,
+  hal::u16 home,
+  hal::u16 arm,
+  hal::u16 endeffector);
+
+arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver);
 
 inline void reset()
 {

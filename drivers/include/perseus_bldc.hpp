@@ -78,7 +78,7 @@ public:
   void send_message(std::array<hal::byte, 8> const& p_payload);
   void receive_message(std::array<hal::byte, 8>& buffer);
 
-private:
+// private:
   int m_ticks_per_rotation;
   hal::can_message_finder m_can;
   hal::v5::optional_ptr<hal::steady_clock> m_clock;

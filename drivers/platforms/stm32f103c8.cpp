@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstddef>
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
@@ -37,6 +38,8 @@
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
+#include <libhal/error.hpp>
+#include <libhal/output_pin.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/steady_clock.hpp>
@@ -131,50 +134,58 @@ hal::v5::strong_ptr<hal::i2c> i2c()
 
 hal::v5::strong_ptr<hal::input_pin> input_pin_0()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
-    driver_allocator(), gpio_a().acquire_input_pin(0));
+  auto pin = gpio_a().acquire_input_pin(0);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
 hal::v5::strong_ptr<hal::input_pin> input_pin_1()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(15))>(
-    driver_allocator(), gpio_a().acquire_input_pin(15));
+  auto pin = gpio_a().acquire_input_pin(15);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
 hal::v5::strong_ptr<hal::input_pin> input_pin_2()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(3))>(
-    driver_allocator(), gpio_b().acquire_input_pin(3));
+  auto pin = gpio_b().acquire_input_pin(3);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
+hal::v5::strong_ptr<hal::output_pin> output_pin_5()
+{
+  auto pin = gpio_b().acquire_output_pin(13);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
+}
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
-    driver_allocator(), gpio_a().acquire_output_pin(0));
+  auto pin = gpio_a().acquire_output_pin(0);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_1()
+
+hal::v5::strong_ptr<hal::output_pin> output_pin_7()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
-    driver_allocator(), gpio_a().acquire_output_pin(15));
+  auto pin = gpio_b().acquire_output_pin(15);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_2()
+hal::v5::strong_ptr<hal::output_pin> output_pin_6()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
-    driver_allocator(), gpio_b().acquire_output_pin(3));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_3()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
-    driver_allocator(), gpio_b().acquire_output_pin(4));
+  auto pin = gpio_b().acquire_output_pin(14);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
 hal::v5::strong_ptr<hal::output_pin> output_pin_4()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
-    driver_allocator(), gpio_b().acquire_output_pin(12));
+  auto pin = gpio_b().acquire_output_pin(12);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
 }
 
 auto& timer1()
@@ -223,7 +234,7 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
     driver_allocator(),
     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb6),
       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb7) },
-    5281);
+    753);
 }
 
 [[noreturn]] void terminate_handler() noexcept

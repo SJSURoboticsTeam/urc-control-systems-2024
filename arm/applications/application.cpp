@@ -1,10 +1,12 @@
 
+#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal/units.hpp>
 #include <system_error>
 
 #include "../hardware_map.hpp"
@@ -29,7 +31,12 @@ void print_can_message(hal::serial& p_console,
                   p_message.payload[6],
                   p_message.payload[7]);
 }
-
+enum arm_addresses : hal::u16
+{
+  home_address = 0x211,
+  arm_address = 0x212,
+  end_effector = 0x215
+};
 void application()
 {
   using namespace std::chrono_literals;
@@ -38,11 +45,13 @@ void application()
   std::span<hal::can_message> receive_buffer(buffer_storage);
   auto can_transceiver = resources::can_transceiver(receive_buffer);
   auto can_bus_manager = resources::can_bus_manager();
-  auto track_servo = resources::track_servo(can_transceiver);
-  auto shoulder_servo = resources::shoulder_servo(can_transceiver);
-  auto elbow_servo = resources::elbow_servo(can_transceiver);
-  auto wrist_roll_servo = resources::wrist_roll_servo(can_transceiver);
-  auto wrist_pitch_servo = resources::wrist_pitch_servo(can_transceiver);
+
+  auto arm_servos = resources::arm_servos(can_transceiver);
+  auto can_finders = resources::can_finders(can_transceiver,
+                                            arm_addresses::home_address,
+                                            arm_addresses::arm_address,
+                                            arm_addresses::end_effector);
+
   auto console = resources::console();
 
   // starts homing or waits fro homing command
@@ -54,18 +63,13 @@ void application()
   // filter messages this module sees? arm and drive are separate can buses so
   // it should be fine
   can_bus_manager->baud_rate(1.0_MHz);
-  hal::u32 receive_cursor = 0;
   while (true) {
-    // forever can loop
-    auto const buffer = can_transceiver->receive_buffer();
-    auto cursor = can_transceiver->receive_cursor();
-    for (; receive_cursor != cursor;
-         receive_cursor = (receive_cursor + 1) % buffer.size()) {
-      print_can_message(*console, buffer[receive_cursor]);
-      // process can message.
-      // if homing send homing commands to servos
-      // else send track servo position and speed requirements
-      cursor = can_transceiver->receive_cursor();
+    auto optional_message = can_finders.home_finder->find();
+    if (optional_message) {
+      print_can_message(*console, *optional_message);
+      // process_can_message(*optional_message, target, current);
+      //
+      // can_finder->transceiver().send()
     }
   }
 }

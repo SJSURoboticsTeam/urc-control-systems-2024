@@ -6,8 +6,8 @@ using namespace std::chrono_literals;
 namespace sjsu::drivers {
 void application()
 {
-  auto a_high = resources::output_pin_0();
-  auto b_high = resources::output_pin_1();
+  auto a_high = resources::output_pin_5();
+  auto b_high = resources::output_pin_6();
   auto a_low = resources::pwm_channel_0();
   auto b_low = resources::pwm_channel_1();
   auto clock = resources::clock();

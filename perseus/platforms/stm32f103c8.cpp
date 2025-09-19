@@ -1,3 +1,4 @@
+
 // Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,7 @@
 #include <libhal-exceptions/control.hpp>
 
 #include "../hardware_map.hpp"
+#include <libhal-util/can.hpp>
 #include <libhal/pointers.hpp>
 
 namespace sjsu::perseus::resources {
@@ -119,9 +121,18 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
 {
   auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
+    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
+}
+
+hal::v5::strong_ptr<hal::rotation_sensor> encoder()
+{
+  return timer2().acquire_quadrature_encoder(
+    driver_allocator(),
+    { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
+      static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
+    5281);
 }
 
 auto& get_can_peripheral()
@@ -151,10 +162,19 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
                                                      std::move(bus_man));
 }
-
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
+template<hal::u8 set_number>
+auto& get_identifier_filter_set()
 {
-  throw hal::operation_not_supported(nullptr);
+  static auto filter_set = get_can_peripheral().acquire_identifier_filter();
+  return filter_set;
+}
+
+hal::v5::strong_ptr<hal::can_message_finder> can_finder(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 servo_address)
+{
+  return hal::v5::make_strong_ptr<hal::can_message_finder>(
+    driver_allocator(),
+    *transceiver, servo_address);
 }
 
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
@@ -190,7 +210,7 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
   }
 }
 
-}  // namespace sjsu::drivers::resources
+}  // namespace sjsu::perseus::resources
 namespace sjsu::perseus {
 void initialize_platform()
 {
@@ -227,4 +247,4 @@ void initialize_platform()
 
   hal::stm32f1::release_jtag_pins();
 }
-}  // namespace sjsu::drivers
+}  // namespace sjsu::perseus

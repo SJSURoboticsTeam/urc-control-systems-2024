@@ -14,6 +14,7 @@
 #pragma once
 
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 #include <libhal/functional.hpp>
 #include <libhal/input_pin.hpp>
@@ -21,12 +22,11 @@
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
+#include <libhal/rotation_sensor.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
-#include <libhal/rotation_sensor.hpp>
-#include <libhal-util/steady_clock.hpp>
-
+#include <libhal-util/can.hpp>
 
 namespace sjsu::perseus {
 namespace custom {
@@ -78,9 +78,13 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 // current sensing
 // quadrature encoder
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
+  std::span<hal::can_message> receive_buffer);
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
 
-
+hal::v5::strong_ptr<hal::can_message_finder> can_finder(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 servo_address);
 inline void reset()
 {
   hal::cortex_m::reset();
@@ -95,4 +99,4 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
-}  // namespace sjsu::drivers
+}  // namespace sjsu::perseus
