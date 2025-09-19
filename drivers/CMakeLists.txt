@@ -27,7 +27,7 @@ libhal_build_demos(
   # tla2528_output_pin_demo
   # tla2528_input_pin_demo
   # tla2528_analog_input_demo
-  # apds9960_demo
+  apds9960_demo
 
   INCLUDES
   include
@@ -37,14 +37,14 @@ SOURCES
     platforms/stm32f103c8.cpp
     # src/color_sensor_opt4048.cpp
     # src/mq4.cpp
-    src/pressure_sensor_bme680.cpp
+    # src/pressure_sensor_bme680.cpp
     # src/scd40.cpp
     # src/soil_sensor_sht21.cpp
     # src/sk9822.cpp
     # src/h_bridge.cpp
     # src/tla2528.cpp
     # src/tla2528_adapters.cpp
-    # src/apds9960.cpp
+    src/apds9960.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
