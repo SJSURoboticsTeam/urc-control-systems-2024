@@ -1,11 +1,10 @@
 #include "../include/bldc_servo.hpp"
-#include "h_bridge.hpp"
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/units.hpp>
 namespace sjsu::perseus {
 
 // ...existing code...
-bldc_perseus::bldc_perseus(hal::v5::strong_ptr<drivers::h_bridge> p_hbridge,
+bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridge,
                            hal::v5::strong_ptr<hal::rotation_sensor> p_encoder)
   : h_bridge(p_hbridge)
   , m_encoder(p_encoder)
@@ -35,7 +34,7 @@ hal::u16 bldc_perseus::get_target_position()
 
 hal::u16 bldc_perseus::get_current_position()
 {
-  
+
   m_current.position = static_cast<hal::u16>(m_encoder->read().angle);
   return m_current.position;
 }
@@ -64,8 +63,7 @@ void bldc_perseus::reset_encoder()
 {
   // make the encoder eading value 0
   // we don't have ability to change the value insdie the driver encoder
-  
+
   m_current.position = 0;
-  
 }
 }  // namespace sjsu::perseus

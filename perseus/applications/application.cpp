@@ -1,13 +1,15 @@
 // copied from drivers/applications/h_bridge_demo.cpp
 
-#include <h_bridge.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 
+#include "../../drivers/include/h_bridge.hpp"
 #include "../hardware_map.hpp"
 #include <bldc_servo.hpp>
+#include <libhal/error.hpp>
+#include <libhal/pointers.hpp>
 using namespace std::chrono_literals;
 namespace sjsu::perseus {
 
@@ -32,12 +34,16 @@ void print_can_message(hal::serial& p_console,
 
 enum class action : hal::byte
 {
-  actuate_torque = 0x10,
-  clamp_speed = 0x11,
+  // actuators
+  actuate_torque = 0x10,  // (?)
   actuate_position = 0x12,
+  stop = 0x22,  // hard stop the servo to be 0
+                // readers
   read_position = 0x20,
   read_velocity = 0x21,
-  stop = 0x22 // hard stop the servo to be 0
+  // setters
+  clamp_speed = 0x30,
+  set_pid = 0x31
 };
 enum servo_address : hal::u16
 {
@@ -48,39 +54,73 @@ enum servo_address : hal::u16
   wrist_roll = 0x124,
   clamp = 0x125
 };
-struct status  // this struct will be both target and current
-{
-  hal::u16 position;
-  hal::u16 velocity;
-};
 
-// void process_can_message(hal::can_message const& p_message,
-//                          status& target_status,
-//                          status const& current_status)
-// {
-//   switch (static_cast<action>(p_message.payload[0])) {
-//     case action::read_position:
-//       target_status break;
-//     case action::actuate_position:
-//       break;
-//     case action::clamp_speed:
-//       break;
-//     case action::actuate_torque:
-//       break;
-//     case action::read_velocity:
-//       break;
-//   }
-// }
+void process_can_message(hal::can_message const& p_message,
+                         hal::v5::strong_ptr<bldc_perseus> bldc,
+                         hal::v5::optional_ptr<hal::can_message> response)
+{
+  switch (static_cast<action>(p_message.payload[0])) {
+    case action::read_position: {
+      auto current_position = bldc->get_current_position();
+      response->payload[0] = action::read_position + 0x100;
+      break;
+    }
+    case action::actuate_position: {
+      auto target_position = p_message.payload[1] << 8 | p_message.payload[2];
+      bldc->set_target_position(target_position);
+      break;
+    }
+    case action::clamp_speed: {
+      auto target_speed = p_message.payload[1] << 8 | p_message.payload[2];
+      bldc->set_clamped_speed(target_speed);
+      break;
+    }
+    case action::actuate_torque: {
+      // i think what i mean by this is that we are updating the torque (force
+      // on this joint)
+      // so we need to calculate equal opposite velocity that we need the motor
+      // to run to not droop
+      break;
+    }
+    case action::read_velocity: {
+      auto current_velocity = bldc->get_current_velocity();
+      response->payload[0] = action::read_velocity + 0x100;
+      response->payload[1] =
+        (current_velocity >> 8) & 0xFF;  // HIGH BYTE FIRST // HIGH BYTE FIRST
+      response->payload[2] = current_velocity & 0xFF;  // LOW BYTE SECOND
+      break;
+    }
+    case action::stop:
+      bldc->set_current_velocity(0);
+      break;
+    case action::set_pid: {
+      bldc_perseus::PID_settings settings = {
+        .kp =
+          static_cast<float>(p_message.payload[1] << 8 | p_message.payload[2]),
+        .ki =
+          static_cast<float>(p_message.payload[3] << 8 | p_message.payload[4]),
+        .kd =
+          static_cast<float>(p_message.payload[5] << 8 | p_message.payload[6])
+      };
+      bldc->update_pid_settings(settings);
+      break;
+    }
+    default:
+      hal::safe_throw(nullptr);
+  }
+}
 
 void application()
 {
   using namespace std::chrono_literals;
   using namespace hal::literals;
-
-  auto h_bridge = sjsu::drivers::h_bridge(resources::pwm_channel_0(),
-                                    resources::pwm_channel_1(),
-                                    resources::output_pin_0(),
-                                    resources::output_pin_1());
+  auto a_high = resources::output_pin_0();
+  auto b_high = resources::output_pin_1();
+  auto a_low = resources::pwm_channel_0();
+  auto b_low = resources::pwm_channel_1();
+  auto h_bridge = hal::v5::make_strong_ptr<sjsu::drivers::h_bridge>(
+    resources::driver_allocator(), a_low, b_low, a_high, b_high);
+  auto encoder = resources::encoder();
   std::array<hal::can_message, 32> buffer_storage;  // not sure if 32 is too big
   std::span<hal::can_message> receive_buffer(buffer_storage);
   auto can_transceiver = resources::can_transceiver(receive_buffer);
@@ -91,20 +131,30 @@ void application()
                                  // to change depending on device flashing
   auto can_finder = resources::can_finder(can_transceiver, servo_address);
   bus_manager->baud_rate(1.0_MHz);
+  auto servo = hal::v5::make_strong_ptr<bldc_perseus>(
+    resources::driver_allocator(), h_bridge, encoder);
 
   // do nothing on startup
   // status current = { .position = 0, .velocity = 0 };
   // status target = { .position = 0, .velocity = 0 };
   while (true) {
     // forever can loop
+    // basically check if we have any message
+    // if we have then update target struct
+    // in each loop check current position and update velocity using PID and
+    // update the current position
+
     auto optional_message = can_finder->find();
     if (optional_message) {
       hal::print<128>(*console, "%x%X Servo received a message", servo_address);
       print_can_message(*console, *optional_message);
-      // process_can_message(*optional_message, target, current);
-      //
-      // can_finder->transceiver().send()
+      hal::v5::optional_ptr<hal::can_message> response;
+      process_can_message(*optional_message, servo, response);
+      if (response) {
+        can_finder->transceiver().send(*response);
+      }
     }
+
     // here we need to check if desired location is not equal to current
     // location then we need to set position
   }

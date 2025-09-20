@@ -1,4 +1,5 @@
-#include <h_bridge.hpp>
+#pragma once
+#include "../../drivers/include/h_bridge.hpp"
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/rotation_sensor.hpp>
@@ -29,18 +30,22 @@ public:
   void set_target_position(hal::u16 target_position);
   hal::u16 get_target_position();
   hal::u16 get_current_position();
-  void set_current_position(hal::u16 current_position); 
-  // when we change velocity we must
+  void set_current_position(hal::u16 current_position);
+  // when we change velocity we must in this we interpolate the velocity
   void set_target_velocity(hal::u16 target_velocity);
+  // in this we directly go to that velocity (this may cause weird jerk so I
+  // think it only needs to be used to stop)
+  void set_current_velocity(hal::u16 current_velocity);
   hal::u16 get_current_velocity();
   hal::u16 get_target_velocity();
   void update_pid_settings(PID_settings settings);
   void reset_encoder();  // this needs to happen when homed
-  
+  void set_clamped_speed(hal::u16 target_clamped_speed);
+
 private:
   status m_current;
   status m_target;
-  hal::v5::optional_ptr<hal::motor>
+  hal::v5::optional_ptr<sjsu::drivers::h_bridge>
     h_bridge;  // idk if this can be copied trivially.
   hal::v5::optional_ptr<hal::rotation_sensor>
     m_encoder;            // idk if these are supposed to be pointers or what
@@ -51,7 +56,6 @@ private:
   // if current direction changes then we know we overflowed
   // if speed is positive direction should be up and if speed is negative then
   // direction should be down
-  
 };
 
 }  // namespace sjsu::perseus
