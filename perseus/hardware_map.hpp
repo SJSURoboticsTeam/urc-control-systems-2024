@@ -84,7 +84,7 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
 
 hal::v5::strong_ptr<hal::can_message_finder> can_finder(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 servo_address);
+  hal::v5::strong_ptr<hal::can_transceiver>, hal::u16);
 inline void reset()
 {
   hal::cortex_m::reset();

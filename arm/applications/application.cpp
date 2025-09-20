@@ -7,7 +7,6 @@
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
-#include <system_error>
 
 #include "../hardware_map.hpp"
 
@@ -31,12 +30,16 @@ void print_can_message(hal::serial& p_console,
                   p_message.payload[6],
                   p_message.payload[7]);
 }
+
+// void process_can_message(hal)
 enum arm_addresses : hal::u16
 {
-  home_address = 0x211,
-  arm_address = 0x212,
-  end_effector = 0x215
+  home_address = 0x111,
+  arm_address = 0x112,
+  end_effector = 0x115
 };
+
+
 void application()
 {
   using namespace std::chrono_literals;
@@ -64,12 +67,24 @@ void application()
   // it should be fine
   can_bus_manager->baud_rate(1.0_MHz);
   while (true) {
-    auto optional_message = can_finders.home_finder->find();
-    if (optional_message) {
-      print_can_message(*console, *optional_message);
+    auto optional_home_message = can_finders.home_finder->find();
+    auto optional_arm_message = can_finders.arm_finder->find();
+    auto optional_endeffector_message = can_finders.endeffector_finder->find();
+    if (optional_home_message) {
+      hal::print(*console, "Received homing command");
+      print_can_message(*console, *optional_home_message);
       // process_can_message(*optional_message, target, current);
-      //
+      
       // can_finder->transceiver().send()
+    }
+    if (optional_arm_message) {
+      hal::print(*console, "Received arm movement command");
+      // make some sort of arm class that converts angles provided by mission
+      // control and sends those to
+      // arm servos at some amount of max speed
+    }
+    if (optional_endeffector_message) {
+      hal::print(*console, "Received end effector command");
     }
   }
 }

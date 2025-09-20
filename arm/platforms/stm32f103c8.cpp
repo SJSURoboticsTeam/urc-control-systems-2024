@@ -113,15 +113,6 @@ auto& get_identifier_filter_set()
   return filter_set;
 }
 
-// hal::v5::strong_ptr<hal::can_message_finder> can_finder(
-//   hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16
-//   servo_address)
-// {
-//   return hal::v5::make_strong_ptr<hal::can_message_finder>(
-//     driver_allocator(),
-//     *transceiver, servo_address);
-// }
-
 arm_can_finders can_finders(
   hal::v5::strong_ptr<hal::can_transceiver> transceiver,
   hal::u16 home,
