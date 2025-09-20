@@ -12,13 +12,18 @@ void application()
 {
   using namespace std::chrono_literals;
   using namespace hal::literals;
-  auto i2c2 = resources::i2c();
   auto counter = resources::clock();
   auto terminal = resources::console();
+  auto i2c2 = resources::i2c();
+  hal::print<64>(*terminal, "i2c Created \n");
 
   apds9960 adps9960_sensor = apds9960(i2c2, counter, terminal);
+  hal::print<64>(*terminal, "Sensor Created \n");
+
+  // not sure why it's taking a long time to print.. or to create sensor
 
   while (true) {
+    hal::print<64>(*terminal, "Loop Time! \n");
     hal::delay(*counter, 50ms);
 
     apds9960::color read_color = adps9960_sensor.readColor();
