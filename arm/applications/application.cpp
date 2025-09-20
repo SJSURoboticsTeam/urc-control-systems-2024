@@ -39,7 +39,6 @@ enum arm_addresses : hal::u16
   end_effector = 0x115
 };
 
-
 void application()
 {
   using namespace std::chrono_literals;
@@ -74,7 +73,7 @@ void application()
       hal::print(*console, "Received homing command");
       print_can_message(*console, *optional_home_message);
       // process_can_message(*optional_message, target, current);
-      
+
       // can_finder->transceiver().send()
     }
     if (optional_arm_message) {

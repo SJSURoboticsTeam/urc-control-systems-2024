@@ -1,6 +1,7 @@
 #include "../include/bldc_servo.hpp"
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/units.hpp>
+#include <cmath>
 namespace sjsu::perseus {
 
 // ...existing code...
@@ -45,7 +46,7 @@ void bldc_perseus::set_target_velocity(hal::u16 target_velocity)
   m_target.velocity = target_velocity;
   float diff = m_target.velocity - m_current.velocity;
   // lerp to target velocity (idk if this is called lerping but whatev
-  m_current.velocity += std::clamp(diff, -1 * m_clamped_accel, m_clamped_accel);
+  m_current.velocity += std::lerp(diff, -1 * m_clamped_accel, m_clamped_accel);
   h_bridge->power(m_current.velocity);
 }
 

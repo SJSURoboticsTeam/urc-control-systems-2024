@@ -62,7 +62,10 @@ void process_can_message(hal::can_message const& p_message,
   switch (static_cast<action>(p_message.payload[0])) {
     case action::read_position: {
       auto current_position = bldc->get_current_position();
-      response->payload[0] = action::read_position + 0x100;
+      response->payload[0] =
+        static_cast<hal::byte>(action::read_position) + 0x50;
+      response->payload[1] = (current_position >> 8) & 0xff;
+      response->payload[1] = current_position & 0xff;
       break;
     }
     case action::actuate_position: {
@@ -84,7 +87,8 @@ void process_can_message(hal::can_message const& p_message,
     }
     case action::read_velocity: {
       auto current_velocity = bldc->get_current_velocity();
-      response->payload[0] = action::read_velocity + 0x100;
+      response->payload[0] =
+        static_cast<hal::byte>(action::read_velocity) + 0x50;
       response->payload[1] =
         (current_velocity >> 8) & 0xFF;  // HIGH BYTE FIRST // HIGH BYTE FIRST
       response->payload[2] = current_velocity & 0xFF;  // LOW BYTE SECOND
@@ -134,9 +138,6 @@ void application()
   auto servo = hal::v5::make_strong_ptr<bldc_perseus>(
     resources::driver_allocator(), h_bridge, encoder);
 
-  // do nothing on startup
-  // status current = { .position = 0, .velocity = 0 };
-  // status target = { .position = 0, .velocity = 0 };
   while (true) {
     // forever can loop
     // basically check if we have any message
@@ -149,14 +150,16 @@ void application()
       hal::print<128>(*console, "%x%X Servo received a message", servo_address);
       print_can_message(*console, *optional_message);
       hal::v5::optional_ptr<hal::can_message> response;
+      response->length = 8;
       process_can_message(*optional_message, servo, response);
       if (response) {
         can_finder->transceiver().send(*response);
       }
     }
-
-    // here we need to check if desired location is not equal to current
-    // location then we need to set position
+    // this is a very preliminary version
+    servo->set_target_velocity(
+      (servo->get_target_position() - servo->get_current_position()));
+    
   }
 }
 }  // namespace sjsu::perseus
