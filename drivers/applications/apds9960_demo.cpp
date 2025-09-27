@@ -14,6 +14,7 @@ void application()
   using namespace hal::literals;
   auto counter = resources::clock();
   auto terminal = resources::console();
+  hal::print<64>(*terminal, "Clock and Console Created \n");
   auto i2c2 = resources::i2c();
   hal::print<64>(*terminal, "i2c Created \n");
 
