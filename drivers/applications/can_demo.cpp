@@ -42,25 +42,26 @@ void application()
   using namespace hal::literals;
 
   auto clock = resources::clock();
-  auto can_transceiver = resources::can_transceiver();
-  auto can_bus_manager = resources::can_bus_manager();
-  auto can_interrupt = resources::can_interrupt();
   auto console = resources::console();
+  hal::print(*console, "console init!\n");
+
+  std::array<hal::can_message, 32> buffer_storage;  // not sure if 32 is too big
+  std::span<hal::can_message> receive_buffer(buffer_storage);
+  auto can_transceiver = resources::can_transceiver(receive_buffer);
+  hal::print(*console, "transceiver init!\n");
+
+  auto can_bus_manager = resources::can_bus_manager();
+  hal::print(*console, "bus manager init!\n");
 
   // Change the CAN baudrate here.
-  static constexpr auto baudrate = 100.0_kHz;
+  static constexpr auto baudrate = 1.0_MHz;
 
   hal::print(*console, "Starting CAN demo!\n");
 
   can_bus_manager->baud_rate(baudrate);
+  hal::print(*console, "baud rate set.!\n");
 
-  can_interrupt->on_receive([&console](hal::can_interrupt::on_receive_tag,
-                                       hal::can_message const& p_message) {
-    hal::print(*console, "Printing can message from interrupt!\n");
-    print_can_message(*console, p_message);
-  });
-
-  hal::u32 receive_cursor = 0;
+  // hal::u32 receive_cursor = 0;
 
   while (true) {
     using namespace std::chrono_literals;
@@ -74,49 +75,24 @@ void application()
       },
     };
 
-    hal::can_message standard_message2{
-      .id = 0x333,
-      .length = 0,
-    };
-
-    hal::can_message extended_message{
-      .id = 0x0123'4567,
-      .extended = true,
-      .length = 3,
-      .payload = {
-        0xAA, 0xBB, 0xCC, 0xDD, 0xDE, 0xAD, 0xBE, 0xEF,
-      },
-    };
-
-    hal::can_message extended_message2 {
-      .id = 0x0222'0005,
-      .extended = true,
-      .length = 3,
-      .payload = {
-        0xAA, 0xBB, 0xCC, 0xDD, 0xDE, 0xAD, 0xBE, 0xEF,
-      },
-    };
-
     hal::print(*console, "Sending payload(s)...\n");
 
     can_transceiver->send(standard_message);
-    can_transceiver->send(standard_message2);
-    can_transceiver->send(extended_message);
-    can_transceiver->send(extended_message2);
+    hal::print(*console, "m1 sent!\n");
 
-    hal::delay(*clock, 1s);
+    hal::delay(*clock, 10s);
 
-    hal::print(*console,
-               "Printing received messages stored in circular buffer...\n");
-    auto const buffer = can_transceiver->receive_buffer();
-    auto cursor = can_transceiver->receive_cursor();
-    for (; receive_cursor != cursor;
-         receive_cursor = (receive_cursor + 1) % buffer.size()) {
-      print_can_message(*console, buffer[receive_cursor]);
-      cursor = can_transceiver->receive_cursor();
-    }
+    // hal::print(*console,
+    //            "Printing received messages stored in circular buffer...\n");
+    // auto const buffer = can_transceiver->receive_buffer();
+    // auto cursor = can_transceiver->receive_cursor();
+    // for (; receive_cursor != cursor;
+    //      receive_cursor = (receive_cursor + 1) % buffer.size()) {
+    //   print_can_message(*console, buffer[receive_cursor]);
+    //   cursor = can_transceiver->receive_cursor();
+    // }
 
-    hal::print(*console, "Printing done.\n\n");
+    // hal::print(*console, "Printing done.\n\n");
   }
 }
 }  // namespace sjsu::drivers

@@ -29,6 +29,7 @@ libhal_build_demos(
     tla2528_analog_input_demo
     quadrature_encoder_demo
     drv8825_demo
+    can_demo
     # rmd_demo
 
   INCLUDES

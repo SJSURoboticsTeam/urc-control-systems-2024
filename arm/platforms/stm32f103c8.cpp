@@ -120,7 +120,7 @@ arm_can_finders can_finders(
   hal::u16 endeffector)
 {
   return { .home_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
-             driver_allocator(), *transceiver, home),
+             driver_allocator(), *transceiver, home), // finds message with address for home
            .arm_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
              driver_allocator(), *transceiver, arm),
            .endeffector_finder =

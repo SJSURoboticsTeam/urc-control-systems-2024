@@ -14,6 +14,7 @@
 #pragma once
 
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/can.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/adc.hpp>
 #include <libhal/can.hpp>
@@ -89,8 +90,10 @@ hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
-
-
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
+  std::span<hal::can_message> receive_buffer);
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_message_finder> finder();
 
 inline void reset()
 {

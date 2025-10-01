@@ -34,6 +34,7 @@
 #include <libhal-util/atomic_spin_lock.hpp>
 #include <libhal-util/bit_bang_i2c.hpp>
 #include <libhal-util/bit_bang_spi.hpp>
+#include <libhal-util/can.hpp>
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -166,7 +167,6 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_0()
                                                  std::move(pin));
 }
 
-
 hal::v5::strong_ptr<hal::output_pin> output_pin_7()
 {
   auto pin = gpio_b().acquire_output_pin(15);
@@ -235,6 +235,34 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb6),
       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb7) },
     753);
+}
+
+auto& get_can_peripheral()
+{
+  using namespace std::chrono_literals;
+  auto clock = resources::clock();
+  static hal::stm32f1::can_peripheral_manager can(
+    100_kHz,
+    *clock,
+    1ms,
+    hal::stm32f1::can_pins::pb9_pb8);  // this needs to be static because we are
+                                       // returning a non strong pointer type
+  return can;
+}
+
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
+  std::span<hal::can_message> receive_buffer)
+{
+  auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
+  return hal::v5::make_strong_ptr<decltype(transceiver)>(
+    driver_allocator(), std::move(transceiver));
+}
+
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
+{
+  auto bus_man = get_can_peripheral().acquire_bus_manager();
+  return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
+                                                     std::move(bus_man));
 }
 
 [[noreturn]] void terminate_handler() noexcept

@@ -27,6 +27,7 @@ perseus_bldc::perseus_bldc(
 {
   hal::u16 response_offest = 0x100;
   p_filter.allow(servo_address + response_offest);
+  
   m_max_response_time = 500ms;
 }
 

@@ -32,13 +32,14 @@ void print_can_message(hal::serial& p_console,
 }
 
 // void process_can_message(hal)
+// response: 0x200: byte1: servo#, byte2 byte3 (desired angle)
+// speed cap
 enum arm_addresses : hal::u16
 {
-  home_address = 0x111,
-  arm_address = 0x112,
-  end_effector = 0x115
+  home_address = 0x111, // settings address 1rst 2-7 (specify)
+  arm_address = 0x112,  // track, shoulder, elbow
+  end_effector = 0x115  // roll, pitch, yaw
 };
-
 void application()
 {
   using namespace std::chrono_literals;
