@@ -1,11 +1,11 @@
-#include "swerve_module.hpp"
-#include "vector2d.hpp"
 #include <array>
 #include <cmath>
 #include <cstdlib>
 #include <libhal/units.hpp>
-#include <numbers>
+#include <swerve_module.hpp>
 #include <sys/types.h>
+#include <vector2d.hpp>
+
 namespace sjsu::drive {
 
 using namespace std::chrono_literals;
@@ -16,23 +16,35 @@ using namespace std::chrono_literals;
  * modules
  *
  * @param p_chassis_velocities the target chassis velocities
- * @param p_modules modules velocities are being calculated for
+ * @param p_module the module the velocities are being calculated for
+ *
+ * @return ideal velocity vector in meters per second in the, they are returned
+ * in the order of their corelating modules
+ */
+vector2d chassis_velocities_to_module_vector(
+  chassis_velocities p_chassis_velocities,
+  swerve_module& p_module);
+/**
+ * @brief converts chassis velocities into ideal velocity vectors for the given
+ * modules
+ *
+ * @param p_chassis_velocities the target chassis velocities
+ * @param p_modules the modules the velocities are being calculated for
  *
  * @return ideal velocity vectors in meters per second in the, they are returned
  * in the order of their corelating modules
  */
 std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   chassis_velocities p_chassis_velocities,
-  std::array<swerve_module, module_count>& p_modules);
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules);
 
-
-//will likely be unused for this rover
+// will likely be unused for this rover
 /**
  * @brief calculates a score that represents how much conflict there is between
  * the modules
  */
 float module_validity_strain_score(
-  std::array<swerve_module, module_count>& p_modules,
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
   std::array<vector2d, module_count> p_vectors);
 
 /**
@@ -43,7 +55,7 @@ float module_validity_strain_score(
  * @return chassis velocities estimate
  */
 chassis_velocities calc_estimated_chassis_velocities(
-  std::array<swerve_module, module_count>& p_modules);
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules);
 
 /**
  * @brief calculates the swerve state with the most angular freedom either side
@@ -87,7 +99,7 @@ sec calculate_total_interpolation_time(swerve_module& p_module,
  * @return estimation of time to interpolate all modules in seconds
  */
 sec calculate_total_interpolation_time(
-  std::array<swerve_module, module_count>& p_modules,
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
   std::array<swerve_module_state, module_count> p_end_states);
 
 /**
@@ -99,7 +111,7 @@ sec calculate_total_interpolation_time(
  * @return the states scaled down if needed
  */
 std::array<swerve_module_state, module_count> scale_down_propulsion_speed(
-  std::array<swerve_module, module_count>& p_modules,
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
   std::array<swerve_module_state, module_count> p_states);
 
 /**
@@ -124,6 +136,16 @@ swerve_module_state interpolate_state(float p_portion,
  */
 std::array<swerve_module_state, module_count> interpolate_states(
   sec p_cycle_time,
-  std::array<swerve_module, module_count>& p_modules,
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
   std::array<swerve_module_state, module_count> p_end_states);
+
+/**
+ * @brief takes a value and places it in a bounds as if it were bounds of a ring
+ * or clock. You can use this to convert a angle to the bounds of -pi to pi or
+ * some some other similar.
+ * @param p_value the value to place in bounds
+ * @param p_lower the lower limit of the bounds to place the value in
+ * @param p_upper the upper limit of the bounds to place the value in
+ */
+float modulus_range(float p_value, float p_lower, float p_upper);
 }  // namespace sjsu::drive
