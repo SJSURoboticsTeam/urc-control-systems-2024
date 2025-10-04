@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -94,7 +95,7 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
   std::span<hal::can_message> receive_buffer);
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_message_finder> finder();
-
+hal::stm32f1::can_peripheral_manager& get_can_peripheral();
 inline void reset()
 {
   hal::cortex_m::reset();

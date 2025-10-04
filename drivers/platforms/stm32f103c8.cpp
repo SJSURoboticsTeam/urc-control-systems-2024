@@ -230,19 +230,19 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency()
 
 hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 {
-  return timer4().acquire_quadrature_encoder(
+  return timer2().acquire_quadrature_encoder(
     driver_allocator(),
-    { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb6),
-      static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer4_pin::pb7) },
+    { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1),
+      static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0) },
     753);
 }
 
-auto& get_can_peripheral()
+hal::stm32f1::can_peripheral_manager& get_can_peripheral()
 {
   using namespace std::chrono_literals;
   auto clock = resources::clock();
   static hal::stm32f1::can_peripheral_manager can(
-    100_kHz,
+    1.0_MHz,
     *clock,
     1ms,
     hal::stm32f1::can_pins::pb9_pb8);  // this needs to be static because we are
@@ -250,10 +250,11 @@ auto& get_can_peripheral()
   return can;
 }
 
+
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
   std::span<hal::can_message> receive_buffer)
 {
-  auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
+  static auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
   return hal::v5::make_strong_ptr<decltype(transceiver)>(
     driver_allocator(), std::move(transceiver));
 }
@@ -264,7 +265,12 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
                                                      std::move(bus_man));
 }
+// hal::v5::strong_ptr<hal::can_message_finder> finder(hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 addr)
+// {
 
+//   hal::v5::make_strong_ptr<hal::can_message_finder>(
+//              driver_allocator(), *transceiver, addr);
+// }
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {

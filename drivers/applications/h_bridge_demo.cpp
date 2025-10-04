@@ -31,7 +31,6 @@ void application()
     hal::delay(*clock, 2000ms);
     m_h_bridge.power(-1);
     hal::delay(*clock, 2000ms);
-
     m_h_bridge.power(0);
     hal::delay(*clock, 2000ms);
   }

@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "../hardware_map.hpp"
+#include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
-
-#include "../hardware_map.hpp"
+#include <libhal/pointers.hpp>
 namespace sjsu::drivers {
 void print_can_message(hal::serial& p_console,
                        hal::can_message const& p_message)
@@ -36,6 +37,12 @@ void print_can_message(hal::serial& p_console,
                   p_message.payload[6],
                   p_message.payload[7]);
 }
+template<hal::u8 set_number>
+auto& get_identifier_filter_set()
+{
+  static auto filter_set = resources::get_can_peripheral().acquire_identifier_filter();
+  return filter_set;
+}
 
 void application()
 {
@@ -45,7 +52,8 @@ void application()
   auto console = resources::console();
   hal::print(*console, "console init!\n");
 
-  std::array<hal::can_message, 32> buffer_storage;  // not sure if 32 is too big
+  std::array<hal::can_message, 32>
+    buffer_storage = {};  // not sure if 32 is too big
   std::span<hal::can_message> receive_buffer(buffer_storage);
   auto can_transceiver = resources::can_transceiver(receive_buffer);
   hal::print(*console, "transceiver init!\n");
@@ -61,8 +69,9 @@ void application()
   can_bus_manager->baud_rate(baudrate);
   hal::print(*console, "baud rate set.!\n");
 
-  // hal::u32 receive_cursor = 0;
-
+  // hal::u32 _receive_cursor = 0;
+  hal::can_message_finder reader(*can_transceiver, 0x110);
+  get_identifier_filter_set<0>().filter[0].allow(0x110);
   while (true) {
     using namespace std::chrono_literals;
     hal::can_message standard_message {
@@ -80,19 +89,21 @@ void application()
     can_transceiver->send(standard_message);
     hal::print(*console, "m1 sent!\n");
 
-    hal::delay(*clock, 10s);
+    hal::delay(*clock, 1s);
 
-    // hal::print(*console,
-    //            "Printing received messages stored in circular buffer...\n");
-    // auto const buffer = can_transceiver->receive_buffer();
-    // auto cursor = can_transceiver->receive_cursor();
-    // for (; receive_cursor != cursor;
-    //      receive_cursor = (receive_cursor + 1) % buffer.size()) {
-    //   print_can_message(*console, buffer[receive_cursor]);
-    //   cursor = can_transceiver->receive_cursor();
+    auto res = can_transceiver->receive_buffer().size_bytes();
+    hal::print<128>(*console, "lenghthththt: %u\n", res);
+    // if (res) {
+    //   hal::print(*console, "something????");
     // }
-
-    // hal::print(*console, "Printing done.\n\n");
+    std::optional<hal::can_message> found_message = reader.find();
+    if (found_message) {
+      hal::print(*console, "here??\n");
+      print_can_message(*console, *found_message);
+    } else {
+      // Message has not not been received yet
+    }
+    hal::print(*console, "Printing done.\n\n");
   }
 }
 }  // namespace sjsu::drivers
