@@ -24,4 +24,6 @@ class demos(ConanFile):
     def requirements(self):
         self.requires("libhal-util/[^5.4.0]")
         self.requires("libhal-arm-mcu/[1.15.0 || latest]")
+        self.requires("libhal-expander/[1.3.0 || latest]") #  Gimble stuff 
+        self.requires("libhal-sensor/[1.1.2 || latest]") # Gimble stuff
         self.requires("minimp3/cci.20211201")
