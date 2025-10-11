@@ -10,8 +10,7 @@ DEMOS
 INCLUDES
     include
 SOURCE
-    src/drivetrain_math.cpp
-    src/drivetrain.cpp
+    src
 
 PACKAGES
 #    libhal-__device__
