@@ -6,9 +6,9 @@ namespace sjsu::drive {
 swerve_module::swerve_module(hal::actuator::rmd_mc_x_v2& p_steer_motor,
                              hal::actuator::rmd_mc_x_v2& p_propulsion_motor,
                              swerve_module_settings p_settings)
-  : m_steer_motor(p_steer_motor)
+  : settings(p_settings)
+  , m_steer_motor(p_steer_motor)
   , m_propulsion_motor(p_propulsion_motor)
-  , settings(p_settings)
 {
 }
 void swerve_module::stop()
