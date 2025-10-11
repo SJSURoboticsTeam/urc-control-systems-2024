@@ -39,27 +39,27 @@ public:
   /**
    * @brief stops the motors of the module
    */
-   void stop();
+  void stop();
   /**
    * @brief sets the target module state the module will try to set
    *
    * @param p_target_state the target module state
    */
-  void set_target_state(swerve_module_state p_target_state);
+  void set_target_state(swerve_module_state const& p_target_state);
   /**
    * @brief calculate if a given state is achievable for the module
    *
    * @param p_state the state the module would try to achieve
    * @return if the values are with in tolerances based on settings
    */
-  bool can_reach_state(swerve_module_state p_state);
+  bool can_reach_state(swerve_module_state const& p_state);
 
   /**
    * @brief gives the cached module state based on most recent readings
    *
    * @return the module state based on most recent readings
    */
-  swerve_module_state get_actual_state_cache();
+  swerve_module_state get_actual_state_cache() const;
   /**
    * @brief reads the encoder values to update the cached module state
    *
@@ -85,5 +85,11 @@ public:
    * @return if the the module has been outside of tolerance for too long
    */
   bool tolerance_timed_out();
+
+private:
+  hal::actuator::rmd_mc_x_v2& m_steer_motor;
+  hal::actuator::rmd_mc_x_v2& m_propulsion_motor;
+  swerve_module_state m_target_state;
+  swerve_module_state m_actual_state_cache;
 };
 }  // namespace sjsu::drive
