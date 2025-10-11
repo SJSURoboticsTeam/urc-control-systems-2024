@@ -1,5 +1,6 @@
 #pragma once
 #include "../include/swerve_module.hpp"
+#include <cstdlib>
 #include <libhal/units.hpp>
 
 namespace sjsu::drive {
@@ -28,12 +29,9 @@ void swerve_module::set_target_state(swerve_module_state const& p_target_state)
 
 bool swerve_module::can_reach_state(swerve_module_state const& p_state)
 {
-  if ((p_state.propulsion_velocity <= settings.max_speed) &&
-      (p_state.steer_angle >= settings.min_angle) &&
-      (p_state.steer_angle <= settings.max_angle)) {
-    return true;
-  }
-  return false;
+  return ((p_state.propulsion_velocity <= std::abs(settings.max_speed)) &&
+          (p_state.steer_angle >= settings.min_angle) &&
+          (p_state.steer_angle <= settings.max_angle));
 }
 
 swerve_module_state swerve_module::get_actual_state_cache() const
