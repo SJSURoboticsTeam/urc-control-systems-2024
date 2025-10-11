@@ -188,18 +188,36 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_4()
                                                  std::move(pin));
 }
 
+hal::v5::strong_ptr<hal::output_pin> a_low()
+{
+  auto pin = gpio_a().acquire_output_pin(8);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
+}
+
+hal::v5::strong_ptr<hal::output_pin> b_low()
+{
+  auto pin = gpio_a().acquire_output_pin(3);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
+}
 auto& timer1()
 {
   static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
   return timer1;
 }
 
+
 auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
-
+auto& timer3()
+{
+  static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
+  return timer3;
+}
 auto& timer4()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer4> timer4{};
@@ -208,7 +226,7 @@ auto& timer4()
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   auto timer_pwm_channel =
-    timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
+    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
@@ -216,7 +234,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
 {
   auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
+    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa7);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
@@ -250,11 +268,11 @@ hal::stm32f1::can_peripheral_manager& get_can_peripheral()
   return can;
 }
 
-
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
   std::span<hal::can_message> receive_buffer)
 {
-  static auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
+  static auto transceiver =
+    get_can_peripheral().acquire_transceiver(receive_buffer);
   return hal::v5::make_strong_ptr<decltype(transceiver)>(
     driver_allocator(), std::move(transceiver));
 }
@@ -265,7 +283,8 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
                                                      std::move(bus_man));
 }
-// hal::v5::strong_ptr<hal::can_message_finder> finder(hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 addr)
+// hal::v5::strong_ptr<hal::can_message_finder>
+// finder(hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 addr)
 // {
 
 //   hal::v5::make_strong_ptr<hal::can_message_finder>(
@@ -329,8 +348,8 @@ void initialize_platform()
       },
     },
   });
-  hal::stm32f1::activate_mco_pa8(
-    hal::stm32f1::mco_source::pll_clock_divided_by_2);
+  // Commented out MCO on PA8 since we're using it for PWM
+  // hal::stm32f1::activate_mco_pa8(hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }

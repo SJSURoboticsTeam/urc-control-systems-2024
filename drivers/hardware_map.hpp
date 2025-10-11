@@ -85,8 +85,11 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_6();
 hal::v5::strong_ptr<hal::output_pin> output_pin_7();
 hal::v5::strong_ptr<hal::output_pin> output_pin_5();
 hal::v5::strong_ptr<hal::output_pin> output_pin_4();
+hal::v5::strong_ptr<hal::output_pin> a_low();  // h bridge demo
+hal::v5::strong_ptr<hal::output_pin> b_low();  // h bridge demo
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency();
 hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
