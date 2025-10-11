@@ -109,6 +109,10 @@ swerve_module_state calculate_freest_state(swerve_module& p_module,
 swerve_module_state calculate_closest_state(swerve_module& p_module,
                                             vector2d p_target_vector)
 {
+  //if velocity 0 just keep current angle
+  if (vector2d::length(p_target_vector) == 0) {
+    return {p_module.get_actual_state_cache().steer_angle, 0};
+  }
   float cur_angle = p_module.get_actual_state_cache().steer_angle;
   swerve_module_state closest_state;
   closest_state.steer_angle =
