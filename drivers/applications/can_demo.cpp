@@ -37,12 +37,6 @@ void print_can_message(hal::serial& p_console,
                   p_message.payload[6],
                   p_message.payload[7]);
 }
-template<hal::u8 set_number>
-auto& get_identifier_filter_set()
-{
-  static auto filter_set = resources::get_can_peripheral().acquire_identifier_filter();
-  return filter_set;
-}
 
 void application()
 {
@@ -50,28 +44,19 @@ void application()
 
   auto clock = resources::clock();
   auto console = resources::console();
-  hal::print(*console, "console init!\n");
-
-  std::array<hal::can_message, 32>
-    buffer_storage = {};  // not sure if 32 is too big
-  std::span<hal::can_message> receive_buffer(buffer_storage);
-  auto can_transceiver = resources::can_transceiver(receive_buffer);
-  hal::print(*console, "transceiver init!\n");
-
+  auto can_transceiver = resources::can_transceiver();
   auto can_bus_manager = resources::can_bus_manager();
-  hal::print(*console, "bus manager init!\n");
-
+  auto can_idf = resources::can_identifier_filter();
+  
   // Change the CAN baudrate here.
   static constexpr auto baudrate = 1.0_MHz;
 
-  hal::print(*console, "Starting CAN demo!\n");
-
   can_bus_manager->baud_rate(baudrate);
-  hal::print(*console, "baud rate set.!\n");
 
   // hal::u32 _receive_cursor = 0;
   hal::can_message_finder reader(*can_transceiver, 0x110);
-  get_identifier_filter_set<0>().filter[0].allow(0x110);
+  can_idf->allow(0x110);
+
   while (true) {
     using namespace std::chrono_literals;
     hal::can_message standard_message {
@@ -84,21 +69,13 @@ void application()
       },
     };
 
-    hal::print(*console, "Sending payload(s)...\n");
 
     can_transceiver->send(standard_message);
-    hal::print(*console, "m1 sent!\n");
 
     hal::delay(*clock, 1s);
 
-    auto res = can_transceiver->receive_buffer().size_bytes();
-    hal::print<128>(*console, "lenghthththt: %u\n", res);
-    // if (res) {
-    //   hal::print(*console, "something????");
-    // }
     std::optional<hal::can_message> found_message = reader.find();
     if (found_message) {
-      hal::print(*console, "here??\n");
       print_can_message(*console, *found_message);
     } else {
       // Message has not not been received yet

@@ -2,6 +2,7 @@
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/units.hpp>
 #include <cmath>
+#include <sys/types.h>
 namespace sjsu::perseus {
 
 // ...existing code...
@@ -54,12 +55,22 @@ hal::u16 bldc_perseus::get_current_velocity()
 {
   return m_current.velocity;
 }
-
+void bldc_perseus::set_current_velocity(hal::u16 current_velocity)
+{
+  m_current.velocity = current_velocity;
+}
 hal::u16 bldc_perseus::get_target_velocity()
 {
   return m_target.velocity;
 }
-
+void bldc_perseus::set_clamped_speed(hal::u16 clamped_speed)
+{
+  m_clamped_speed = clamped_speed;
+}
+void bldc_perseus::update_pid_settings(PID_settings settings)
+{
+  m_current_settings = settings;
+}
 void bldc_perseus::reset_encoder()
 {
   // make the encoder eading value 0

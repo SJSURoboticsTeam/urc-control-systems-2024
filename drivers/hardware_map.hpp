@@ -94,11 +94,10 @@ hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
-  std::span<hal::can_message> receive_buffer);
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_message_finder> finder();
-hal::stm32f1::can_peripheral_manager& get_can_peripheral();
+hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 inline void reset()
 {
   hal::cortex_m::reset();

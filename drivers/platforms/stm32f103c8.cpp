@@ -18,6 +18,7 @@
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
 #include <libhal-arm-mcu/stm32f1/can.hpp>
+#include <libhal-arm-mcu/stm32f1/can2.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -207,7 +208,6 @@ auto& timer1()
   return timer1;
 }
 
-
 auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
@@ -255,41 +255,40 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
     753);
 }
 
-hal::stm32f1::can_peripheral_manager& get_can_peripheral()
+hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+
+void initialize_can()
 {
-  using namespace std::chrono_literals;
-  auto clock = resources::clock();
-  static hal::stm32f1::can_peripheral_manager can(
-    1.0_MHz,
-    *clock,
-    1ms,
-    hal::stm32f1::can_pins::pb9_pb8);  // this needs to be static because we are
-                                       // returning a non strong pointer type
-  return can;
+  if (not can_manager) {
+    auto clock_ref = clock();
+    can_manager =
+      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
+        driver_allocator(),
+        32,
+        driver_allocator(),
+        100'000,
+        *clock_ref,
+        std::chrono::milliseconds(1),
+        hal::stm32f1::can_pins::pb9_pb8);
+  }
 }
 
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
-  std::span<hal::can_message> receive_buffer)
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
-  static auto transceiver =
-    get_can_peripheral().acquire_transceiver(receive_buffer);
-  return hal::v5::make_strong_ptr<decltype(transceiver)>(
-    driver_allocator(), std::move(transceiver));
+  initialize_can();
+  return hal::acquire_can_transceiver(driver_allocator(), can_manager);
 }
 
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  auto bus_man = get_can_peripheral().acquire_bus_manager();
-  return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
-                                                     std::move(bus_man));
+  initialize_can();
+  return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
 }
-// hal::v5::strong_ptr<hal::can_message_finder>
-// finder(hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 addr)
-// {
-
-//   hal::v5::make_strong_ptr<hal::can_message_finder>(
-//              driver_allocator(), *transceiver, addr);
-// }
+hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
+{
+  initialize_can();
+  return hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
+}
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {

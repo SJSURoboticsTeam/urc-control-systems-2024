@@ -78,8 +78,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 // current sensing
 // quadrature encoder
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
-  std::span<hal::can_message> receive_buffer);
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
 

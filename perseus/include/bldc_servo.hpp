@@ -45,6 +45,7 @@ public:
 private:
   status m_current;
   status m_target;
+  PID_settings m_current_settings;
   hal::v5::optional_ptr<sjsu::drivers::h_bridge>
     h_bridge;  // idk if this can be copied trivially.
   hal::v5::optional_ptr<hal::rotation_sensor>

@@ -15,7 +15,7 @@
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
+#include <libhal-arm-mcu/stm32f1/can2.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -135,51 +135,48 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
     5281);
 }
 
-auto& get_can_peripheral()
+hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+
+void initialize_can()
 {
-  using namespace std::chrono_literals;
-  auto clock = resources::clock();
-  static hal::stm32f1::can_peripheral_manager can(
-    100_kHz,
-    *clock,
-    1ms,
-    hal::stm32f1::can_pins::pb9_pb8);  // this needs to be static because we are
-                                       // returning a non strong pointer type
-  return can;
+  if (not can_manager) {
+    auto clock_ref = clock();
+    can_manager =
+      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
+        driver_allocator(),
+        32,
+        driver_allocator(),
+        100'000,
+        *clock_ref,
+        std::chrono::milliseconds(1),
+        hal::stm32f1::can_pins::pb9_pb8);
+  }
 }
 
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
-  std::span<hal::can_message> receive_buffer)
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
-  auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
-  return hal::v5::make_strong_ptr<decltype(transceiver)>(
-    driver_allocator(), std::move(transceiver));
+  initialize_can();
+  return hal::acquire_can_transceiver(driver_allocator(), can_manager);
 }
 
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  auto bus_man = get_can_peripheral().acquire_bus_manager();
-  return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
-                                                     std::move(bus_man));
-}
-template<hal::u8 set_number>
-auto& get_identifier_filter_set()
-{
-  static auto filter_set = get_can_peripheral().acquire_identifier_filter();
-  return filter_set;
+  initialize_can();
+  return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
 }
 
 hal::v5::strong_ptr<hal::can_message_finder> can_finder(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver, hal::u16 servo_address)
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver,
+  hal::u16 servo_address)
 {
   return hal::v5::make_strong_ptr<hal::can_message_finder>(
-    driver_allocator(),
-    *transceiver, servo_address);
+    driver_allocator(), *transceiver, servo_address);
 }
 
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 {
-  throw hal::operation_not_supported(nullptr);
+  initialize_can();
+  return hal::acquire_can_interrupt(driver_allocator(), can_manager);
 }
 
 // add one for quadrature encoder
