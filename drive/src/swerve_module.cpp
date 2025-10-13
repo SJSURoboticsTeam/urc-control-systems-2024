@@ -5,9 +5,10 @@
 #include <libhal/units.hpp>
 
 namespace sjsu::drive {
-swerve_module::swerve_module(hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
-                             hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
-                             swerve_module_settings p_settings)
+swerve_module::swerve_module(
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
+  swerve_module_settings p_settings)
   : settings(p_settings)
   , m_steer_motor(p_steer_motor)
   , m_propulsion_motor(p_propulsion_motor)
@@ -28,7 +29,7 @@ void swerve_module::set_target_state(swerve_module_state const& p_target_state)
   }
 }
 
-bool swerve_module::can_reach_state(swerve_module_state const& p_state)
+bool swerve_module::can_reach_state(swerve_module_state const& p_state) const
 {
   return ((p_state.propulsion_velocity <= std::abs(settings.max_speed)) &&
           (p_state.steer_angle >= settings.min_angle) &&
