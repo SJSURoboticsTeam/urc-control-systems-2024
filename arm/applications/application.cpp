@@ -44,9 +44,7 @@ void application()
 {
   using namespace std::chrono_literals;
   using namespace hal::literals;
-  std::array<hal::can_message, 32> buffer_storage;  // not sure if 32 is too big
-  std::span<hal::can_message> receive_buffer(buffer_storage);
-  auto can_transceiver = resources::can_transceiver(receive_buffer);
+  auto can_transceiver = resources::can_transceiver();
   auto can_bus_manager = resources::can_bus_manager();
 
   auto arm_servos = resources::arm_servos(can_transceiver);

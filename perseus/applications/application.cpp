@@ -4,12 +4,14 @@
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
+#include <libhal/error.hpp>
+#include <libhal/pointers.hpp>
+
+#include <bldc_servo.hpp>
 
 #include "../../drivers/include/h_bridge.hpp"
 #include "../hardware_map.hpp"
-#include <bldc_servo.hpp>
-#include <libhal/error.hpp>
-#include <libhal/pointers.hpp>
+
 using namespace std::chrono_literals;
 namespace sjsu::perseus {
 
@@ -118,13 +120,7 @@ void application()
 {
   using namespace std::chrono_literals;
   using namespace hal::literals;
-  auto a_low = resources::output_pin_0();
-  auto b_low = resources::output_pin_1();
-  auto a_high = resources::pwm_channel_0();
-  auto b_high = resources::pwm_channel_1();
-  auto h_bridge = sjsu::drivers::h_bridge({ a_high, a_low }, { b_high, b_low });
-  auto h_bridge_ptr = hal::v5::make_strong_ptr<decltype(h_bridge)>(
-    resources::driver_allocator(), std::move(h_bridge));
+  auto h_bridge = resources::h_bridge();
   auto encoder = resources::encoder();
   auto can_transceiver = resources::can_transceiver();
   auto bus_manager = resources::can_bus_manager();
@@ -135,7 +131,7 @@ void application()
   auto can_finder = resources::can_finder(can_transceiver, servo_address);
   bus_manager->baud_rate(1.0_MHz);
   auto servo = hal::v5::make_strong_ptr<bldc_perseus>(
-    resources::driver_allocator(), h_bridge_ptr, encoder);
+    resources::driver_allocator(), h_bridge, encoder);
 
   while (true) {
     // forever can loop

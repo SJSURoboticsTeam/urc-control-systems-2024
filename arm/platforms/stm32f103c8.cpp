@@ -1,7 +1,7 @@
 #include "../hardware_map.hpp"
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
+#include <libhal-arm-mcu/stm32f1/can2.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -78,39 +78,33 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-auto& get_can_peripheral()
-{
-  using namespace std::chrono_literals;
-  auto clock = resources::clock();
-  static hal::stm32f1::can_peripheral_manager can(
-    100_kHz,
-    *clock,
-    1ms,
-    hal::stm32f1::can_pins::pb9_pb8);  // this needs to be static because we are
-                                       // returning a non strong pointer type
-  return can;
-}
+hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
 
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
-  std::span<hal::can_message> receive_buffer)
+void initialize_can()
 {
-  auto transceiver = get_can_peripheral().acquire_transceiver(receive_buffer);
-  return hal::v5::make_strong_ptr<decltype(transceiver)>(
-    driver_allocator(), std::move(transceiver));
+  if (not can_manager) {
+    auto clock_ref = clock();
+    can_manager =
+      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
+        driver_allocator(),
+        32,
+        driver_allocator(),
+        100'000,
+        *clock_ref,
+        std::chrono::milliseconds(1),
+        hal::stm32f1::can_pins::pb9_pb8);
+  }
+}
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
+{
+  initialize_can();
+  return hal::acquire_can_transceiver(driver_allocator(), can_manager);
 }
 
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  auto bus_man = get_can_peripheral().acquire_bus_manager();
-  return hal::v5::make_strong_ptr<decltype(bus_man)>(driver_allocator(),
-                                                     std::move(bus_man));
-}
-
-template<hal::u8 set_number>
-auto& get_identifier_filter_set()
-{
-  static auto filter_set = get_can_peripheral().acquire_identifier_filter();
-  return filter_set;
+  initialize_can();
+  return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
 }
 
 arm_can_finders can_finders(
@@ -120,7 +114,9 @@ arm_can_finders can_finders(
   hal::u16 endeffector)
 {
   return { .home_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
-             driver_allocator(), *transceiver, home), // finds message with address for home
+             driver_allocator(),
+             *transceiver,
+             home),  // finds message with address for home
            .arm_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
              driver_allocator(), *transceiver, arm),
            .endeffector_finder =
@@ -130,48 +126,53 @@ arm_can_finders can_finders(
 
 arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
 {
-  return
-  {
+  return {
     .track_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,  // this will allow the class to send messages to the actual
                     // perseus controller
-      get_identifier_filter_set<0>().filter[0],
+      hal::acquire_can_identifier_filter(
+        driver_allocator(), can_manager)[can_manager->available_filter()],
       clock(),
       100,
       0x120),
     .shoulder_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      get_identifier_filter_set<0>().filter[1],
+      hal::acquire_can_identifier_filter(
+        driver_allocator(), can_manager)[can_manager->available_filter()],
       clock(),
       100,
       0x121),
     .elbow_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      get_identifier_filter_set<0>().filter[2],
+      hal::acquire_can_identifier_filter(
+        driver_allocator(), can_manager)[can_manager->available_filter()],
       clock(),
       100,
       0x122),
     .wrist_pitch_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      get_identifier_filter_set<1>().filter[0],
+      hal::acquire_can_identifier_filter(
+        driver_allocator(), can_manager)[can_manager->available_filter()],
       clock(),
       100,
       0x123),
     .wrist_roll_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      get_identifier_filter_set<1>().filter[1],
+      hal::acquire_can_identifier_filter(
+        driver_allocator(), can_manager)[can_manager->available_filter()],
       clock(),
       100,
       0x124),
     .clamp_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      get_identifier_filter_set<1>().filter[1],
+      hal::acquire_can_identifier_filter(
+        driver_allocator(), can_manager)[can_manager->available_filter()],
       clock(),
       100,
       0x125)

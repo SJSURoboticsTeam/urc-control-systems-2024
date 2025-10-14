@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include "h_bridge.hpp"
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
@@ -69,21 +70,16 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // to instantiate H-bridge
-hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> output_pin_1();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-// current sensing
-// quadrature encoder
+hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
-
 hal::v5::strong_ptr<hal::can_message_finder> can_finder(
-  hal::v5::strong_ptr<hal::can_transceiver>, hal::u16);
+  hal::v5::strong_ptr<hal::can_transceiver>,
+  hal::u16);
+
 inline void reset()
 {
   hal::cortex_m::reset();

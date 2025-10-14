@@ -48,11 +48,6 @@ auto& gpio_a()
   static hal::stm32f1::gpio<st_peripheral::gpio_a> gpio;
   return gpio;
 }
-auto& gpio_b()
-{
-  static hal::stm32f1::gpio<st_peripheral::gpio_b> gpio;
-  return gpio;
-}
 auto& gpio_c()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_c> gpio;
@@ -134,7 +129,16 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
     5281);
 }
-
+hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
+{
+  auto a_low = resources::output_pin_0();
+  auto b_low = resources::output_pin_1();
+  auto a_high = resources::pwm_channel_0();
+  auto b_high = resources::pwm_channel_1();
+  auto h_bridge = sjsu::drivers::h_bridge({ a_high, a_low }, { b_high, b_low });
+  return hal::v5::make_strong_ptr<decltype(h_bridge)>(
+    resources::driver_allocator(), std::move(h_bridge));
+}
 hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
 
 void initialize_can()
