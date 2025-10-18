@@ -6,7 +6,6 @@
 #include <libhal/steady_clock.hpp>
 
 #include "./application.hpp"
-#include "../resource_list.hpp"
 
 
 namespace sjsu::drive {

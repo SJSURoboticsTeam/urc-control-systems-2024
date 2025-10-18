@@ -7,6 +7,7 @@ libhal_build_demos(
 
 DEMOS
     application
+    
 INCLUDES
     include
 SOURCE

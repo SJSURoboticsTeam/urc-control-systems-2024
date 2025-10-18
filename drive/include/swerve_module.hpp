@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
+#include <libhal-arm-mcu/stm32f1/input_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/servo.hpp>
 #include <libhal/units.hpp>
@@ -23,12 +24,15 @@ struct swerve_module_settings
   hal::degrees position_tolerance;
   meters_per_sec velocity_tolerance;
   sec tolerance_timeout;
+  bool reversed;
 };
 
 class swerve_module
 {
 public:
   swerve_module_settings settings;
+  hal::v5::strong_ptr<hal::input_pin> limit_switch;
+
   /**
    * @param p_steer_motor the motor used to control
    * @param p_propulsion_motor the motor
@@ -37,6 +41,7 @@ public:
   swerve_module(
     hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
     hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
+    hal::v5::strong_ptr<hal::input_pin> p_limit_switch,
     swerve_module_settings p_settings);
   /**
    * @brief stops the motors of the module

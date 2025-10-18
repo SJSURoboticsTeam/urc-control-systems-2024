@@ -7,8 +7,10 @@
 namespace sjsu::drive {
 swerve_module::swerve_module(hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
                              hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
+                            hal::v5::strong_ptr<hal::input_pin> p_limit_switch,
                              swerve_module_settings p_settings)
   : settings(p_settings)
+  , limit_switch(p_limit_switch)
   , m_steer_motor(p_steer_motor)
   , m_propulsion_motor(p_propulsion_motor)
 {

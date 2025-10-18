@@ -17,12 +17,9 @@
 #include <libhal-util/steady_clock.hpp>
 #include "applications/application.hpp"
 
-#include "resource_list.hpp"
-
 int main()
 {
   initialize_platform();
-  sjsu::drive::application();
   std::terminate();
 }
 
