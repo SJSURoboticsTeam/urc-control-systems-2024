@@ -41,7 +41,7 @@ void apds9960::default_enable()
 apds9960::color apds9960::readColor()
 {
   color data_color;
-  hal::print<64>(*m_terminal, "Reading from color sensor\n");
+  hal::print<64>(*m_terminal, "Reading from Color Sensor...\n");
 
   std::array<hal::byte, 1> data_buff_low;
   std::array<hal::byte, 1> data_buff_high;
@@ -49,11 +49,11 @@ apds9960::color apds9960::readColor()
   std::array<hal::byte, 1> write_to_address = { register_set::cdatal };
   hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_low);
   hal::delay(*m_clock, 10ms);
-  write_to_address = { register_set::cdatah };
-  hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_high);
+  // write_to_address = { register_set::cdatah };
+  hal::read(*m_i2c, m_address, data_buff_high);
 
-  hal::print<64>(*m_terminal, "low byte: %u\n", data_buff_low[0]);
-  hal::print<64>(*m_terminal, "high byte: %u\n", data_buff_high[0]);
+  hal::print<64>(*m_terminal, "Clear Low Byte: %u\n", data_buff_low[0]);
+  hal::print<64>(*m_terminal, "Clear High Byte: %u\n", data_buff_high[0]);
 
   data_color.clear_data = data_buff_high[0] << 8 | data_buff_low[0];
 
@@ -63,8 +63,8 @@ apds9960::color apds9960::readColor()
   hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_low);
   hal::delay(*m_clock, 10ms);
 
-  write_to_address = { register_set::rdatah };
-  hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_high);
+  // write_to_address = { register_set::rdatah };
+  hal::read(*m_i2c, m_address, data_buff_high);
 
   hal::print<64>(*m_terminal, "Red Low Byte: %u\n", data_buff_low[0]);
   hal::print<64>(*m_terminal, "Red High Byte: %u\n", data_buff_high[0]);
@@ -77,8 +77,8 @@ apds9960::color apds9960::readColor()
   hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_low);
   hal::delay(*m_clock, 10ms);
 
-  write_to_address = { register_set::gdatah };
-  hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_high);
+  // write_to_address = { register_set::gdatah };
+  hal::read(*m_i2c, m_address, data_buff_high);
 
   hal::print<64>(*m_terminal, "Green Low Byte: %u\n", data_buff_low[0]);
   hal::print<64>(*m_terminal, "Green High Byte: %u\n", data_buff_high[0]);
@@ -91,11 +91,11 @@ apds9960::color apds9960::readColor()
   hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_low);
   hal::delay(*m_clock, 10ms);
 
-  write_to_address = { register_set::bdatah };
-  hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_high);
+  // write_to_address = { register_set::bdatah };
+  hal::read(*m_i2c, m_address, data_buff_high);
 
   hal::print<64>(*m_terminal, "Blue Low Byte: %u\n", data_buff_low[0]);
-  hal::print<64>(*m_terminal, "Blue High Hyte: %u\n", data_buff_high[0]);
+  hal::print<64>(*m_terminal, "Blue High Byte: %u\n", data_buff_high[0]);
 
   data_color.blue_data = data_buff_high[0] << 8 | data_buff_low[0];
 

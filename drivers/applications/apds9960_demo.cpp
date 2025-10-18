@@ -32,10 +32,6 @@ void application()
 
   apds9960 adps9960_sensor = apds9960(i2c2, counter, terminal);
 
-  // while (1) {
-  //   hal::print<64>(*terminal, "Waiting \n");
-  // }
-
   hal::delay(*counter, 1000ms);
 
   hal::print<64>(*terminal, "Sensor Created \n");
@@ -47,11 +43,7 @@ void application()
 
     apds9960::color read_color = adps9960_sensor.readColor();
 
-    // // Update: all values are 0 when printed w %f, values change when printed
-    // w %u hal::print<64>(*terminal, "Red: %u\n", read_color.red_data);
-    // hal::print<64>(*terminal, "Green: %u\n", read_color.green_data);
-    // hal::print<64>(*terminal, "Blue: %u\n", read_color.blue_data);
-    // hal::print<64>(*terminal, "Clear: %u\n", read_color.clear_data);
+    // all values are 0 when printed w %f, values change when printed w %u
 
     // Raw Values
     hal::print<64>(*terminal,
