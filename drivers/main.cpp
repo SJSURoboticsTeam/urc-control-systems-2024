@@ -21,12 +21,13 @@
 int main()
 {
   sjsu::drivers::initialize_platform();
-  auto console = sjsu::drivers::resources::console();
-  try {
-    sjsu::drivers::application();
-  } catch (...) {
-    hal::print(*console, "ERROR! \n");
-  }
+  // auto console = sjsu::drivers::resources::console();
+  // try {
+  //   sjsu::drivers::application();
+  // } catch (...) {
+  //   hal::print(*console, "ERROR! \n");
+  // }
+  sjsu::drivers::application();
   std::terminate();
 }
 // libhal-arm-mcu specific APIs defined to reduce code size

@@ -17,22 +17,49 @@ void application()
   hal::print<64>(*terminal, "Clock and Console Created \n");
   auto i2c2 = resources::i2c();
   hal::print<64>(*terminal, "i2c Created \n");
+  using namespace std::literals;
+
+  // [[maybe_unused]] constexpr hal::byte first_i2c_address = 0x08;
+  // [[maybe_unused]] constexpr hal::byte last_i2c_address = 0x78;
+  // hal::print(*terminal, "I2C devices found: ");
+  // for (hal::byte address = first_i2c_address; address < last_i2c_address;
+  //      address++) {
+  //   // this can only fail if the device is not present
+  //   if (hal::probe(*i2c2, address)) {
+  //     hal::print<12>(*terminal, "0x%02X ", address);
+  //   }
+  // }
 
   apds9960 adps9960_sensor = apds9960(i2c2, counter, terminal);
+
+  // while (1) {
+  //   hal::print<64>(*terminal, "Waiting \n");
+  // }
+
+  hal::delay(*counter, 1000ms);
+
   hal::print<64>(*terminal, "Sensor Created \n");
+  hal::delay(*counter, 150ms);
 
-  // not sure why it's taking a long time to print.. or to create sensor
-
+  hal::print<64>(*terminal, "Loop Time! \n");
   while (true) {
-    hal::print<64>(*terminal, "Loop Time! \n");
-    hal::delay(*counter, 50ms);
+    hal::delay(*counter, 500ms);
 
     apds9960::color read_color = adps9960_sensor.readColor();
 
-    hal::print<64>(*terminal, "Red: %f\n", read_color.red_data);
-    hal::print<64>(*terminal, "Green: %f\n", read_color.green_data);
-    hal::print<64>(*terminal, "Blue: %f\n", read_color.blue_data);
-    hal::print<64>(*terminal, "Clear: %f\n", read_color.clear_data);
+    // // Update: all values are 0 when printed w %f, values change when printed
+    // w %u hal::print<64>(*terminal, "Red: %u\n", read_color.red_data);
+    // hal::print<64>(*terminal, "Green: %u\n", read_color.green_data);
+    // hal::print<64>(*terminal, "Blue: %u\n", read_color.blue_data);
+    // hal::print<64>(*terminal, "Clear: %u\n", read_color.clear_data);
+
+    // Raw Values
+    hal::print<64>(*terminal,
+                   "R:%u  G:%u  B:%u  C:%u\n",
+                   read_color.red_data,
+                   read_color.green_data,
+                   read_color.blue_data,
+                   read_color.clear_data);
   }
 }
 }  // namespace sjsu::drivers

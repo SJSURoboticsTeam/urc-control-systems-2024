@@ -5,8 +5,9 @@
 #include <libhal/i2c.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/serial.hpp>
-
 #include <libhal/units.hpp>
+
+using namespace std::chrono_literals;
 
 namespace sjsu::drivers {
 class apds9960
@@ -29,6 +30,9 @@ public:
   enum register_set
   {
     enable = 0x80,
+    control = 0x8F,
+    config1 = 0x8D,
+    config2 = 0x90,
 
     // store rgbc
     cdatal = 0x94,
@@ -50,7 +54,6 @@ public:
   };
 
   void default_enable();
-
   color readColor();
 };
 }  // namespace sjsu::drivers
