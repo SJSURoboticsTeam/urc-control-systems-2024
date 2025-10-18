@@ -9,6 +9,7 @@ DEMOS
     application
 INCLUDES
     include
+    .
 SOURCE
     src
 
