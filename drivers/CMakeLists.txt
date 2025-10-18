@@ -28,7 +28,7 @@ libhal_build_demos(
   # tla2528_input_pin_demo
   # tla2528_analog_input_demo
   # drv8825_demo
-  gimble_demp
+  gimbal_demo
 
   INCLUDES
   include
@@ -46,7 +46,7 @@ SOURCES
     # src/tla2528.cpp
     # src/tla2528_adapters.cpp
     # src/drv8825.cpp
-    src/gimble.cpp
+    src/gimbal.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"

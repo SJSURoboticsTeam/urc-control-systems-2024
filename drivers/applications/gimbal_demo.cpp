@@ -4,7 +4,7 @@
 #include <libhal/units.hpp>
 
 #include "../hardware_map.hpp"
-#include <gimble.hpp>
+#include <gimbal.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
