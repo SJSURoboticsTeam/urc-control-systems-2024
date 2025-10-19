@@ -11,5 +11,5 @@ libhal_build_demos(
     ../drivers/include
     
     SOURCES
-    ../drivers/src/perseus_bldc.cpp
+    ../drivers/src/
 )

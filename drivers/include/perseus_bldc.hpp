@@ -32,7 +32,8 @@ public:
     max_speed = 0x11,  // driver sends this speed, the PID controller must use
                        // this speed to get to position
     position =
-      0x12  // this driver must get to postion using PID and feedforward
+      0x12,  // this driver must get to postion using PID and feedforward
+    velocity = 0x13,
   };
 
   enum class read : hal::byte
@@ -51,7 +52,7 @@ public:
                  p_filter,  // this filter will allow it to see messages that
                             // only this pegasus cares about.
                hal::v5::strong_ptr<hal::steady_clock> clock,
-               int ticks_per_rotation,  // kind of like gear ratio
+               int gear_ratio,  // kind of like gear ratio
                hal::u16 servo_address);
 
   // make appropriate move, copy etc constructors in order to make a
@@ -65,7 +66,7 @@ public:
   hal::degrees get_velocity();
   // when we say position we mean angle from homing position
   void set_position(hal::u16 degrees);
-  void set_velocity(float rpm);
+  void set_max_velocity(hal::rpm rpm);
   // insread of set position and set_velocity i could just do a get_feedback and
   // parse position and velocity
   // this depends on whether I can get velocity (in rpm as apposed to percent
@@ -73,13 +74,12 @@ public:
   // convert torque into (feedforwarded velocity
   // with respect to current angle)
   void set_feedfoward_torque();
-  void reset_factor();
   void set_gear_ratio(float p_ratio);
   void send_message(std::array<hal::byte, 8> const& p_payload);
   void receive_message(std::array<hal::byte, 8>& buffer);
 
 // private:
-  int m_ticks_per_rotation;
+  int m_gear_ratio;
   hal::can_message_finder m_can;
   hal::v5::optional_ptr<hal::steady_clock> m_clock;
   hal::u32 m_device_id;

@@ -143,6 +143,7 @@ hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
 
 void initialize_can()
 {
+  constexpr hal::u32 baudrate = 100'000;
   if (not can_manager) {
     auto clock_ref = clock();
     can_manager =
@@ -150,7 +151,7 @@ void initialize_can()
         driver_allocator(),
         32,
         driver_allocator(),
-        100'000,
+        baudrate,
         *clock_ref,
         std::chrono::milliseconds(1),
         hal::stm32f1::can_pins::pb9_pb8);

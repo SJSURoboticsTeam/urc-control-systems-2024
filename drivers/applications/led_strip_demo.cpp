@@ -75,8 +75,8 @@ void application()
   auto clock = resources::clock();
   //   auto& console = *p_resources.terminal;
 
-  auto clock_pin = resources::output_pin_5();
-  auto data_pin = resources::output_pin_6();
+  auto clock_pin = resources::output_pin_0();
+  auto data_pin = resources::output_pin_1();
 
   light_strip<35> lights;
   sk9822 driver(clock_pin, data_pin, clock);

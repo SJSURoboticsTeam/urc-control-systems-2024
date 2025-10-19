@@ -52,10 +52,10 @@ void application()
                                             arm_addresses::home_address,
                                             arm_addresses::arm_address,
                                             arm_addresses::end_effector);
-
+  // output pins for ARM 
   auto console = resources::console();
 
-  // starts homing or waits fro homing command
+  // starts homing or waits for homing command
   // IMP: elbow will start drooping once homed because gravity. Immediately send
   // desired position as 0 once homed, and use feedforward + PID to stay at
   // homed position
@@ -64,6 +64,9 @@ void application()
   // filter messages this module sees? arm and drive are separate can buses so
   // it should be fine
   can_bus_manager->baud_rate(1.0_MHz);
+  // need to have a way to make the servo not move BUT allow the motor to
+  // move enough to counter the torque.
+  bool isHomed = false;
   while (true) {
     auto optional_home_message = can_finders.home_finder->find();
     auto optional_arm_message = can_finders.arm_finder->find();
@@ -71,17 +74,19 @@ void application()
     if (optional_home_message) {
       hal::print(*console, "Received homing command");
       print_can_message(*console, *optional_home_message);
+      
       // process_can_message(*optional_message, target, current);
 
       // can_finder->transceiver().send()
+      isHomed = true;
     }
-    if (optional_arm_message) {
+    if (optional_arm_message && isHomed) {
       hal::print(*console, "Received arm movement command");
       // make some sort of arm class that converts angles provided by mission
       // control and sends those to
       // arm servos at some amount of max speed
     }
-    if (optional_endeffector_message) {
+    if (optional_endeffector_message && isHomed) {
       hal::print(*console, "Received end effector command");
     }
   }

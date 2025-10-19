@@ -16,18 +16,18 @@ perseus_bldc::perseus_bldc(
   hal::v5::strong_ptr<hal::can_transceiver> transceiver,
   hal::can_identifier_filter&
     p_filter,  // this filter will allow it to see messages
-               // that only this pegasus cares about.
+               // that only this perseus cares about.
   hal::v5::strong_ptr<hal::steady_clock> clock,
-  int ticks_per_rotation,  // kind of like gear ratio
+  int gear_ratio,  // kind of like gear ratio
   hal::u16 servo_address)
-  : m_ticks_per_rotation(ticks_per_rotation)
+  : m_gear_ratio(gear_ratio)
   , m_can(*transceiver, servo_address)
   , m_clock(clock)
   , m_device_id(servo_address)
 {
-  hal::u16 response_offest = 0x100;
+  constexpr hal::u16 response_offest = 0x100;
   p_filter.allow(servo_address + response_offest);
-  
+
   m_max_response_time = 500ms;
 }
 
@@ -70,9 +70,8 @@ void perseus_bldc::set_position(hal::u16 degrees)
 {
   std::array<hal::byte, 8> payload = {
     static_cast<hal::byte>(perseus_bldc::read::position),
-    static_cast<hal::byte>(degrees >> 24),
-    static_cast<hal::byte>(degrees >> 16),
-
+    static_cast<hal::byte>(degrees >> 8), // high byte
+    static_cast<hal::byte>(degrees & 0x00FF), // low byte
   };
 
   perseus_bldc::send_message(payload);
