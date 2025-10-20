@@ -25,7 +25,7 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
 
-namespace sjsu::hub {
+namespace sjsu::drivers {
 namespace custom {
 /**
  * @brief A stand in interface until libhal supports an official watchdog
@@ -77,6 +77,9 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 // current sensing
 hal::v5::strong_ptr<hal::adc> adc_0();
 
+// quadrature encoder
+hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+
 inline void reset()
 {
   hal::cortex_m::reset();
@@ -91,4 +94,4 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
-}  // namespace sjsu::hub
+}  // namespace sjsu::drivers
