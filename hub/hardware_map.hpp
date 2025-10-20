@@ -14,17 +14,23 @@
 #pragma once
 
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/steady_clock.hpp>
+#include <libhal/adc.hpp>
 #include <libhal/can.hpp>
+#include <libhal/dac.hpp>
 #include <libhal/functional.hpp>
+#include <libhal/i2c.hpp>
 #include <libhal/input_pin.hpp>
 #include <libhal/interrupt_pin.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
+#include <libhal/spi.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
-
+#include <libhal/zero_copy_serial.hpp>
 namespace sjsu::hub {
 namespace custom {
 /**
@@ -66,16 +72,21 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-
+hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
+hal::v5::strong_ptr<hal::input_pin> input_pin_0();
+hal::v5::strong_ptr<hal::input_pin> input_pin_1();
+hal::v5::strong_ptr<hal::input_pin> input_pin_2();
 hal::v5::strong_ptr<hal::output_pin> status_led();
-// to instantiate H-bridge
 hal::v5::strong_ptr<hal::output_pin> output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> output_pin_1();
+hal::v5::strong_ptr<hal::output_pin> output_pin_2();
+hal::v5::strong_ptr<hal::output_pin> output_pin_3();
+hal::v5::strong_ptr<hal::output_pin> output_pin_4();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-
-// current sensing
 hal::v5::strong_ptr<hal::adc> adc_0();
+hal::v5::strong_ptr<hal::adc> adc_1();
+hal::v5::strong_ptr<hal::i2c> i2c();
 
 inline void reset()
 {
