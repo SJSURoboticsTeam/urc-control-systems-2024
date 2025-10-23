@@ -103,7 +103,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
 //adc2-12 - pc2
 //adc3-11 - pc1
 //adc4- 9 - pb1
-hal::v5::strong_ptr<hal::adc> compass_adc_0()
+hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
 {
   static hal::atomic_spin_lock adc_lock0;
   static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
