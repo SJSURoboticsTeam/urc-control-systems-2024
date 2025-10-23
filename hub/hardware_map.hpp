@@ -31,6 +31,19 @@
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
+
+
+//pins
+//gpio0
+//gpio1
+//adc1
+//adc2
+//adc3
+//adc4
+//pwm0
+//pwm1
+//pwm2
+//watchdog
 namespace sjsu::hub {
 namespace custom {
 /**
@@ -73,19 +86,13 @@ std::pmr::polymorphic_allocator<> driver_allocator();
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
-hal::v5::strong_ptr<hal::input_pin> input_pin_0();
-hal::v5::strong_ptr<hal::input_pin> input_pin_1();
-hal::v5::strong_ptr<hal::input_pin> input_pin_2();
-hal::v5::strong_ptr<hal::output_pin> status_led();
-hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> output_pin_1();
-hal::v5::strong_ptr<hal::output_pin> output_pin_2();
-hal::v5::strong_ptr<hal::output_pin> output_pin_3();
-hal::v5::strong_ptr<hal::output_pin> output_pin_4();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-hal::v5::strong_ptr<hal::adc> adc_0();
-hal::v5::strong_ptr<hal::adc> adc_1();
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
+hal::v5::strong_ptr<hal::adc> compass_adc_0();
+hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
 
 inline void reset()
