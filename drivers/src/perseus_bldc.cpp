@@ -14,7 +14,7 @@ using namespace hal::literals;
 
 perseus_bldc::perseus_bldc(
   hal::v5::strong_ptr<hal::can_transceiver> transceiver,
-  hal::can_identifier_filter&
+  hal::v5::strong_ptr<hal::can_identifier_filter>
     p_filter,  // this filter will allow it to see messages
                // that only this perseus cares about.
   hal::v5::strong_ptr<hal::steady_clock> clock,
@@ -26,7 +26,7 @@ perseus_bldc::perseus_bldc(
   , m_device_id(servo_address)
 {
   constexpr hal::u16 response_offest = 0x100;
-  p_filter.allow(servo_address + response_offest);
+  p_filter->allow(servo_address + response_offest);
 
   m_max_response_time = 500ms;
 }

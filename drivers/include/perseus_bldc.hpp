@@ -48,7 +48,7 @@ public:
   // receive messages from the can_transceiver
 
   perseus_bldc(hal::v5::strong_ptr<hal::can_transceiver> transceiver,
-               hal::can_identifier_filter&
+               hal::v5::strong_ptr<hal::can_identifier_filter>
                  p_filter,  // this filter will allow it to see messages that
                             // only this pegasus cares about.
                hal::v5::strong_ptr<hal::steady_clock> clock,

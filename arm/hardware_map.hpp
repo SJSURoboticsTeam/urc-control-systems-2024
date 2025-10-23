@@ -94,8 +94,7 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel();
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver(
-  std::span<hal::can_message> receive_buffer);
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
 

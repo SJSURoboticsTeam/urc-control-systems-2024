@@ -89,7 +89,7 @@ void initialize_can()
         driver_allocator(),
         32,
         driver_allocator(),
-        100'000,
+        100'000'000, // 1 MHz
         *clock_ref,
         std::chrono::milliseconds(1),
         hal::stm32f1::can_pins::pb9_pb8);
@@ -126,8 +126,8 @@ arm_can_finders can_finders(
 
 arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
 {
-  auto idf1 = hal::acquire_can_identifier_filter(); // each filter returns 4 ids
-  auto idf2 = hal::acquire_can_identifier_filter();
+  auto idf1 = hal::acquire_can_identifier_filter(driver_allocator(), can_manager); // each filter returns 4 ids
+  auto idf2 = hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
   return {
     .track_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
