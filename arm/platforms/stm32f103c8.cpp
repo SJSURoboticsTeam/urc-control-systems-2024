@@ -126,53 +126,49 @@ arm_can_finders can_finders(
 
 arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
 {
+  auto idf1 = hal::acquire_can_identifier_filter(); // each filter returns 4 ids
+  auto idf2 = hal::acquire_can_identifier_filter();
   return {
     .track_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,  // this will allow the class to send messages to the actual
                     // perseus controller
-      hal::acquire_can_identifier_filter(
-        driver_allocator(), can_manager)[can_manager->available_filter()],
+      idf1[0],
       clock(),
       100,
       0x120),
     .shoulder_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      hal::acquire_can_identifier_filter(
-        driver_allocator(), can_manager)[can_manager->available_filter()],
+      idf1[1],
       clock(),
       100,
       0x121),
     .elbow_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      hal::acquire_can_identifier_filter(
-        driver_allocator(), can_manager)[can_manager->available_filter()],
+      idf1[2],
       clock(),
       100,
       0x122),
     .wrist_pitch_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      hal::acquire_can_identifier_filter(
-        driver_allocator(), can_manager)[can_manager->available_filter()],
+      idf1[3],
       clock(),
       100,
       0x123),
     .wrist_roll_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      hal::acquire_can_identifier_filter(
-        driver_allocator(), can_manager)[can_manager->available_filter()],
+      idf2[0],
       clock(),
       100,
       0x124),
     .clamp_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
-      hal::acquire_can_identifier_filter(
-        driver_allocator(), can_manager)[can_manager->available_filter()],
+      idf2[1],
       clock(),
       100,
       0x125)
