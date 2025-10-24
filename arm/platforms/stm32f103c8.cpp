@@ -135,42 +135,42 @@ arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
                     // perseus controller
       idf1[0],
       clock(),
-      100,
+      753,
       0x120),
     .shoulder_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
       idf1[1],
       clock(),
-      100,
+      753,
       0x121),
     .elbow_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
       idf1[2],
       clock(),
-      100,
+      753,
       0x122),
     .wrist_pitch_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
       idf1[3],
       clock(),
-      100,
+      753,
       0x123),
     .wrist_roll_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
       idf2[0],
       clock(),
-      100,
+      753,
       0x124),
     .clamp_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
       driver_allocator(),
       transceiver,
       idf2[1],
       clock(),
-      100,
+      753,
       0x125)
   };
 }

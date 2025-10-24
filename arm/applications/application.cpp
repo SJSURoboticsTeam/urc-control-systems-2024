@@ -36,9 +36,11 @@ void print_can_message(hal::serial& p_console,
 // speed cap
 enum arm_addresses : hal::u16
 {
-  home_address = 0x111, // settings address 1rst 2-7 (specify)
-  arm_address = 0x112,  // track, shoulder, elbow
-  end_effector = 0x115  // roll, pitch, yaw
+  home_address = 0x111,  // settings address 1rst 2-7 (specify)
+  arm_address = 0x112,   // track, shoulder, elbow byte[0] = position/velocity 
+                         // byte[1-2] = track byte[3-4]=shoulder,
+  end_effector = 0x115   // roll, pitch, yaw
+  // MC: change PID parameters,
 };
 void application()
 {
