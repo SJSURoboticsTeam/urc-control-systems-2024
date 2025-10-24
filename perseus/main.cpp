@@ -20,8 +20,8 @@
 
 int main()
 {
-  sjsu::drivers::initialize_platform();
-  sjsu::drivers::application();
+  sjsu::perseus::initialize_platform();
+  sjsu::perseus::application();
   std::terminate();
 }
 // libhal-arm-mcu specific APIs defined to reduce code size

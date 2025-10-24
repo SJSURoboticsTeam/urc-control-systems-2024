@@ -21,12 +21,14 @@ libhal_build_demos(
   application
 
   INCLUDES
+  ../drivers/include/
   include
 
 SOURCES
     # platforms/micromod.cpp
     platforms/stm32f103c8.cpp
-
+    ../drivers/src/h_bridge.cpp
+    bldc_servo.cpp
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import
