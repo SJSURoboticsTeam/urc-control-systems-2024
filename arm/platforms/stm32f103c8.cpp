@@ -89,7 +89,7 @@ void initialize_can()
         driver_allocator(),
         32,
         driver_allocator(),
-        100'000'000, // 1 MHz
+        1'000'000, // 1 MHz
         *clock_ref,
         std::chrono::milliseconds(1),
         hal::stm32f1::can_pins::pb9_pb8);
