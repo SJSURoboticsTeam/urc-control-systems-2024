@@ -143,7 +143,7 @@ hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
 
 void initialize_can()
 {
-  constexpr hal::u32 baudrate = 100'000;
+  constexpr hal::u32 baudrate = 1'000'000;
   if (not can_manager) {
     auto clock_ref = clock();
     can_manager =
