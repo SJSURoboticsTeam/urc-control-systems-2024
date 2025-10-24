@@ -6,6 +6,10 @@ project(application LANGUAGES CXX)
 libhal_build_demos(
     DEMOS
     application
-
-SOURCES
+    
+    INCLUDES
+    ../drivers/include
+    
+    SOURCES
+    ../drivers/src/perseus_bldc.cpp
 )
