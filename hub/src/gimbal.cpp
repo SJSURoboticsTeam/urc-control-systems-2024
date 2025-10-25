@@ -1,9 +1,8 @@
-#pragma once
-#include <gimble.hpp>
+#include "../include/gimbal.hpp"
 
 namespace sjsu::hub {
 
-gimble::gimble(hal::v5::strong_ptr<hal::actuator::rc_servo> p_x_servo,
+gimbal::gimbal(hal::v5::strong_ptr<hal::actuator::rc_servo> p_x_servo,
                hal::v5::strong_ptr<hal::actuator::rc_servo> p_y_servo,
                hal::v5::strong_ptr<hal::sensor::icm20948> p_icm,
                hal::degrees p_min_angle,
@@ -14,15 +13,15 @@ gimble::gimble(hal::v5::strong_ptr<hal::actuator::rc_servo> p_x_servo,
   , m_min_angle(p_min_angle)
   , m_max_angle(p_max_angle)
 {
-  mid_angle = (m_min_angle + m_max_angle) / 2.0;
+  float mid_angle = (m_min_angle + m_max_angle) / 2.0;
 
   // Setting starting positions for the servos
   curr_x_servo_angle = mid_angle;
   curr_y_servo_angle = mid_angle;
 
   // Setting the servos at some known location
-  m_x_servo->driver_position(curr_x_servo_angle);
-  m_y_servo->driver_position(curr_y_servo_angle);
+  m_x_servo->position(curr_x_servo_angle);
+  m_y_servo->position(curr_y_servo_angle);
 
   // Default
   tar_pitch = 0.0f;
@@ -34,7 +33,7 @@ gimble::gimble(hal::v5::strong_ptr<hal::actuator::rc_servo> p_x_servo,
   error.Ed = 0.0f;
 }
 
-void gimble::move_left(hal::degrees p_degree)
+void gimbal::move_left(hal::degrees p_degree)
 {
   // Based on how the servo motor is fixed, the left could be moving towards
   // m_min_angle or m_max_angle
@@ -54,10 +53,10 @@ void gimble::move_left(hal::degrees p_degree)
     curr_x_servo_angle += p_degree;
 
   // Update the servo position
-  m_x_servo->driver_position(curr_x_servo_angle);
+  m_x_servo->position(curr_x_servo_angle);
 }
 
-void gimble::move_right(hal::degrees p_degree)
+void gimbal::move_right(hal::degrees p_degree)
 {
   // Based on how the servo motor is fixed, the right could be moving towards
   // m_min_angle or m_max_angle
@@ -77,10 +76,10 @@ void gimble::move_right(hal::degrees p_degree)
     curr_x_servo_angle += p_degree;
 
   // Update the servo position
-  m_x_servo->driver_position(curr_x_servo_angle);
+  m_x_servo->position(curr_x_servo_angle);
 }
 
-void gimble::move_up(hal::degrees p_degree)
+void gimbal::move_up(hal::degrees p_degree)
 {
   // Based on how the servo motor is fixed, the up could be moving towards
   // m_min_angle or m_max_angle
@@ -89,7 +88,7 @@ void gimble::move_up(hal::degrees p_degree)
   tar_pitch += p_degree;
 }
 
-void gimble::move_down(hal::degrees p_degree)
+void gimbal::move_down(hal::degrees p_degree)
 {
   // Based on how the servo motor is fixed, the left could be moving towards
   // m_min_angle or m_max_angle
@@ -98,10 +97,11 @@ void gimble::move_down(hal::degrees p_degree)
   tar_pitch -= p_degree;
 }
 
-void gimble::update_servo(float p_delta_time)
+void gimbal::update_y_servo(float p_delta_time)
 {
-  float alpha = gimble_control_settings::tau /
-                (tau + p_delta_time);  // Used for the complementary filter
+  float alpha = gimbal_control_settings::tau /
+                (gimbal_control_settings::tau +
+                 p_delta_time);  // Used for the complementary filter
 
   // Reading the raw values from the sensor
   auto raw_accel = m_icm->read_acceleration();
@@ -111,7 +111,7 @@ void gimble::update_servo(float p_delta_time)
   float angle_pitch_deg =
     atan2f(raw_accel.x,
            sqrtf(raw_accel.y * raw_accel.y + raw_accel.z * raw_accel.z)) *
-    180.0f / gimble_control_setting::pi;
+    180.0f / gimbal_control_settings::pi;
 
   // Cleaning the pitch value from noise
   filtered_pitch = alpha * (filtered_pitch + raw_gyro.y * p_delta_time) +
@@ -125,8 +125,8 @@ void gimble::update_servo(float p_delta_time)
   bool at_upper = (curr_y_servo_angle >= m_max_angle - 0.001f);
   bool at_lower = (curr_y_servo_angle >= m_min_angle + 0.001f);
 
-  bool pushing_upper = at_upper && (e_pitch > 0);
-  bool pushing_lower = at_lower && (e_pitch < 0);
+  bool pushing_upper = at_upper && (curr_error > 0);
+  bool pushing_lower = at_lower && (curr_error < 0);
 
   if (!pushing_upper && !pushing_lower)
     error.Ei += curr_error * p_delta_time;
@@ -136,27 +136,27 @@ void gimble::update_servo(float p_delta_time)
 
   // Calculating the offset to help the ICM sensor reach steady state
   // (tar_pitch)
-  float control_var = (gimble_control_settings::Kp * error.Ep) +
-                      (gimble_control_settings::Ki * error.Ei) +
-                      (gimble_control_settings::Kd * error.Ed);
+  float control_var = (gimbal_control_settings::Kp_pitch * error.Ep) +
+                      (gimbal_control_settings::Ki_pitch * error.Ei) +
+                      (gimbal_control_settings::Kd_pitch * error.Ed);
 
   // Ensure that we aren't going above the servo's range
   control_var =
     std::clamp(control_var,
-               m_min_angle + gimble_control_settings::deg_tolerance,
-               m_max_angle + gimble_control_settings::deg_tolerance);
+               m_min_angle + gimbal_control_settings::deg_tolerance,
+               m_max_angle + gimbal_control_settings::deg_tolerance);
 
   float new_angle_pos = (m_min_angle + m_max_angle) / 2 + control_var;
 
   new_angle_pos = std::clamp(new_angle_pos, m_min_angle, m_max_angle);
   new_angle_pos =
     std::clamp(new_angle_pos,
-               curr_y_servo_angle - gimble_control_settings::max_servo_step,
-               curr_y_servo_angle + gimble_control_settings::max_servo_step);
+               curr_y_servo_angle - gimbal_control_settings::max_servo_step,
+               curr_y_servo_angle + gimbal_control_settings::max_servo_step);
   new_angle_pos = std::clamp(new_angle_pos, m_min_angle, m_max_angle);
 
   // Updating the servo position
-  m_y_servo->driver_position(new_angle_pos);
+  m_y_servo->position(new_angle_pos);
   curr_y_servo_angle = new_angle_pos;
 }
 }  // namespace sjsu::hub

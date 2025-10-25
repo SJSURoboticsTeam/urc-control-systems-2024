@@ -4,11 +4,12 @@
 
 #include <libhal-actuator/rc_servo.hpp>    // For the two servos
 #include <libhal-sensor/imu/icm20948.hpp>  // Need Gyro, Accel, and Compass
+#include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
 
 namespace sjsu::hub {
 
-struct gimble_control_settings
+struct gimbal_control_settings
 {
   static constexpr float tau = 0.75;  // For the complementary filter
   static constexpr float pi = 3.14159265f;
@@ -26,7 +27,7 @@ struct gimble_control_settings
 
   static constexpr hal::degrees max_servo_step =
     30.0;  // Maximum step the servo can take during PID
-  static constexpr hal::degrees deg_tolerance = 5
+  static constexpr hal::degrees deg_tolerance = 5;
 };
 
 struct pid_error
@@ -34,9 +35,9 @@ struct pid_error
   float Ep;  // Error on the proportional gain
   float Ei;  // Error on the integral gain
   float Ed;  // Error on the derivative gain
-}
+};
 
-class gimble
+class gimbal
 {
 public:
   /**
@@ -51,14 +52,14 @@ public:
    * @param p_max_angle maximum angle set inside the rc_servo_settings for both
    * the servo
    */
-  gimble(hal::v5::strong_ptr<hal::actuator::rc_servo> p_x_servo,
+  gimbal(hal::v5::strong_ptr<hal::actuator::rc_servo> p_x_servo,
          hal::v5::strong_ptr<hal::actuator::rc_servo> p_y_servo,
          hal::v5::strong_ptr<hal::sensor::icm20948> p_icm,
          hal::degrees p_min_angle,
          hal::degrees p_max_angle);
 
   /**
-   * @brief The function will move the gimble towards the left by p_degrees (no
+   * @brief The function will move the gimbal towards the left by p_degrees (no
    * PID)
    *
    * @param p_degree the # of degrees to move the servo in the left direction
@@ -66,7 +67,7 @@ public:
   void move_left(hal::degrees p_degree);
 
   /**
-   * @brief The function will move the gimble towards the right by p_degrees (no
+   * @brief The function will move the gimbal towards the right by p_degrees (no
    * PID)
    *
    * @param p_degree the # of degrees to move the servo in the right direction
@@ -75,7 +76,7 @@ public:
 
   /**
    * @brief The function will update the target_pitch by p_degree and
-   * update_y_servo will update the gimble's oreitnation to match the
+   * update_y_servo will update the gimbal's oreitnation to match the
    *
    * @param p_degree the # of degrees to move the servo in the up direction
    */
@@ -83,7 +84,7 @@ public:
 
   /**
    * @brief The function will update the target_pitch by p_degree and
-   * update_y_servo will update the gimble's oreitnation to match the
+   * update_y_servo will update the gimbal's oreitnation to match the
    *
    * @param p_degree the # of degrees to move the servo in the down direction
    */
@@ -101,14 +102,14 @@ public:
 private:
   hal::v5::strong_ptr<hal::actuator::rc_servo> m_x_servo;
   hal::v5::strong_ptr<hal::actuator::rc_servo> m_y_servo;
-  hal::v5::sttrong_ptr<hal::sensoq::icm20948> m_icm;
+  hal::v5::strong_ptr<hal::sensor::icm20948> m_icm;
   hal::degrees m_min_angle, m_max_angle;
 
   hal::degrees curr_y_servo_angle, curr_x_servo_angle;
 
   float tar_pitch, curr_pitch, filtered_pitch;  // For PID; in degrees
   // float tar_yaw, curr_pitch; // Incase Mission Control wants PID on the yaw
-  // of the gimble
+  // of the gimbal
 
   struct pid_error error;
 };
