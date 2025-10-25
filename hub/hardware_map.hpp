@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include <libhal-arm-mcu/stm32f1/independent_watchdog.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/adc.hpp>
@@ -31,7 +32,6 @@
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
-
 
 namespace sjsu::hub {
 namespace custom {
@@ -52,6 +52,7 @@ public:
   virtual ~watchdog() = default;
 };
 }  // namespace custom
+
 namespace resources {
 // =======================================================
 // Defined by each platform file
@@ -77,8 +78,10 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+// hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
+// hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_1();
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
 hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
