@@ -20,21 +20,21 @@ libhal_build_demos(
   DEMOS
   application
 
-  INCLUDES
-  include
+INCLUDES
 
 SOURCES
     # platforms/micromod.cpp
     platforms/stm32f103c8.cpp
+    src/gimbal.cpp
+
 
     PACKAGES
-    #Template for importing libhal packages is "libhal-__device__"
-    #replace "__device__" with the libhal device you wish to import
-    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal-rmd"
+    libhal-actuator
+    libhal-sensor
+
 
     LINK_LIBRARIES
-    #Template for linking libhal namespaces is "libhal::__device__"
-    #replace "__device__" with the libhal device you wish to import
-    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
+    libhal::actuator
+    libhal::sensor
     
 )
