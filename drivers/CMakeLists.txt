@@ -27,6 +27,7 @@ libhal_build_demos(
   tla2528_output_pin_demo
   tla2528_input_pin_demo
   tla2528_analog_input_demo
+  
 
   INCLUDES
   include

@@ -83,6 +83,10 @@ hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
 hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
+hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 
 inline void reset()
 {
