@@ -99,7 +99,6 @@ class command_handler
       }
     }
 
-    assert(segment_cursor > 0);
     segments = segments.subspan(0, segment_cursor);
   }
 
@@ -120,6 +119,9 @@ public:
     std::array<std::span<hal::byte>, 128> segments;
     std::span<std::span<hal::byte>> segview{ segments };
     parse_command(segview);
+    if (segview.size() == 0) {
+      return;
+    }
 
     std::span<hal::byte> prefix = segments[0];
     std::span<std::span<hal::byte>> params{ segments.begin() + 1,
