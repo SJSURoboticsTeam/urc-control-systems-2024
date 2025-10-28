@@ -10,10 +10,7 @@
 
 namespace sjsu::drive {
 
-void home(std::span<swerve_module> legs,
-        //   hal::can_transceiver& can,
-          hal::steady_clock& clock,
-          hal::serial& terminal);
-
+void home(hal::v5::strong_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4> > legs,
+           hal::v5::strong_ptr<hal::serial> terminal);
 
 }  // namespace sjsu::drive

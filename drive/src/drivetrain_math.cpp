@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
+
 #include <numbers>
 #include <sys/types.h>
 
@@ -35,7 +36,7 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   //  convert rotation speed to radians
   float rotational_vel_radians_per_sec =
     p_chassis_velocities.rotational_vel * std::numbers::pi / 180;
-  for (uint i = 0; i < vectors.size(); i++) {
+  for (unsigned int i = 0; i < vectors.size(); i++) {
     // translation vector is the same
     vector2d transition = p_chassis_velocities.translation;
     // rotation position vector by 90 degrees is the vector for 1 rad per sec
@@ -158,7 +159,7 @@ sec calculate_total_interpolation_time(
   std::array<swerve_module_state, module_count> p_end_states)
 {
   sec max_time = 0.0f;
-  for (uint i = 0; i < p_modules.size(); i++) {
+  for (unsigned int i = 0; i < p_modules.size(); i++) {
     sec time =
       calculate_total_interpolation_time(*(p_modules[i]), p_end_states[i]);
     if (time > max_time) {
@@ -173,7 +174,7 @@ std::array<swerve_module_state, module_count> scale_down_propulsion_speed(
   std::array<swerve_module_state, module_count> p_states)
 {
   float portion = 1.0;
-  for (uint i = 0; i < p_modules.size(); i++) {
+  for (unsigned int i = 0; i < p_modules.size(); i++) {
     if (fabsf(p_states[i].propulsion_velocity * portion) >
         p_modules[i]->settings.max_speed) {
       portion = p_modules[i]->settings.max_speed /
@@ -181,7 +182,7 @@ std::array<swerve_module_state, module_count> scale_down_propulsion_speed(
     }
   }
   std::array<swerve_module_state, module_count> scale_down_states;
-  for (uint i = 0; i < scale_down_states.size(); i++) {
+  for (unsigned int i = 0; i < scale_down_states.size(); i++) {
     scale_down_states[i] = { .steer_angle = p_states[i].steer_angle,
                              .propulsion_velocity =
                                p_states[i].propulsion_velocity * portion };
@@ -223,7 +224,7 @@ std::array<swerve_module_state, module_count> interpolate_states(
   if (portion >= 1) {
     return p_end_states;
   }
-  for (uint i = 0; i < p_modules.size(); i++) {
+  for (unsigned int i = 0; i < p_modules.size(); i++) {
     interpolated_states[i] = interpolate_state(
       portion, p_modules[i]->get_actual_state_cache(), p_end_states[i]);
   }

@@ -16,10 +16,10 @@
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include "applications/application.hpp"
-
 int main()
 {
-  initialize_platform();
+  sjsu::drive::initialize_platform();
+  sjsu::drive::application();
   std::terminate();
 }
 

@@ -10,14 +10,17 @@ DEMOS
     
 INCLUDES
     include
-SOURCE
-    src
+SOURCES
+    ./src/drivetrain_math.cpp
+    ./src/drivetrain.cpp
+    ./src/homing.cpp
+    ./src/swerve_module.cpp
 
 PACKAGES
 #    libhal-__device__
-libhal-actuator
+    libhal-actuator
 
-    LINK_LIBRARIES
+LINK_LIBRARIES
 #    libhal::__device__
-libhal::actuator
+    libhal::actuator
 )
