@@ -22,8 +22,8 @@ using namespace std::chrono_literals;
  * in the order of their corelating modules
  */
 vector2d chassis_velocities_to_module_vector(
-  chassis_velocities p_chassis_velocities,
-  swerve_module& p_module);
+  chassis_velocities const& p_chassis_velocities,
+  swerve_module const& p_module);
 /**
  * @brief converts chassis velocities into ideal velocity vectors for the given
  * modules
@@ -35,8 +35,9 @@ vector2d chassis_velocities_to_module_vector(
  * in the order of their corelating modules
  */
 std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
-  chassis_velocities p_chassis_velocities,
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules);
+  chassis_velocities const& p_chassis_velocities,
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
+    p_modules);
 
 // will likely be unused for this rover
 /**
@@ -44,7 +45,7 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
  * the modules
  */
 float module_validity_strain_score(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
   std::array<vector2d, module_count> p_vectors);
 
 /**
@@ -55,7 +56,8 @@ float module_validity_strain_score(
  * @return chassis velocities estimate
  */
 chassis_velocities calc_estimated_chassis_velocities(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules);
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
+    p_modules);
 
 /**
  * @brief calculates the swerve state with the most angular freedom either side
@@ -66,8 +68,8 @@ chassis_velocities calc_estimated_chassis_velocities(
  * @param p_target_vector the velocity vector in meters per second
  * @return state with most angular freedom
  */
-swerve_module_state calculate_freest_state(swerve_module& p_module,
-                                           vector2d p_target_vector);
+swerve_module_state calculate_freest_state(swerve_module const& p_module,
+                                           vector2d const& p_target_vector);
 /**
  * @brief calculates the swerve state that requires the least steer movement to
  * get tothat generates the target velocity vector. It doesn't calculate it can
@@ -77,8 +79,8 @@ swerve_module_state calculate_freest_state(swerve_module& p_module,
  * @param p_target_vector the velocity vector in meters per second
  * @return state that requires the least steer movement to get to
  */
-swerve_module_state calculate_closest_state(swerve_module& p_module,
-                                            vector2d p_target_vector);
+swerve_module_state calculate_closest_state(swerve_module const& p_module,
+                                            vector2d const& p_target_vector);
 
 /**
  * @brief calculates estimation of time to interpolate the module to a state
@@ -87,8 +89,8 @@ swerve_module_state calculate_closest_state(swerve_module& p_module,
  * @param p_end_state state the modules should be in by the end
  * @return estimation of time to interpolate the modules in seconds
  */
-sec calculate_total_interpolation_time(swerve_module& p_module,
-                                       swerve_module_state p_end_state);
+sec calculate_total_interpolation_time(swerve_module const& p_module,
+                                       swerve_module_state const& p_end_state);
 
 /**
  * @brief calculates estimation of time to interpolate all modules to a
@@ -99,8 +101,8 @@ sec calculate_total_interpolation_time(swerve_module& p_module,
  * @return estimation of time to interpolate all modules in seconds
  */
 sec calculate_total_interpolation_time(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
-  std::array<swerve_module_state, module_count> p_end_states);
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
+  std::array<swerve_module_state, module_count> const& p_end_states);
 
 /**
  * @brief scales swerve states down keep the a modules state velocity within
@@ -111,8 +113,8 @@ sec calculate_total_interpolation_time(
  * @return the states scaled down if needed
  */
 std::array<swerve_module_state, module_count> scale_down_propulsion_speed(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
-  std::array<swerve_module_state, module_count> p_states);
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
+  std::array<swerve_module_state, module_count> const& p_states);
 
 /**
  * @brief calculates the module state mid interpolation
@@ -124,8 +126,8 @@ std::array<swerve_module_state, module_count> scale_down_propulsion_speed(
  * @return the module state at the the portion in the interpolation
  */
 swerve_module_state interpolate_state(float p_portion,
-                                      swerve_module_state p_start_state,
-                                      swerve_module_state p_end_state);
+                                      swerve_module_state const& p_start_state,
+                                      swerve_module_state const& p_end_state);
 
 /**
  * @brief calculates next module states to target while interpolating
@@ -136,8 +138,8 @@ swerve_module_state interpolate_state(float p_portion,
  */
 std::array<swerve_module_state, module_count> interpolate_states(
   sec p_cycle_time,
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
-  std::array<swerve_module_state, module_count> p_end_states);
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
+  std::array<swerve_module_state, module_count> const& p_end_states);
 
 /**
  * @brief takes a value and places it in a bounds as if it were bounds of a ring

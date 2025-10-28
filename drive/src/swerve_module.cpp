@@ -38,7 +38,7 @@ void swerve_module::set_target_state(swerve_module_state const& p_target_state)
   }
 }
 
-bool swerve_module::can_reach_state(swerve_module_state const& p_state)
+bool swerve_module::can_reach_state(swerve_module_state const& p_state) const
 {
   return ((p_state.propulsion_velocity <= std::abs(settings.max_speed)) &&
           (p_state.steer_angle >= settings.min_angle) &&
