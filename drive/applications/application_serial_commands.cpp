@@ -5,36 +5,46 @@
 #include <libhal/pointers.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timeout.hpp>
-#include <optional>
 #include <resource_list.hpp>
+#include <stdexcept>
+#include <string.h>
 
 // just a convenience type
 using hal_serial = hal::v5::strong_ptr<hal::serial>;
 
 struct command_def
 {
-  std::span<hal::byte> prefix;
-  void (*callback)(std::span<std::span<hal::byte>> parameters);
+  char const* prefix;
+  std::function<void(std::span<std::span<hal::byte>>)> callback;
 };
 
-std::optional<int> parse_int(std::span<hal::byte> s)
+int parse_int(std::span<hal::byte> s)
 {
   char* end;
-  int val = std::strtol(reinterpret_cast<char*>(s.begin()), &end, 10);
-  if (end != reinterpret_cast<char*>(s.end())) {
-    return std::nullopt;
+  int val = std::strtol(reinterpret_cast<char*>(s.begin().base()), &end, 10);
+  if (end != reinterpret_cast<char*>(s.end().base())) {
+    throw std::runtime_error("integer parse failure");
   }
   return val;
 }
 
-std::optional<float> parse_float(std::span<hal::byte> s)
+float parse_float(std::span<hal::byte> s)
 {
   char* end;
-  float val = std::strtod(reinterpret_cast<char*>(s.begin()), &end, 10);
-  if (end != reinterpret_cast<char*>(s.end())) {
-    return std::nullopt;
+  float val = std::strtod(reinterpret_cast<char*>(s.begin().base()), &end);
+  if (end != reinterpret_cast<char*>(s.end().base())) {
+    throw std::runtime_error("float parse failure");
   }
   return val;
+}
+
+std::span<hal::byte> get_param(std::span<std::span<hal::byte>> params,
+                               size_t idx)
+{
+  if (idx >= params.size()) {
+    throw std::runtime_error("not enough parameters");
+  }
+  return params[idx];
 }
 
 class command_handler
@@ -129,11 +139,24 @@ public:
 
     for (size_t i = 0; i < commands.size(); i++) {
       command_def cmd = commands[i];
-      if (cmd.prefix != prefix) {
-        continue;
+      bool equal = false;
+      for (size_t pi = 0;; pi++) {
+        char target_char = cmd.prefix[pi];
+        bool given_end = pi >= prefix.size();
+        bool target_end = target_char == '\0';
+        if (given_end || target_end) {
+          equal = given_end && target_end;
+          break;
+        }
+        if (prefix[pi] != target_char) {
+          equal = false;
+          break;
+        }
       }
-      cmd.callback(params);
-      break;
+      if (equal) {
+        cmd.callback(params);
+        break;
+      }
     }
   }
 };
@@ -147,61 +170,45 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-#define FLOAT(params, idx, var)                                                \
-  auto _res##idx = parse_float(params[idx]);                                   \
-  if (!_res##idx.has_value()) {                                                \
-    return;                                                                    \
-  }                                                                            \
-  float var = _res##idx.value();
-
-#define INT(params, idx, var)                                                  \
-  auto _res##idx = parse_int(params[idx]);                                     \
-  if (!_res##idx.has_value()) {                                                \
-    return;                                                                    \
-  }                                                                            \
-  int var = _res##idx.value();
-
   std::array cmd_defs = {
     // not going to include all variations of {F/B/D}{L/R}{S/P}, they work in
     // the same fashion
     command_def{
       "fls",
-      [console](params) {
-        FLOAT(params, 0, speed)
+      [console](auto params) {
+        float speed = parse_float(get_param(params, 0));
         hal::print<32>(*console, "FLS: %f\n", speed);
       },
     },
     command_def{
       "brp",
-      [console](params) {
-        FLOAT(params, 0, speed)
+      [console](auto params) {
+        float speed = parse_float(get_param(params, 0));
         hal::print<32>(*console, "BRP: %f\n", speed);
       },
     },
     command_def{
       "drs",
-      [console](params) {
-        FLOAT(params, 0, speed)
+      [console](auto params) {
+        float speed = parse_float(get_param(params, 0));
         hal::print<32>(*console, "DRS: %f\n", speed);
       },
     },
     command_def{
       "noparam",
-      [console](params) { hal::print(*console, "No parameter command\n"); },
+      [console](auto) { hal::print(*console, "No parameter command\n"); },
     },
     command_def{
       "multiparam",
-      [console](params) {
-        FLOAT(params, 0, p1)
-        INT(params, 1, p2)
-        INT(params, 2, p3)
+      [console](auto params) {
+        float p1 = parse_float(get_param(params, 0));
+        int p2 = parse_int(get_param(params, 1));
+        int p3 = parse_int(get_param(params, 2));
         hal::print<64>(
           *console, "Multi-parameter command: %f %d %d\n", p1, p2, p3);
       },
     },
   };  // namespace sjsu::drive
-
-#undef FLOAT
 
   command_handler cmd{};
 
