@@ -1,7 +1,7 @@
 #include "../include/bldc_servo.hpp"
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/units.hpp>
-#include <cmath>
+
 #include <sys/types.h>
 namespace sjsu::perseus {
 
@@ -41,21 +41,21 @@ hal::u16 bldc_perseus::get_current_position()
   return m_current.position;
 }
 
-void bldc_perseus::set_target_velocity(hal::u16 target_velocity)
+void bldc_perseus::set_target_velocity(hal::i16 target_velocity)
 {
-  // we want to try to arrive at velocity
   m_target.velocity = target_velocity;
-  float diff = m_target.velocity - m_current.velocity;
-  // lerp to target velocity (idk if this is called lerping but whatev
-  m_current.velocity += std::lerp(diff, -1 * m_clamped_accel, m_clamped_accel);
-  h_bridge->power(m_current.velocity);
 }
 
-hal::u16 bldc_perseus::get_current_velocity()
+hal::u16 bldc_perseus::get_current_velocity_in_tps()
 {
   return m_current.velocity;
 }
-void bldc_perseus::set_current_velocity(hal::u16 current_velocity)
+
+hal::u16 bldc_perseus::get_current_velocity_percentage()
+{
+  return m_current.velocity;
+}
+void bldc_perseus::set_current_velocity(hal::i16 current_velocity)
 {
   m_current.velocity = current_velocity;
 }
@@ -67,15 +67,39 @@ void bldc_perseus::set_clamped_speed(hal::u16 clamped_speed)
 {
   m_clamped_speed = clamped_speed;
 }
-void bldc_perseus::update_pid_settings(PID_settings settings)
+void bldc_perseus::update_pid_position(PID_settings settings)
 {
-  m_current_settings = settings;
+  m_current_position_settings = settings;
 }
-void bldc_perseus::reset_encoder()
+void bldc_perseus::update_pid_velocity(PID_settings settings)
 {
-  // make the encoder eading value 0
-  // we don't have ability to change the value insdie the driver encoder
-
+  m_current_velocity_settings = settings;
+}
+void bldc_perseus::home_encoder()
+{
+  current_encoder_value = m_encoder->read().angle;
   m_current.position = 0;
+}
+
+void bldc_perseus::update()
+{
+  auto position_error = m_target.position - m_current.position;
+  auto velocity_error = m_target.velocity - m_current.velocity;
+  total_position_error += position_error;
+  total_velocity_error += velocity_error;
+  // PID calculations
+  auto p_term_position = m_current_position_settings.kp * position_error;
+  auto i_term_position = m_current_position_settings.ki * position_error;
+  auto d_term_position = m_current_position_settings.kd * (position_error - last_position_error);
+
+  auto p_term_velocity = m_current_velocity_settings.kp * velocity_error;
+  auto i_term_velocity = m_current_velocity_settings.ki * velocity_error;
+  auto d_term_velocity =
+    m_current_velocity_settings.kd * (velocity_error - last_velocity_error);
+
+  auto output_position = p_term_position + i_term_position + d_term_position;
+  auto output_velocity = p_term_velocity + i_term_velocity + d_term_velocity;
+
+  // servo->h_bridge->power()
 }
 }  // namespace sjsu::perseus

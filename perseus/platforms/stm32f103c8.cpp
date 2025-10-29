@@ -105,6 +105,20 @@ auto& timer2()
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
+
+hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
+{
+  auto pin = gpio_a().acquire_output_pin(8);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
+}
+
+hal::v5::strong_ptr<hal::output_pin> rx1_a3()
+{
+  auto pin = gpio_a().acquire_output_pin(3);
+  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
+                                                 std::move(pin));
+}
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   auto timer_pwm_channel =
@@ -131,8 +145,8 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 }
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
-  auto a_low = resources::output_pin_0();
-  auto b_low = resources::output_pin_1();
+  auto a_low = resources::pwm0_a8();
+  auto b_low = resources::rx1_a3();
   auto a_high = resources::pwm_channel_0();
   auto b_high = resources::pwm_channel_1();
   auto h_bridge = sjsu::drivers::h_bridge({ a_high, a_low }, { b_high, b_low });
@@ -244,8 +258,6 @@ void initialize_platform()
       },
     },
   });
-  hal::stm32f1::activate_mco_pa8(
-    hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
