@@ -10,11 +10,14 @@ void application()
   auto terminal = resources::console();
   auto a_high = resources::pwm_channel_0();
   auto b_high = resources::pwm_channel_1();
-  auto a_low = resources::a_low();
-  auto b_low = resources::b_low();
-  auto clock = resources::clock();
-  auto m_h_bridge = h_bridge({ a_high, a_low }, { b_high, b_low });
+  // output pins 1 - 3 don't work
+  auto a_low = resources::output_pin_0();
+  auto b_low = resources::output_pin_4();
 
+  auto clock = resources::clock();
+
+  auto m_h_bridge = h_bridge({ a_high, a_low }, { b_high, b_low });
+  hal::print(*terminal, "Starting H-Bridge Demo\n");
   while (true) {
     m_h_bridge.power(0.1);
     hal::delay(*clock, 2000ms);

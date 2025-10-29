@@ -86,7 +86,7 @@ hal::v5::strong_ptr<hal::serial> console()
 {
   return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
     driver_allocator(), hal::port<1>, hal::buffer<128>);
-}
+} 
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
@@ -190,19 +190,7 @@ auto& timer3()
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
   return timer3;
 }
-hal::v5::strong_ptr<hal::output_pin> a_low()
-{
-  auto pin = gpio_a().acquire_output_pin(8);
-  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
-                                                 std::move(pin));
-}
 
-hal::v5::strong_ptr<hal::output_pin> b_low()
-{
-  auto pin = gpio_a().acquire_output_pin(3);
-  return hal::v5::make_strong_ptr<decltype(pin)>(driver_allocator(),
-                                                 std::move(pin));
-}
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   auto timer_pwm_channel =
@@ -307,8 +295,6 @@ void initialize_platform()
       },
     },
   });
-  hal::stm32f1::activate_mco_pa8(
-    hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
