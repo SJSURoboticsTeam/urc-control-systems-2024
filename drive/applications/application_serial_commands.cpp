@@ -161,6 +161,11 @@ public:
   }
 };
 
+// TODO:
+// 1. implement the ability to read multiple characters in one handle() call
+// 2. implement backspace and <Ctrl-C>
+// 3. improve get_param, error handling, and command def ergonomics
+
 namespace sjsu::drive {
 void application()
 {
