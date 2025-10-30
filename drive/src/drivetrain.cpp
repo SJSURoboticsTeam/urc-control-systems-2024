@@ -1,5 +1,3 @@
-#pragma once
-
 #include "vector2d.hpp"
 #include <array>
 #include <drivetrain.hpp>

@@ -8,5 +8,6 @@ class demos(ConanFile):
 
     def requirements(self):
         self.requires("libhal-util/[^5.4.0]")
-        self.requires("libhal-arm-mcu/[1.18.0]")
-        self.requires("libhal-actuator/[1.2.2]")
+        self.requires("libhal-arm-mcu/1.18.0")
+        self.requires("minimp3/cci.20211201")
+        self.requires("libhal-actuator/[1.2.2 || latest]")
