@@ -10,6 +10,7 @@ DEMOS
     
 INCLUDES
     include
+    .
 SOURCES
     ./src/drivetrain_math.cpp
     ./src/drivetrain.cpp
