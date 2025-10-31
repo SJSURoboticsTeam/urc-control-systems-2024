@@ -289,6 +289,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
 {
   if (not front_right_steer_ptr) {
     try {
+      // front_right_steer_ptr = make_rmd(0x150);
       front_right_steer_ptr = make_rmd(front_right_steer_can_id);
       front_right_steer_ptr->velocity_control(0);
     } catch (hal::exception e) {

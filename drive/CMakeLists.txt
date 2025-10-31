@@ -12,8 +12,10 @@ DEMOS
     prop_motor_test
     chassis_vel_demo
     iterate_state
-    poll_motor_connections
+    simple_can_reply_demo
+    poll_connecitons
     serial_command_demo
+    mc_stability_test
     limit_switch_test
 INCLUDES
     include
@@ -22,6 +24,9 @@ INCLUDES
 SOURCES
     src/drivetrain_math.cpp
     src/drivetrain.cpp
+    src/swerve_module.cpp
+    ../drivers/src/serial_commands.cpp
+    src/mission_control_manager.cpp
     src/swerve_module.cpp
     ../drivers/src/serial_commands.cpp
 

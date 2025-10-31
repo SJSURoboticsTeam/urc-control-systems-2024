@@ -8,7 +8,6 @@
 #include <swerve_module.hpp>
 #include <vector2d.hpp>
 
-
 namespace sjsu::drive {
 
 drivetrain::drivetrain(
@@ -37,7 +36,7 @@ bool drivetrain::set_target_state(chassis_velocities p_target_state,
   bool can_reach = true;
   for (int i = 0; can_reach && i < module_count; i++) {
     if (vector2d::length_squared(vectors[i]) == 0) {
-      //TODO: doesn't seam to work/do anything, fix
+      // TODO: doesn't seam to work/do anything, fix
       m_final_target_module_states[i] = swerve_module_state(NAN, 0);
     } else {
       m_final_target_module_states[i] =
