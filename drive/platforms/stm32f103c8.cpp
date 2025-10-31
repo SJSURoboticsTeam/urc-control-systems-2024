@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include <array>
+#include <cstdint>
+#include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
@@ -221,22 +223,25 @@ hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch()
   return back_right_limit_switch_ptr;
 }
 
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> make_rmd(uint16_t p_address)
+{
+  auto console_ref = resources::console();
+  auto clock_ref = resources::clock();
+  auto transceiver = resources::can_transceiver();
+  auto idf = get_new_can_filter();
+  return hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
+    driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, p_address);
+}
+
 hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer()
 {
   if (not front_left_steer_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      front_left_steer_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x14C);
+      front_left_steer_ptr = make_rmd(0x14C);
     } catch (hal::exception e) {
-      print<64>(*console_ref,
-                "Front left steer failed, error code: \n",
-                e.error_code());
+      auto console_ref = console();
+      print<64>(*console_ref, "Front left steer failed, error code: \n", e.error_code());
       throw e;
     }
   }
@@ -247,16 +252,10 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop()
 {
   if (not front_left_prop_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      front_left_prop_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x141);
-      ;
+      front_left_prop_ptr = make_rmd(0x141);
     } catch (hal::exception e) {
+      auto console_ref = console();
       print<64>(
         *console_ref, "Front left prop failed, error code: \n", e.error_code());
       throw e;
@@ -269,19 +268,11 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
 {
   if (not front_right_steer_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      front_right_steer_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x142);
-      ;
+      front_right_steer_ptr = make_rmd(0x142);
     } catch (hal::exception e) {
-      print<64>(*console_ref,
-                "Front right steer failed, error code: \n",
-                e.error_code());
+      auto console_ref = console();
+      print<64>(*console_ref, "Front right steer failed, error code: \n", e.error_code());
       throw e;
     }
   }
@@ -292,19 +283,11 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop()
 {
   if (not front_right_prop_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      front_right_prop_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x14D);
-      ;
+      front_right_prop_ptr = make_rmd(0x14D);
     } catch (hal::exception e) {
-      print<64>(*console_ref,
-                "Front right prop failed, error code: \n",
-                e.error_code());
+      auto console_ref = console();
+      print<64>(*console_ref, "Front right prop failed, error code: \n", e.error_code());
       throw e;
     }
   }
@@ -315,15 +298,10 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer()
 {
   if (not back_left_steer_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      back_left_steer_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x144);
+      back_left_steer_ptr = make_rmd(0x144);
     } catch (hal::exception e) {
+      auto console_ref = console();
       print<64>(
         *console_ref, "back left steer failed, error code: \n", e.error_code());
       throw e;
@@ -336,14 +314,10 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop()
 {
   if (not back_left_prop_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      back_left_prop_ptr = hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-        driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x141);
+      back_left_prop_ptr = make_rmd(0x141);
     } catch (hal::exception e) {
+      auto console_ref = resources::console();
       print<64>(
         *console_ref, "back left prop failed, error code: \n", e.error_code());
       throw e;
@@ -356,18 +330,11 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer()
 {
   if (not back_right_steer_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      back_right_steer_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x14F);
+      back_right_steer_ptr = make_rmd(0x14F);
     } catch (hal::exception e) {
-      print<64>(*console_ref,
-                "back right steer failed, error code: \n",
-                e.error_code());
+      auto console_ref = console();
+      print<64>(*console_ref, "back right steer failed, error code: \n", e.error_code());
       throw e;
     }
   }
@@ -378,15 +345,10 @@ hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop()
 {
   if (not back_right_prop_ptr) {
-    auto console_ref = resources::console();
-    auto clock_ref = resources::clock();
-    auto transceiver = resources::can_transceiver();
-    auto idf = get_new_can_filter();
     try {
-      back_right_prop_ptr =
-        hal::v5::make_strong_ptr<hal::actuator::rmd_mc_x_v2>(
-          driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, 0x153);
+      back_right_prop_ptr = make_rmd(0x153);
     } catch (hal::exception e) {
+      auto console_ref = console();
       print<64>(
         *console_ref, "back right prop failed, error code: \n", e.error_code());
       throw e;
