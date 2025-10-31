@@ -34,6 +34,15 @@ public:
     float kd = 0.1;
   };
   /**
+    * @brief Struct keeps previous PID settings for the servo.
+    * Obtained from update_velocity/position(_noff) functions 
+  */
+  struct PID_prev_values 
+  {
+    float integral; 
+    float last_error; 
+  }; 
+  /**
     * @brief Set the target position of the servo.
     * @param target_position The target position to set, it is a hal::u16 value. This is relative to the home position. 
   */
@@ -118,18 +127,37 @@ public:
   */
   void set_clamped_speed(hal::u16 target_clamped_speed);
 
+  /**
+    * @brief Update velocity 
+    * @param settings PID values 
+  */
+  void update_velocity_noff(PID_settings settings); 
+  /**
+    * @brief Update position 
+    * @param settings PID values 
+  */
+  void update_position_noff(PID_settings settings); 
+   /**
+    * @brief get velocity from encoder values 
+    * prints to terminal
+  */
+  void get_current_velocity(); 
+
 private:
   status m_current;
   status m_target;
   PID_settings m_current_position_settings;
   PID_settings m_current_velocity_settings;
   hal::v5::optional_ptr<sjsu::drivers::h_bridge>
-    h_bridge;  // idk if this can be copied trivially.
+    m_h_bridge;  // idk if this can be copied trivially.
   hal::v5::optional_ptr<hal::rotation_sensor>
     m_encoder;            // idk if these are supposed to be pointers or what
   float m_clamped_speed;
   float m_clamped_accel;
   float current_encoder_value;
+  PID_prev_values m_PID_prev_velocity_values; 
+  PID_prev_values m_PID_prev_position_values; 
+  // I think below can be commented out? 
   float total_position_error;
   float total_velocity_error;
   float last_position_error;
