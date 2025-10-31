@@ -38,15 +38,6 @@ float parse_float(std::span<hal::byte> s)
   return val;
 }
 
-std::span<hal::byte> get_param(std::span<std::span<hal::byte>> params,
-                               size_t idx)
-{
-  if (idx >= params.size()) {
-    throw std::runtime_error("not enough parameters");
-  }
-  return params[idx];
-}
-
 class command_handler
 {
   std::array<hal::byte, 256> line;
@@ -180,16 +171,17 @@ public:
         }
       }
       if (equal) {
-        cmd.callback(params);
+        try {
+          cmd.callback(params);
+        } catch (std::exception const& err) {
+          std::string_view str{ err.what() };
+          hal::print(*console, str);
+        }
         break;
       }
     }
   }
 };
-
-// TODO:
-// 2. implement backspace and <Ctrl-C>
-// 3. improve get_param, error handling, and command def ergonomics
 
 namespace sjsu::drive {
 void application()
@@ -206,21 +198,30 @@ void application()
     command_def{
       "fls",
       [console](auto params) {
-        float speed = parse_float(get_param(params, 0));
+        if (params.size() < 1) {
+          throw std::runtime_error("not enough arguments, want 1");
+        }
+        float speed = parse_float(params[0]);
         hal::print<32>(*console, "FLS: %f\n", speed);
       },
     },
     command_def{
       "brp",
       [console](auto params) {
-        float speed = parse_float(get_param(params, 0));
+        if (params.size() < 1) {
+          throw std::runtime_error("not enough arguments, want 1");
+        }
+        float speed = parse_float(params[0]);
         hal::print<32>(*console, "BRP: %f\n", speed);
       },
     },
     command_def{
       "drs",
       [console](auto params) {
-        float speed = parse_float(get_param(params, 0));
+        if (params.size() < 1) {
+          throw std::runtime_error("not enough arguments, want 1");
+        }
+        float speed = parse_float(params[0]);
         hal::print<32>(*console, "DRS: %f\n", speed);
       },
     },
@@ -231,9 +232,12 @@ void application()
     command_def{
       "multiparam",
       [console](auto params) {
-        float p1 = parse_float(get_param(params, 0));
-        int p2 = parse_int(get_param(params, 1));
-        int p3 = parse_int(get_param(params, 2));
+        if (params.size() < 3) {
+          throw std::runtime_error("not enough arguments, want 3");
+        }
+        float p1 = parse_float(params[0]);
+        int p2 = parse_int(params[1]);
+        int p3 = parse_int(params[2]);
         hal::print<64>(
           *console, "Multi-parameter command: %f %d %d\n", p1, p2, p3);
       },
