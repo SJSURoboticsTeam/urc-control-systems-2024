@@ -23,7 +23,7 @@
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/output_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/pin.hpp>
-#include <libhal-arm-mcu/stm32f1/spi.hpp>
+//#include <libhal-arm-mcu/stm32f1/spi.hpp>
 #include <libhal-arm-mcu/stm32f1/timer.hpp>
 #include <libhal-arm-mcu/stm32f1/uart.hpp>
 #include <libhal-arm-mcu/stm32f1/usart.hpp>
@@ -41,7 +41,7 @@
 #include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
 
-namespace sjsu::drivers::resources {
+namespace sjsu::hub::resources {
 using namespace hal::literals;
 using st_peripheral = hal::stm32f1::peripheral;
 
@@ -86,7 +86,7 @@ hal::v5::strong_ptr<hal::serial> console()
 {
   return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
     driver_allocator(), hal::port<1>, hal::buffer<128>);
-} 
+}
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
@@ -99,19 +99,25 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::strong_ptr<hal::adc> adc_0()
+//adc1-15- pc5
+//adc2-12 - pc2
+//adc3-11 - pc1
+//adc4- 9 - pb1
+hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
 {
-  static hal::atomic_spin_lock adc_lock;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+  static hal::atomic_spin_lock adc_lock0;
+  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
+  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
 }
 
-hal::v5::strong_ptr<hal::adc> adc_1()
+hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1()
 {
-  static hal::atomic_spin_lock adc_lock;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb1);
+  static hal::atomic_spin_lock adc_lock1;
+  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock1);
+  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
 }
+
+
 hal::v5::strong_ptr<hal::i2c> i2c()
 {
   static auto sda_output_pin = gpio_b().acquire_output_pin(7);
@@ -125,52 +131,17 @@ hal::v5::strong_ptr<hal::i2c> i2c()
                                                      *clock);
 }
 
-hal::v5::strong_ptr<hal::input_pin> input_pin_0()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
-    driver_allocator(), gpio_a().acquire_input_pin(0));
-}
 
-hal::v5::strong_ptr<hal::input_pin> input_pin_1()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(15))>(
-    driver_allocator(), gpio_a().acquire_input_pin(15));
-}
-
-hal::v5::strong_ptr<hal::input_pin> input_pin_2()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(3))>(
-    driver_allocator(), gpio_b().acquire_input_pin(3));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_0()
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0() //G0 -> PA0
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
     driver_allocator(), gpio_a().acquire_output_pin(0));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_1()
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1() //G1 ->PA15
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
     driver_allocator(), gpio_a().acquire_output_pin(15));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_2()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
-    driver_allocator(), gpio_b().acquire_output_pin(3));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_3()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
-    driver_allocator(), gpio_b().acquire_output_pin(4));
-}
-
-hal::v5::strong_ptr<hal::output_pin> output_pin_4()
-{
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
-    driver_allocator(), gpio_b().acquire_output_pin(12));
 }
 
 auto& timer1()
@@ -185,31 +156,42 @@ auto& timer2()
   return timer2;
 }
 
-auto& timer3()
-{
-  static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
-  return timer3;
-}
-
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
+//pwm0 - 32 -> ch8
+//pwm1 - 47 -> ch1
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
 {
   auto timer_pwm_channel =
-    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
+    timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
 {
   auto timer_pwm_channel =
-    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa7);
+    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
+  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+    driver_allocator(), std::move(timer_pwm_channel));
+}
+//PA5_SPI1_SCK will be used for pwm2, this is here as a holder
+hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
+{
+  auto timer_pwm_channel =
+    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency()
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
 {
   auto timer_pwm_frequency = timer1().acquire_pwm_group_frequency();
+  return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
+    driver_allocator(), std::move(timer_pwm_frequency));
+}
+
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
+{
+  auto timer_pwm_frequency = timer2().acquire_pwm_group_frequency();
   return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
     driver_allocator(), std::move(timer_pwm_frequency));
 }
@@ -263,12 +245,12 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
   }
 }
 
-}  // namespace sjsu::drivers::resources
-namespace sjsu::drivers {
+}  // namespace sjsu::hub::resources
+namespace sjsu::hub {
 void initialize_platform()
 {
   using namespace hal::literals;
-  hal::set_terminate(sjsu::drivers::resources::terminate_handler);
+  hal::set_terminate(sjsu::hub::resources::terminate_handler);
   // Set the MCU to the maximum clock speed
 
   hal::stm32f1::configure_clocks(hal::stm32f1::clock_tree{
@@ -295,7 +277,10 @@ void initialize_platform()
       },
     },
   });
+  //pwm0 uses pa8
+  //hal::stm32f1::activate_mco_pa8(
+  // hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
-}  // namespace sjsu::drivers
+}  // namespace sjsu::hub

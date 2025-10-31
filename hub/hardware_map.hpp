@@ -30,9 +30,10 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
-#include <libhal/usb.hpp>
 #include <libhal/zero_copy_serial.hpp>
 
+
+namespace sjsu::hub {
 namespace custom {
 /**
  * @brief A stand in interface until libhal supports an official watchdog
@@ -51,7 +52,6 @@ public:
   virtual ~watchdog() = default;
 };
 }  // namespace custom
-
 namespace resources {
 // =======================================================
 // Defined by each platform file
@@ -75,23 +75,14 @@ std::pmr::polymorphic_allocator<> driver_allocator();
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
-hal::v5::strong_ptr<hal::output_pin> status_led();
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
-hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
-hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
-hal::v5::strong_ptr<hal::adc> adc();
-hal::v5::strong_ptr<hal::input_pin> input_pin();
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
+hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
+hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
-hal::v5::strong_ptr<hal::interrupt_pin> interrupt_pin();
-hal::v5::strong_ptr<hal::pwm> pwm();
-hal::v5::strong_ptr<hal::timer> timed_interrupt();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel();
-hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency();
-hal::v5::strong_ptr<hal::spi> spi();
-hal::v5::strong_ptr<hal::output_pin> spi_chip_select();
-hal::v5::strong_ptr<hal::stream_dac_u8> stream_dac();
-hal::v5::strong_ptr<hal::dac> dac();
-hal::v5::strong_ptr<custom::watchdog> watchdog();
 
 inline void reset()
 {
@@ -107,3 +98,4 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
+}  // namespace sjsu::hub
