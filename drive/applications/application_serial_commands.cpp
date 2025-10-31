@@ -74,10 +74,20 @@ class command_handler
     // echo received key back to client
     console->write(view);
 
-    if (line[cursor] == '\n') {
-      cursor = 0;
-      return 1;
+    switch (line[cursor]) {
+      // Ctrl-C (end-of-text)
+      case 0x03:
+        cursor = 0;
+        return 0;
+      // backspace
+      case '\b':
+        cursor--;
+        return 0;
+      case '\n':
+        cursor = 0;
+        return 1;
     }
+
     cursor++;
     return 0;
   }
