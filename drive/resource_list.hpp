@@ -19,14 +19,13 @@
 #include <libhal/timer.hpp>
 #include <libhal/usb.hpp>
 #include <libhal/zero_copy_serial.hpp>
-#include <optional>
 #include <swerve_module.hpp>
 
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.
 namespace sjsu::drive {
 namespace resources {
-  
+
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
@@ -49,7 +48,8 @@ hal::v5::strong_ptr<swerve_module> front_left_swerve_module();
 hal::v5::strong_ptr<swerve_module> front_right_swerve_module();
 hal::v5::strong_ptr<swerve_module> back_left_swerve_module();
 hal::v5::strong_ptr<swerve_module> back_right_swerve_module();
-hal::v5::strong_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4>>
+hal::v5::strong_ptr<
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>>
 swerve_modules();
 
 inline void reset()

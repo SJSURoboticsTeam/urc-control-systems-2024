@@ -482,21 +482,23 @@ hal::v5::strong_ptr<swerve_module> back_right_swerve_module()
   return back_right_swerve_module_ptr;
 }
 
-hal::v5::optional_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4>>
+hal::v5::optional_ptr<
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>>
   swerve_modules_ptr;
-hal::v5::strong_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4>>
+hal::v5::strong_ptr<
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count>>
 swerve_modules()
 {
   if (not swerve_modules_ptr) {
-    auto modules = std::array<hal::v5::strong_ptr<swerve_module>, 4>{
+    auto modules = std::array<hal::v5::strong_ptr<swerve_module>, module_count>{
       front_left_swerve_module(),
       front_right_swerve_module(),
       back_left_swerve_module(),
       back_right_swerve_module()
     };
     swerve_modules_ptr = hal::v5::make_strong_ptr<
-      std::array<hal::v5::strong_ptr<swerve_module>, 4>>(driver_allocator(),
-                                                         std::move(modules));
+      std::array<hal::v5::strong_ptr<swerve_module>, module_count>>(
+      driver_allocator(), std::move(modules));
   }
   return swerve_modules_ptr;
 }
