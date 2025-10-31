@@ -1,5 +1,4 @@
 #include <drivetrain_math.hpp>
-#include <homing.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -10,19 +9,6 @@
 namespace sjsu::drive {
 void application()
 {
-  using namespace std::chrono_literals;
-
-  auto clock = resources::clock();
-  auto console = resources::console();
-  try {
-    auto swerve_modules = resources::swerve_modules();
-    hal::print(*console, "modules defined\n");
-    hal::print(*console, "starting homing!\n");
-    home(swerve_modules, console);
-  } catch (hal::exception e) {
-    hal::print<128>(*console, "Exception code %d\n", e.error_code());
-  }
-
   // resources::reset();
   // each loop:
   // -if stop message stop then stop drive

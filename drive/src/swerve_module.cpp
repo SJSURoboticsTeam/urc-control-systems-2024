@@ -5,7 +5,6 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/pointers.hpp>
 
-
 using namespace std::chrono_literals;
 using namespace hal::literals;
 
@@ -59,7 +58,7 @@ swerve_module_state swerve_module::refresh_actual_state_cache()
   return m_actual_state_cache;
 }
 
-void swerve_module::home()
+void swerve_module::hard_home()
 {
   auto console = resources::console();
   m_steer_motor->feedback_request(

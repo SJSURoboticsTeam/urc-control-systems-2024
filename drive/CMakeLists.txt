@@ -7,6 +7,7 @@ libhal_build_demos(
 
 DEMOS
     application
+    sequential_homing_demo
     
 INCLUDES
     include
@@ -14,7 +15,6 @@ INCLUDES
 SOURCES
     ./src/drivetrain_math.cpp
     ./src/drivetrain.cpp
-    ./src/homing.cpp
     ./src/swerve_module.cpp
 
 PACKAGES

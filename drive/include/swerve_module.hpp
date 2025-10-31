@@ -99,8 +99,10 @@ public:
    * @return if the the module has been outside of tolerance for too long
    */
   bool tolerance_timed_out() const;
-
-  void home();
+  /**
+   * @brief with run homing in a fixed loop (will not update other motors or get interupted)
+   */
+  void hard_home();
 
 private:
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_steer_motor;
