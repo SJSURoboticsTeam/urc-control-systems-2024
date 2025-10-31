@@ -26,16 +26,17 @@
 // (.cpp) files.
 namespace sjsu::drive {
 namespace resources {
+  
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
-hal::v5::strong_ptr<hal::input_pin> fl_pin();
-hal::v5::strong_ptr<hal::input_pin> fr_pin();
-hal::v5::strong_ptr<hal::input_pin> bl_pin();
-hal::v5::strong_ptr<hal::input_pin> br_pin();
+hal::v5::strong_ptr<hal::input_pin> front_left_limit_switch();
+hal::v5::strong_ptr<hal::input_pin> front_right_limit_switch();
+hal::v5::strong_ptr<hal::input_pin> back_left_limit_switch();
+hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch();
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer();
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop();
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer();

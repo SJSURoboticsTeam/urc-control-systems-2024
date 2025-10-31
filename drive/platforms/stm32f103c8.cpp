@@ -173,48 +173,52 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return can_bus_manager_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> fl_pin_ptr;
-hal::v5::strong_ptr<hal::input_pin> fl_pin()
+hal::v5::optional_ptr<hal::input_pin> front_left_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> front_left_limit_switch()
 {
-  if (not fl_pin_ptr) {
-    fl_pin_ptr =
-      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(12))>(
-        driver_allocator(), gpio_b().acquire_input_pin(12));  // 4
+  if (not front_left_limit_switch_ptr) {
+    auto front_left_limit_switch = gpio_b().acquire_input_pin(12);  // 4
+    front_left_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(front_left_limit_switch)>(
+        driver_allocator(), std::move(front_left_limit_switch));
   }
-  return fl_pin_ptr;
+  return front_left_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> fr_pin_ptr;
-hal::v5::strong_ptr<hal::input_pin> fr_pin()
+hal::v5::optional_ptr<hal::input_pin> front_right_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> front_right_limit_switch()
 {
-  if (not fr_pin_ptr) {
-    fr_pin_ptr =
-      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(13))>(
-        driver_allocator(), gpio_b().acquire_input_pin(13));  // 5
+  if (not front_right_limit_switch_ptr) {
+    auto front_right_limit_switch = gpio_b().acquire_input_pin(13);  // 5
+    front_right_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(front_right_limit_switch)>(
+        driver_allocator(), std::move(front_right_limit_switch));
   }
-  return fr_pin_ptr;
+  return front_right_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> bl_pin_ptr;
-hal::v5::strong_ptr<hal::input_pin> bl_pin()
+hal::v5::optional_ptr<hal::input_pin> back_left_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> back_left_limit_switch()
 {
-  if (not bl_pin_ptr) {
-    bl_pin_ptr =
-      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(14))>(
-        driver_allocator(), gpio_b().acquire_input_pin(14));  // 6
+  if (not back_left_limit_switch_ptr) {
+    auto back_left_limit_switch = gpio_b().acquire_input_pin(14);  // 6
+    back_left_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(back_left_limit_switch)>(
+        driver_allocator(), std::move(back_left_limit_switch));
   }
-  return bl_pin_ptr;
+  return back_left_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> br_pin_ptr;
-hal::v5::strong_ptr<hal::input_pin> br_pin()
+hal::v5::optional_ptr<hal::input_pin> back_right_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch()
 {
-  if (not br_pin_ptr) {
-    br_pin_ptr =
-      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(15))>(
-        driver_allocator(), gpio_b().acquire_input_pin(15));  // 7
+  if (not back_right_limit_switch_ptr) {
+    auto back_right_limit_switch = gpio_b().acquire_input_pin(15);  // 7
+    back_right_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(back_right_limit_switch)>(
+        driver_allocator(), std::move(back_right_limit_switch));
   }
-  return br_pin_ptr;
+  return back_right_limit_switch_ptr;
 }
 
 hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer_ptr;
@@ -391,56 +395,65 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop()
   return back_right_prop_ptr;
 }
 
+constexpr swerve_module_settings base_module_settings{
+  .max_speed = 10,
+  .acceleration = 4.0,
+  .turn_speed = 360.0,
+  .min_angle = -135.0,
+  .max_angle = 135.0,
+  .position_tolerance = 5.0,
+  .velocity_tolerance = 0.5,
+  .tolerance_timeout = 0.5,
+};
 hal::v5::optional_ptr<swerve_module> front_left_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> front_left_swerve_module()
 {
   if (not front_left_swerve_module_ptr) {
     constexpr swerve_module_settings front_left_settings{
-      .position = vector2d{ 0.3f, 0.3f },
-      .steer_offset = 0,
-      .max_speed = 10,
-      .acceleration = 4.0,
-      .turn_speed = 360.0,
-      .min_angle = -180.0,
-      .max_angle = 180.0,
-      .position_tolerance = 5.0,
-      .velocity_tolerance = 0.5,
-      .tolerance_timeout = 0.5,
-      .reversed = true
+      .position = vector2d(0.0, 0.0),
+      .max_speed = base_module_settings.max_speed,
+      .acceleration = base_module_settings.acceleration,
+      .turn_speed = base_module_settings.turn_speed,
+      .min_angle = base_module_settings.min_angle,
+      .max_angle = base_module_settings.max_angle,
+      .limit_switch_position = 135.0,
+      .position_tolerance = base_module_settings.position_tolerance,
+      .velocity_tolerance = base_module_settings.velocity_tolerance,
+      .tolerance_timeout = base_module_settings.tolerance_timeout,
+      .home_clockwise = false
     };
     front_left_swerve_module_ptr =
       hal::v5::make_strong_ptr<swerve_module>(driver_allocator(),
                                               front_left_steer(),
                                               front_left_prop(),
-                                              fl_pin(),
+                                              front_left_limit_switch(),
                                               clock(),
                                               front_left_settings);
   }
   return front_left_swerve_module_ptr;
 }
-
 hal::v5::optional_ptr<swerve_module> front_right_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> front_right_swerve_module()
 {
   if (not front_right_swerve_module_ptr) {
     constexpr swerve_module_settings front_right_settings{
-      .position = vector2d{ 0.3f, 0.3f },
-      .steer_offset = 0,
-      .max_speed = 10,
-      .acceleration = 4.0,
-      .turn_speed = 360.0,
-      .min_angle = -180.0,
-      .max_angle = 180.0,
-      .position_tolerance = 5.0,
-      .velocity_tolerance = 0.5,
-      .tolerance_timeout = 0.5,
-      .reversed = false
+      .position = vector2d(0.0, 0.0),
+      .max_speed = base_module_settings.max_speed,
+      .acceleration = base_module_settings.acceleration,
+      .turn_speed = base_module_settings.turn_speed,
+      .min_angle = base_module_settings.min_angle,
+      .max_angle = base_module_settings.max_angle,
+      .limit_switch_position = -135.0,
+      .position_tolerance = base_module_settings.position_tolerance,
+      .velocity_tolerance = base_module_settings.velocity_tolerance,
+      .tolerance_timeout = base_module_settings.tolerance_timeout,
+      .home_clockwise = true
     };
     front_right_swerve_module_ptr =
       hal::v5::make_strong_ptr<swerve_module>(driver_allocator(),
                                               front_right_steer(),
                                               front_right_prop(),
-                                              fr_pin(),
+                                              front_right_limit_switch(),
                                               clock(),
                                               front_right_settings);
   }
@@ -452,23 +465,23 @@ hal::v5::strong_ptr<swerve_module> back_left_swerve_module()
 {
   if (not back_left_swerve_module_ptr) {
     constexpr swerve_module_settings back_left_settings{
-      .position = vector2d{ 0.3f, 0.3f },
-      .steer_offset = 0,
-      .max_speed = 10,
-      .acceleration = 4.0,
-      .turn_speed = 360.0,
-      .min_angle = -180.0,
-      .max_angle = 180.0,
-      .position_tolerance = 5.0,
-      .velocity_tolerance = 0.5,
-      .tolerance_timeout = 0.5,
-      .reversed = true
+      .position = vector2d(0.0, 0.0),
+      .max_speed = base_module_settings.max_speed,
+      .acceleration = base_module_settings.acceleration,
+      .turn_speed = base_module_settings.turn_speed,
+      .min_angle = base_module_settings.min_angle,
+      .max_angle = base_module_settings.max_angle,
+      .limit_switch_position = 135.0,
+      .position_tolerance = base_module_settings.position_tolerance,
+      .velocity_tolerance = base_module_settings.velocity_tolerance,
+      .tolerance_timeout = base_module_settings.tolerance_timeout,
+      .home_clockwise = false
     };
     back_left_swerve_module_ptr =
       hal::v5::make_strong_ptr<swerve_module>(driver_allocator(),
                                               back_left_steer(),
                                               back_left_prop(),
-                                              bl_pin(),
+                                              back_left_limit_switch(),
                                               clock(),
                                               back_left_settings);
   }
@@ -480,23 +493,23 @@ hal::v5::strong_ptr<swerve_module> back_right_swerve_module()
 {
   if (not back_right_swerve_module_ptr) {
     constexpr swerve_module_settings back_right_settings{
-      .position = vector2d{ 0.3f, 0.3f },
-      .steer_offset = 0,
-      .max_speed = 10,
-      .acceleration = 4.0,
-      .turn_speed = 360.0,
-      .min_angle = -180.0,
-      .max_angle = 180.0,
-      .position_tolerance = 5.0,
-      .velocity_tolerance = 0.5,
-      .tolerance_timeout = 0.5,
-      .reversed = false
+      .position = vector2d(0.0, 0.0),
+      .max_speed = base_module_settings.max_speed,
+      .acceleration = base_module_settings.acceleration,
+      .turn_speed = base_module_settings.turn_speed,
+      .min_angle = base_module_settings.min_angle,
+      .max_angle = base_module_settings.max_angle,
+      .limit_switch_position = -135.0,
+      .position_tolerance = base_module_settings.position_tolerance,
+      .velocity_tolerance = base_module_settings.velocity_tolerance,
+      .tolerance_timeout = base_module_settings.tolerance_timeout,
+      .home_clockwise = true
     };
     back_right_swerve_module_ptr =
       hal::v5::make_strong_ptr<swerve_module>(driver_allocator(),
                                               back_right_steer(),
                                               back_right_prop(),
-                                              br_pin(),
+                                              back_right_limit_switch(),
                                               clock(),
                                               back_right_settings);
   }
@@ -509,7 +522,7 @@ hal::v5::strong_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4>>
 swerve_modules()
 {
   if (not swerve_modules_ptr) {
-    static auto modules = std::array<hal::v5::strong_ptr<swerve_module>, 4>{
+    auto modules = std::array<hal::v5::strong_ptr<swerve_module>, 4>{
       front_left_swerve_module(),
       front_right_swerve_module(),
       back_left_swerve_module(),
