@@ -80,6 +80,17 @@ void bldc_perseus::home_encoder()
   current_encoder_value = m_encoder->read().angle;
   m_current.position = 0;
 }
+// get_velocity ( previous position, curernt , dt) => ticks per ms
+// MC sends set_velocity -> update_velocity() -> PID towards our target
+// velocity
+//
+// need to add a dt component
+// update_position() ->
+// update_velocity() -> (different PIDs for when you do have feedforward and
+// when you don't) PID separately for position and velocity at end of each
+// function: m_h_bridge->power(output);
+
+
 
 void bldc_perseus::update()
 {
