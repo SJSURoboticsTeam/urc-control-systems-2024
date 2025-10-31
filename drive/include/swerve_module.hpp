@@ -3,13 +3,11 @@
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
 #include <libhal/pointers.hpp>
+#include <libhal/serial.hpp>
 #include <libhal/servo.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <swerve_structs.hpp>
-#include <libhal/units.hpp>
-#include <libhal/serial.hpp>
-
 
 namespace sjsu::drive {
 
@@ -46,7 +44,6 @@ public:
     hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
     hal::v5::strong_ptr<hal::input_pin> p_limit_switch,
     hal::v5::strong_ptr<hal::steady_clock> p_clock,
-    hal::v5::strong_ptr<hal::serial> p_console,
     swerve_module_settings p_settings);
   /**
    * @brief stops the motors of the module
@@ -110,7 +107,6 @@ private:
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_propulsion_motor;
   hal::v5::strong_ptr<hal::input_pin> m_limit_switch;
   hal::v5::strong_ptr<hal::steady_clock> m_clock;
-  hal::v5::strong_ptr<hal::serial> m_console;
   swerve_module_state m_target_state;
   swerve_module_state m_actual_state_cache;
 

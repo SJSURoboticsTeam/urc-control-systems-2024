@@ -22,7 +22,6 @@
 #include <optional>
 #include <swerve_module.hpp>
 
-
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.
 namespace sjsu::drive {
@@ -49,7 +48,8 @@ hal::v5::strong_ptr<swerve_module> front_left_swerve_module();
 hal::v5::strong_ptr<swerve_module> front_right_swerve_module();
 hal::v5::strong_ptr<swerve_module> back_left_swerve_module();
 hal::v5::strong_ptr<swerve_module> back_right_swerve_module();
-hal::v5::strong_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4>> swerve_modules();
+hal::v5::strong_ptr<std::array<hal::v5::strong_ptr<swerve_module>, 4>>
+swerve_modules();
 
 inline void reset()
 {

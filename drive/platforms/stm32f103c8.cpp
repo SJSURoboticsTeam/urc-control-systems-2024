@@ -414,7 +414,6 @@ hal::v5::strong_ptr<swerve_module> front_left_swerve_module()
                                               front_left_prop(),
                                               fl_pin(),
                                               clock(),
-                                              console(),
                                               front_left_settings);
   }
   return front_left_swerve_module_ptr;
@@ -443,7 +442,6 @@ hal::v5::strong_ptr<swerve_module> front_right_swerve_module()
                                               front_right_prop(),
                                               fr_pin(),
                                               clock(),
-                                              console(),
                                               front_right_settings);
   }
   return front_right_swerve_module_ptr;
@@ -472,7 +470,6 @@ hal::v5::strong_ptr<swerve_module> back_left_swerve_module()
                                               back_left_prop(),
                                               bl_pin(),
                                               clock(),
-                                              console(),
                                               back_left_settings);
   }
   return back_left_swerve_module_ptr;
@@ -501,7 +498,6 @@ hal::v5::strong_ptr<swerve_module> back_right_swerve_module()
                                               back_right_prop(),
                                               br_pin(),
                                               clock(),
-                                              console(),
                                               back_right_settings);
   }
   return back_right_swerve_module_ptr;
