@@ -52,33 +52,38 @@ class command_handler
   std::array<hal::byte, 256> line;
   size_t cursor;
 
-  // readline() returns true if reached end of line
-  bool readline(hal_serial& console)
+  // readline() reads one byte to the current line and returns:
+  // 0) read one char successfully
+  // 1) reached EOL
+  // 2) no bytes to read & not reached EOL
+  // 3) buffer overflow
+  hal::byte readline(hal_serial& console)
   {
     if (cursor >= line.size()) {
       hal::print(*console,
                  "\nError: exceeded max command length 256 characters\n");
       cursor = 0;
-      return false;
+      return 3;
     }
 
     std::span<hal::byte> view{ line.begin() + cursor, 1 };
     auto n = console->read(view).data.size();
-    if (n != 1) {
-      return false;
+    if (n < 1) {
+      return 2;
     }
     // echo received key back to client
     console->write(view);
 
     if (line[cursor] == '\n') {
       cursor = 0;
-      return true;
+      return 1;
     }
     cursor++;
-    return false;
+    return 0;
   }
 
-  void parse_command(std::span<std::span<hal::byte>>& segments)
+  // parse() parses the current line
+  void parse(std::span<std::span<hal::byte>>& segments)
   {
     size_t segment_cursor = 0;
     size_t start = 0;
@@ -113,12 +118,23 @@ class command_handler
   }
 
 public:
+  // handle() reads the currently available bytes from the serial console and
+  // executes a command if it is complete.
   void handle(hal_serial& console, std::span<command_def> commands)
   {
-    bool run = readline(console);
-    if (!run) {
-      return;
+    while (true) {
+      switch (readline(console)) {
+        case 0:
+          break;
+        case 1:
+          goto stop_reading;
+        case 2:
+        case 3:
+          return;
+      }
     }
+
+  stop_reading:
 
     // size = maximum # of segments
     //
@@ -128,7 +144,7 @@ public:
     // thus, max # of segments = 256/2 = 128
     std::array<std::span<hal::byte>, 128> segments;
     std::span<std::span<hal::byte>> segview{ segments };
-    parse_command(segview);
+    parse(segview);
     if (segview.size() == 0) {
       return;
     }
@@ -162,7 +178,6 @@ public:
 };
 
 // TODO:
-// 1. implement the ability to read multiple characters in one handle() call
 // 2. implement backspace and <Ctrl-C>
 // 3. improve get_param, error handling, and command def ergonomics
 
@@ -218,11 +233,20 @@ void application()
   command_handler cmd{};
 
   while (true) {
+    // we tradeoff responsiveness for performance, effectively batching a bunch
+    // of reads in a single 500ms interval into single read at the end of a
+    // 500ms time block
+    //
+    // to ensure that the client doesn't overflow the receive buffer in this
+    // time, we echo every character the client sends so the client can wait
+    // until we "ack" their command.
     cmd.handle(console, cmd_defs);
 
     // Toggle LED
     led->level(true);
     hal::delay(*clock, 500ms);
+
+    cmd.handle(console, cmd_defs);
 
     led->level(false);
     hal::delay(*clock, 500ms);
