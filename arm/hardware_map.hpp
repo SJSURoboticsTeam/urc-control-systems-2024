@@ -82,16 +82,7 @@ struct arm_can_finders
 };
 
 using arm_joints = std::array<hal::v5::strong_ptr<sjsu::drivers::perseus_bldc>, 6>;
-
-struct arm_joints
-{
-  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> track_servo;
-  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> shoulder_servo;
-  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> elbow_servo;
-  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_pitch_servo;
-  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> wrist_roll_servo;
-  hal::v5::strong_ptr<sjsu::drivers::perseus_bldc> clamp_servo;
-};
+using limit_pins = std::array<hal::v5::strong_ptr<hal::input_pin>, 6>;
 
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
@@ -101,6 +92,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
+hal::v5::strong_ptr<limit_pins> arm_home_pins();
 
 arm_can_finders can_finders(
   hal::v5::strong_ptr<hal::can_transceiver> transceiver,
@@ -108,7 +100,7 @@ arm_can_finders can_finders(
   hal::u16 arm,
   hal::u16 endeffector);
 
-arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver);
+hal::v5::strong_ptr<arm_joints> arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver);
 
 inline void reset()
 {

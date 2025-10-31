@@ -9,6 +9,7 @@
 #include <libhal/units.hpp>
 
 #include "../hardware_map.hpp"
+#include "../include/home.hpp"
 
 namespace sjsu::arm {
 
@@ -48,14 +49,15 @@ void application()
   using namespace hal::literals;
   auto can_transceiver = resources::can_transceiver();
   auto can_bus_manager = resources::can_bus_manager();
+  auto console = resources::console();
 
   auto arm_servos = resources::arm_servos(can_transceiver);
   auto can_finders = resources::can_finders(can_transceiver,
                                             arm_addresses::home_address,
                                             arm_addresses::arm_address,
                                             arm_addresses::end_effector);
+  auto home = Home(arm_servos, resources::arm_home_pins());
   // output pins for ARM 
-  auto console = resources::console();
 
   // starts homing or waits for homing command
   // IMP: elbow will start drooping once homed because gravity. Immediately send
@@ -77,9 +79,6 @@ void application()
       hal::print(*console, "Received homing command");
       print_can_message(*console, *optional_home_message);
 
-      
-      
-      // process_can_message(*optional_message, target, current);
 
       // can_finder->transceiver().send()
       isHomed = true;

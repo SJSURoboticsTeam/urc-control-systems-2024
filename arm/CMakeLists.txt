@@ -9,7 +9,9 @@ libhal_build_demos(
     
     INCLUDES
     ../drivers/include
+    include
     
     SOURCES
+    src/home.cpp
     ../drivers/src/perseus_bldc.cpp
 )

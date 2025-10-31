@@ -124,48 +124,48 @@ arm_can_finders can_finders(
                driver_allocator(), *transceiver, endeffector) };
 }
 
-arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+hal::v5::strong_ptr<arm_joints> arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
 {
   auto idf1 = hal::acquire_can_identifier_filter(driver_allocator(), can_manager); // each filter returns 4 ids
-  auto idf2 = hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
-  return {
-    .track_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+  auto idf2 =
+    hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
+  arm_joints arm_servos = {
+    hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // track
       driver_allocator(),
-      transceiver,  // this will allow the class to send messages to the actual
-                    // perseus controller
+      transceiver,
       idf1[0],
       clock(),
       753,
       0x120),
-    .shoulder_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // shoulder
       driver_allocator(),
       transceiver,
       idf1[1],
       clock(),
       753,
       0x121),
-    .elbow_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // elbow
       driver_allocator(),
       transceiver,
       idf1[2],
       clock(),
       753,
       0x122),
-    .wrist_pitch_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // wrist pitch 1
       driver_allocator(),
       transceiver,
       idf1[3],
       clock(),
       753,
       0x123),
-    .wrist_roll_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // wrist pitch 2
       driver_allocator(),
       transceiver,
       idf2[0],
       clock(),
       753,
       0x124),
-    .clamp_servo = hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(
+    hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // clamp
       driver_allocator(),
       transceiver,
       idf2[1],
@@ -173,6 +173,26 @@ arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
       753,
       0x125)
   };
+  return hal::make_strong_ptr<arm_joints>(driver_allocator(), arm_servos);
+}
+
+hal::v5::strong_ptr<limit_pins> arm_home_pins()
+{
+  limit_pins pins = {
+    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
+      driver_allocator(), gpio_a().acquire_input_pin(0)),
+    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(15))>(
+      driver_allocator(), gpio_a().acquire_input_pin(15)),
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(3))>(
+      driver_allocator(), gpio_b().acquire_input_pin(3)),  // elbow
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(12))>(
+      driver_allocator(), gpio_b().acquire_input_pin(12)),  // wrist pitch
+    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(4))>(
+      driver_allocator(), gpio_a().acquire_input_pin(4)),  // wrist roll
+    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(5))>(
+      driver_allocator(), gpio_a().acquire_input_pin(5))  // clamp
+  };
+  return hal::make_strong_ptr<limit_pins>(driver_allocator(), pins);
 }
 [[noreturn]] void terminate_handler() noexcept
 {
@@ -231,8 +251,8 @@ void initialize_platform()
       },
     },
   });
-  hal::stm32f1::activate_mco_pa8(
-    hal::stm32f1::mco_source::pll_clock_divided_by_2);
+  // hal::stm32f1::activate_mco_pa8(
+  //   hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
