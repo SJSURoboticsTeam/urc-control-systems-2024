@@ -69,6 +69,8 @@ public:
   hal::degrees get_velocity();
   // when we say position we mean angle from homing position
   void set_position(hal::u16 degrees);
+
+  void set_velocity(hal::i16 velocity_percentage);
   // insread of set position and set_velocity i could just do a get_feedback and
   // parse position and velocity
   // this depends on whether I can get velocity (in rpm as apposed to percent

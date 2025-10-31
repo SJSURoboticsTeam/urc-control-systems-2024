@@ -76,6 +76,8 @@ void application()
     if (optional_home_message) {
       hal::print(*console, "Received homing command");
       print_can_message(*console, *optional_home_message);
+
+      
       
       // process_can_message(*optional_message, target, current);
 
