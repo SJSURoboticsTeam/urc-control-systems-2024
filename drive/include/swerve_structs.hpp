@@ -1,6 +1,7 @@
 
-#include "vector2d.hpp"
 #include <libhal/units.hpp>
+#include <vector2d.hpp>
+
 
 namespace sjsu::drive {
 
@@ -14,14 +15,22 @@ using radians = float;
 
 struct swerve_module_state
 {
-  hal::degrees steer_angle;
-  meters_per_sec propulsion_velocity;
+  hal::degrees steer_angle = 0.0f;
+  meters_per_sec propulsion_velocity = 0.0f;
+  constexpr bool operator==(swerve_module_state const& b)
+  {
+    return steer_angle == b.steer_angle && propulsion_velocity == b.propulsion_velocity;
+  }
+  constexpr bool operator!=(swerve_module_state const& b)
+  {
+    return !(*this == b);
+  }
 };
 
 struct chassis_velocities
 {
   vector2d translation;
-  deg_per_sec rotational_vel;
+  deg_per_sec rotational_vel = 0.0f;
 };
 
 }  // namespace sjsu::drive

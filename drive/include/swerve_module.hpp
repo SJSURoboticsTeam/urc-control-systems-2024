@@ -1,10 +1,10 @@
 #pragma once
 
-#include "swerve_structs.hpp"
-#include "vector2d.hpp"
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
+#include <libhal/pointers.hpp>
 #include <libhal/servo.hpp>
 #include <libhal/units.hpp>
+#include <swerve_structs.hpp>
 
 namespace sjsu::drive {
 
@@ -33,13 +33,19 @@ public:
    * @param p_propulsion_motor the motor
    * @param p_setting module config info
    */
-  swerve_module(hal::actuator::rmd_mc_x_v2& p_steer_motor,
-                hal::actuator::rmd_mc_x_v2& p_propulsion_motor,
-                swerve_module_settings p_settings);
+  swerve_module(
+    hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
+    hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
+    swerve_module_settings p_settings);
   /**
    * @brief stops the motors of the module
    */
   void stop();
+  /**
+   * @brief if the drivetrain is at a full stop (or within tolerance of stop)
+   * @return if the drivetrain is at a full stop (or within tolerance of stop)
+   */
+  bool stopped() const;
   /**
    * @brief sets the target module state the module will try to set
    *
@@ -52,7 +58,7 @@ public:
    * @param p_state the state the module would try to achieve
    * @return if the values are with in tolerances based on settings
    */
-  bool can_reach_state(swerve_module_state const& p_state);
+  bool can_reach_state(swerve_module_state const& p_state) const;
 
   /**
    * @brief gives the cached module state based on most recent readings
@@ -72,7 +78,7 @@ public:
    *
    * @return the current state the module is trying to achieve
    */
-  swerve_module_state get_target_state();
+  swerve_module_state get_target_state() const;
   /**
    * @brief updates the debounce so the drivetrain stops when a module's states
    * are outside of tolerance for too long
@@ -84,12 +90,14 @@ public:
    *
    * @return if the the module has been outside of tolerance for too long
    */
-  bool tolerance_timed_out();
+  bool tolerance_timed_out() const;
 
 private:
-  hal::actuator::rmd_mc_x_v2& m_steer_motor;
-  hal::actuator::rmd_mc_x_v2& m_propulsion_motor;
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_steer_motor;
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_propulsion_motor;
   swerve_module_state m_target_state;
   swerve_module_state m_actual_state_cache;
+
+private:
 };
 }  // namespace sjsu::drive
