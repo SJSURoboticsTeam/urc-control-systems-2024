@@ -129,27 +129,23 @@ void initialize_can()
   }
 }
 
-std::array<std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>, 2>
+// set to 4 since not filters have been made yet
+unsigned int can_filters_count = 0;
+std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
   can_identifier_filters;
 hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
 {
-  static unsigned int can_filters_array_index = 0;
-  if (can_filters_array_index >=
-      can_identifier_filters.size() * can_identifier_filters[0].size()) {
-    // TODO replace with a better exception
-    throw hal::unknown(nullptr);
-  }
-  if (can_filters_array_index % 4) {
+  if (can_filters_count == 0) {
     initialize_can();
     auto filter_batch =
       hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
     for (unsigned int i = 0; i < filter_batch.size(); i++) {
-      can_identifier_filters[can_filters_array_index / 4][i] = filter_batch[i];
+      can_identifier_filters[i] = filter_batch[i];
     }
+    can_filters_count = filter_batch.size();
   }
-  auto can_id_filter = can_identifier_filters[can_filters_array_index / 4]
-                                             [can_filters_array_index % 4];
-  can_filters_array_index++;
+  can_filters_count--;
+  auto can_id_filter = can_identifier_filters[can_filters_count];
   return can_id_filter;
 }
 
@@ -241,7 +237,9 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer()
       front_left_steer_ptr = make_rmd(0x14C);
     } catch (hal::exception e) {
       auto console_ref = console();
-      print<64>(*console_ref, "Front left steer failed, error code: \n", e.error_code());
+      print<64>(*console_ref,
+                "Front left steer failed, error code: \n",
+                e.error_code());
       throw e;
     }
   }
@@ -272,7 +270,9 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
       front_right_steer_ptr = make_rmd(0x142);
     } catch (hal::exception e) {
       auto console_ref = console();
-      print<64>(*console_ref, "Front right steer failed, error code: \n", e.error_code());
+      print<64>(*console_ref,
+                "Front right steer failed, error code: \n",
+                e.error_code());
       throw e;
     }
   }
@@ -287,7 +287,9 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop()
       front_right_prop_ptr = make_rmd(0x14D);
     } catch (hal::exception e) {
       auto console_ref = console();
-      print<64>(*console_ref, "Front right prop failed, error code: \n", e.error_code());
+      print<64>(*console_ref,
+                "Front right prop failed, error code: \n",
+                e.error_code());
       throw e;
     }
   }
@@ -334,7 +336,9 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer()
       back_right_steer_ptr = make_rmd(0x14F);
     } catch (hal::exception e) {
       auto console_ref = console();
-      print<64>(*console_ref, "back right steer failed, error code: \n", e.error_code());
+      print<64>(*console_ref,
+                "back right steer failed, error code: \n",
+                e.error_code());
       throw e;
     }
   }
