@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iterator>
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
@@ -164,6 +165,52 @@ hal::v5::strong_ptr<hal::input_pin> br_pin()
     driver_allocator(), gpio_b().acquire_input_pin(15));  // 7
 }
 
+hal::v5::strong_ptr<hal::output_pin> output_pin_0()
+{
+  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
+    driver_allocator(), gpio_a().acquire_output_pin(0));
+}
+
+hal::v5::strong_ptr<hal::output_pin> output_pin_1()
+{
+  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
+    driver_allocator(), gpio_a().acquire_output_pin(15));
+}
+
+hal::v5::strong_ptr<hal::output_pin> output_pin_2()
+{
+  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
+    driver_allocator(), gpio_b().acquire_output_pin(3));
+}
+
+hal::v5::strong_ptr<hal::output_pin> output_pin_3()
+{
+  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
+    driver_allocator(), gpio_b().acquire_output_pin(4));
+}
+
+hal::v5::strong_ptr<hal::output_pin> output_pin_4()
+{
+  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
+    driver_allocator(), gpio_b().acquire_output_pin(12));
+}
+
+std::array<hal::v5::strong_ptr<hal::output_pin>, 5> std::output_pins()
+{
+  return
+  {
+    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
+    driver_allocator(), gpio_a().acquire_output_pin(0));
+    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
+    driver_allocator(), gpio_a().acquire_output_pin(15));
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
+    driver_allocator(), gpio_b().acquire_output_pin(3));
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
+    driver_allocator(), gpio_b().acquire_output_pin(4));
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
+    driver_allocator(), gpio_b().acquire_output_pin(12));
+  }
+}
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer(
   hal::v5::strong_ptr<hal::serial> console,
   hal::v5::strong_ptr<hal::steady_clock> clock,

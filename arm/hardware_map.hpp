@@ -33,6 +33,8 @@
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
+#include <array>
+
 namespace sjsu::arm {
 namespace custom {
 /**
@@ -78,6 +80,8 @@ struct arm_can_finders
   hal::v5::strong_ptr<hal::can_message_finder> arm_finder;
   hal::v5::strong_ptr<hal::can_message_finder> endeffector_finder;
 };
+
+using arm_joints = std::array<hal::v5::strong_ptr<sjsu::drivers::perseus_bldc>, 6>;
 
 struct arm_joints
 {
