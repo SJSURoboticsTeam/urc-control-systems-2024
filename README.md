@@ -1,44 +1,38 @@
 # urc-control-systems-2024
 This Repository will host the code for the new SJSU Robotics Rover.
-To build: 
-To build the project:
-### Note: the LPC4078 and stm32f1 platforms are not included, simply the micromod in the arm subsystem. 
-```bash
-conan build . -pr <target_name> -pr <compiler>
+## To build:
 ```
-For the `lpc4078 micro mod`:
-
-For the `lpc4078`
-```bash
-conan build . -pr mod-lpc40-v5 -pr arm-gcc-12.3
-```
-```bash
-conan build . -pr lpc4078 -pr arm-gcc-12.3
+conan build PATH -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
 ```
 
+Replace `PATH` with the corelating path to subsystem or driver(s). The folder contain a `conan.py` file. 
 
-For the STM32F103 MicroMod V4:
+If you are already in in the folder run (for quick copy paste):
 
-```bash
-conan build . -pr mod-stm32f1-v4 -pr arm-gcc-12.3
+```
+conan build . -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
+```
+## To flash to controller:
+```
+stm32loader -e -w -v -B -p DEVICE BIN_PATH
 ```
 
-## Installing Platform Profiles
+If you are on mac or linux replace `DEVICE` with the path to the device you want to flash usually something like `/dev/tty.usbserial-10`
 
-`lpc40` profiles:
+If you are on windows replace `DEVICE` with the com port of the device you want to flash usually something like `COM10`
 
-```bash
-conan config install -sf conan/profiles/v2 -tf profiles https://github.com/libhal/libhal-lpc40.git
+Replace `BIN_PATH` with the path to the binary you wish the flash, from the build folder it the path is `build\stm32f103c8\MinSizeRel\application.elf.bin` for the main application. For demos there should be a `.elf.bin` file with a name matching the demo.
+
+for more info refer to [libhal's getting started to the STM32](https://libhal.github.io/latest/getting_started/#uploading-demos-to-device)
+
+If you are already in the folder and want run the main application (for quick copy paste, just replace ##):
+
+**Unix:**
+```
+stm32loader -e -w -v -B -p /dev/tty.usbserial-## ./build/stm32f103c8/MinSizeRel/application.elf.bin
 ```
 
-`stm32f1` profiles:
-
-```bash
-conan config install -sf conan/profiles/v2 -tf profiles https://github.com/libhal/libhal-stm32f1.git
+**Windows:** 
 ```
-
-`micromod` profiles:
-
-```bash
-conan config install -sf conan/profiles/v1 -tf profiles https://github.com/libhal/libhal-micromod.git
+stm32loader -e -w -v -B -p COM## .\build\stm32f103c8\MinSizeRel\application.elf.bin
 ```
