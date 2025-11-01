@@ -5,7 +5,6 @@
 #include <libhal/error.hpp>
 #include <resource_list.hpp>
 
-
 namespace sjsu::drive {
 void application()
 {
@@ -22,7 +21,8 @@ void application()
         (*swerve_modules)[i]->hard_home();
         hal::print<64>(*console, "Homed wheel: %d\n", i);
       } catch (hal::exception e) {
-        hal::print<64>(*console, "Wheel throwing error %d\n", i);
+        hal::print<64>(
+          *console, "Wheel %d throwing error %d\n", i, e.error_code());
         throw e;
       }
     }

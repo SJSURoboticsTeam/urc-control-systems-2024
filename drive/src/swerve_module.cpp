@@ -38,11 +38,12 @@ void swerve_module::set_target_state(swerve_module_state const& p_target_state)
     throw hal::resource_unavailable_try_again(this);
   }
   m_target_state = p_target_state;
-  if (can_reach_state(m_target_state)) {
-    m_steer_motor->position_control(m_target_state.steer_angle - m_steer_offset,
-                                    50);
-    m_propulsion_motor->velocity_control(m_target_state.propulsion_velocity);
+  if (!can_reach_state(m_target_state)) {
+    throw hal::argument_out_of_domain(this);
   }
+  m_steer_motor->position_control(m_target_state.steer_angle - m_steer_offset,
+                                  50);
+  m_propulsion_motor->velocity_control(m_target_state.propulsion_velocity);
 }
 
 bool swerve_module::can_reach_state(swerve_module_state const& p_state) const
@@ -69,6 +70,7 @@ swerve_module_state swerve_module::refresh_actual_state_cache()
 void swerve_module::hard_home()
 {
   auto console = resources::console();
+  hal::print(*console, "starting hard home changed\n");
   m_steer_motor->feedback_request(
     hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
   m_steer_motor->velocity_control(0);  // dummy message
@@ -76,31 +78,34 @@ void swerve_module::hard_home()
   [[__maybe_unused__]] float start_angle = m_steer_motor->feedback().angle();
   while (!m_limit_switch->level()) {
     hal::print<128>(*console, "level: %d\n", m_limit_switch->level());
+    // m_steer_motor->velocity_control(1);
+    // hal::print(*console, "waiting\n");
+    // hal::delay(*m_clock, 2000ms);
     if (settings.home_clockwise) {
-      m_steer_motor->velocity_control(1);
+      m_steer_motor->velocity_control(-1);
       hal::delay(*m_clock, 5ms);
     } else {
-      m_steer_motor->velocity_control(-1);
+      m_steer_motor->velocity_control(1);
       hal::delay(*m_clock, 5ms);
     }
   }
   hal::print<128>(*console, "Final level: %d\n", m_limit_switch->level());
   m_steer_motor->velocity_control(0);  // stops
-  hal::delay(*m_clock, 1000ms);
+  // hal::delay(*m_clock, 1000ms);
 
-  m_steer_motor->feedback_request(
-    hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
-  float stop_angle = m_steer_motor->feedback().angle();
+  // m_steer_motor->feedback_request(
+  //   hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
+  // float stop_angle = m_steer_motor->feedback().angle();
 
-  if (settings.home_clockwise) {
-    m_steer_motor->position_control(stop_angle - 90, 1);
-  } else {
-    m_steer_motor->position_control(stop_angle + 90, 1);
-  }
-  stop_angle = m_steer_motor->feedback().angle();
+  // if (settings.home_clockwise) {
+  //   m_steer_motor->position_control(stop_angle - 90, 1);
+  // } else {
+  //   m_steer_motor->position_control(stop_angle + 90, 1);
+  // }
+  // stop_angle = m_steer_motor->feedback().angle();
 
-  hal::print<128>(*console, "Stopped angle: %f\n", stop_angle);
-  m_steer_offset = stop_angle - settings.limit_switch_position;
+  // hal::print<128>(*console, "Stopped angle: %f\n", stop_angle);
+  // m_steer_offset = stop_angle - settings.limit_switch_position;
 }
 
 }  // namespace sjsu::drive

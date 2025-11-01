@@ -130,22 +130,24 @@ void initialize_can()
 }
 
 // set to 4 since not filters have been made yet
-unsigned int can_filters_count = 0;
-std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
+unsigned int can_filters_index = 0;
+std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 8>
   can_identifier_filters;
 hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
 {
-  if (can_filters_count == 0) {
+  if (can_filters_index >= can_identifier_filters.size()) {
+    throw hal::unknown(nullptr);//TODO: look for better exception
+  }
+  if (can_filters_index % 4 == 0) {
     initialize_can();
     auto filter_batch =
       hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
     for (unsigned int i = 0; i < filter_batch.size(); i++) {
-      can_identifier_filters[i] = filter_batch[i];
+      can_identifier_filters[i+can_filters_index] = filter_batch[i];
     }
-    can_filters_count = filter_batch.size();
   }
-  can_filters_count--;
-  auto can_id_filter = can_identifier_filters[can_filters_count];
+  auto can_id_filter = can_identifier_filters[can_filters_index];
+  can_filters_index++;
   return can_id_filter;
 }
 
@@ -238,7 +240,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
-                "Front left steer failed, error code: \n",
+                "Front left steer failed, error code: %d\n",
                 e.error_code());
       throw e;
     }
@@ -255,7 +257,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(
-        *console_ref, "Front left prop failed, error code: \n", e.error_code());
+        *console_ref, "Front left prop failed, error code: %d\n", e.error_code());
       throw e;
     }
   }
@@ -271,7 +273,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
-                "Front right steer failed, error code: \n",
+                "Front right steer failed, error code: %d\n",
                 e.error_code());
       throw e;
     }
@@ -288,7 +290,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
-                "Front right prop failed, error code: \n",
+                "Front right prop failed, error code: %d\n",
                 e.error_code());
       throw e;
     }
@@ -305,7 +307,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(
-        *console_ref, "back left steer failed, error code: \n", e.error_code());
+        *console_ref, "back left steer failed, error code: %d\n", e.error_code());
       throw e;
     }
   }
@@ -321,7 +323,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop()
     } catch (hal::exception e) {
       auto console_ref = resources::console();
       print<64>(
-        *console_ref, "back left prop failed, error code: \n", e.error_code());
+        *console_ref, "back left prop failed, error code: %d\n", e.error_code());
       throw e;
     }
   }
@@ -337,7 +339,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
-                "back right steer failed, error code: \n",
+                "back right steer failed, error code: %d\n",
                 e.error_code());
       throw e;
     }
@@ -354,7 +356,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop()
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(
-        *console_ref, "back right prop failed, error code: \n", e.error_code());
+        *console_ref, "back right prop failed, error code: %d\n", e.error_code());
       throw e;
     }
   }
