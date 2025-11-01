@@ -31,8 +31,6 @@ libhal_build_demos(
   INCLUDES
   include
 
-  INCLUDES
-  include
 
 SOURCES
     # platforms/micromod.cpp

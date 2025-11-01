@@ -270,7 +270,7 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 }
 
 }  // namespace sjsu::drivers::resources
-namespace sjsu::scienc {
+namespace sjsu::science {
 void initialize_platform()
 {
   using namespace hal::literals;

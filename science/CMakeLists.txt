@@ -20,6 +20,6 @@ libhal_build_demos(
 
     LINK_LIBRARIES
     libhal::util
-    libhal-actuator
+    libhal::actuator
 
 ) 
