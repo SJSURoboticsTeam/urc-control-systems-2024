@@ -178,19 +178,29 @@ hal::v5::strong_ptr<arm_joints> arm_servos(hal::v5::strong_ptr<hal::can_transcei
 
 hal::v5::strong_ptr<limit_pins> arm_home_pins()
 {
+  // limit_pins pins = {
+  //   hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
+  //     driver_allocator(), gpio_a().acquire_input_pin(0)),
+  //   hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(15))>(
+  //     driver_allocator(), gpio_a().acquire_input_pin(15)),
+  //   hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(3))>(
+  //     driver_allocator(), gpio_b().acquire_input_pin(3)),  // elbow
+  //   hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(12))>(
+  //     driver_allocator(), gpio_b().acquire_input_pin(12)),  // wrist pitch
+  //   hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(4))>(
+  //     driver_allocator(), gpio_a().acquire_input_pin(4)),  // wrist roll
+  //   hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(5))>(
+  //     driver_allocator(), gpio_a().acquire_input_pin(5))  // clamp
+  // };
   limit_pins pins = {
-    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
-      driver_allocator(), gpio_a().acquire_input_pin(0)),
-    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(15))>(
-      driver_allocator(), gpio_a().acquire_input_pin(15)),
-    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(3))>(
-      driver_allocator(), gpio_b().acquire_input_pin(3)),  // elbow
-    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(12))>(
-      driver_allocator(), gpio_b().acquire_input_pin(12)),  // wrist pitch
-    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(4))>(
-      driver_allocator(), gpio_a().acquire_input_pin(4)),  // wrist roll
-    hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(5))>(
-      driver_allocator(), gpio_a().acquire_input_pin(5))  // clamp
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(6))>(
+      driver_allocator(), gpio_b().acquire_input_pin(6)),  // temporary I2C pin
+    hal::v5::make_strong_ptr<decltype(gpio_b().acquire_input_pin(7))>(
+      driver_allocator(), gpio_b().acquire_input_pin(7)),
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr
   };
   return hal::make_strong_ptr<limit_pins>(driver_allocator(), pins);
 }

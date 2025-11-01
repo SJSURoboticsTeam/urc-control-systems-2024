@@ -1,14 +1,17 @@
 // TODO
 #include "../include/home.hpp"
 
+namespace sjsu::arm {
 void Home::home_all_joints()
 {
-for (size_t i = 0; i < m_home_pins->size(); i++)
-    {
+  for (size_t i = 0; i < m_home_pins->size(); i++) {
+    if ((*m_home_pins)[i] != nullptr) { 
       while (!(*m_home_pins)[i]->level())
       {
         (*m_arm_joints)[i]->set_velocity(30);
       }
       (*m_arm_joints)[i]->set_velocity(0);
+      }
     }
+}
 }

@@ -82,7 +82,7 @@ struct arm_can_finders
 };
 
 using arm_joints = std::array<hal::v5::strong_ptr<sjsu::drivers::perseus_bldc>, 6>;
-using limit_pins = std::array<hal::v5::strong_ptr<hal::input_pin>, 6>;
+using limit_pins = std::array<hal::v5::optional_ptr<hal::input_pin>, 6>;
 
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
