@@ -19,7 +19,7 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
   DEMOS
   application
-
+  velocity_test
   INCLUDES
   ../drivers/include/
   include

@@ -56,7 +56,7 @@ public:
    * @brief Get the current position of the servo.
    * @return Gets the position relative to the home position.
   */
-  hal::u16 get_current_position();
+  float get_current_position();
 
   /**
     * @brief Set the current position of the servo.
@@ -143,14 +143,14 @@ public:
   */
   void get_current_velocity(); 
 
-private:
+public:
   status m_current;
   status m_target;
   PID_settings m_current_position_settings;
   PID_settings m_current_velocity_settings;
-  hal::v5::optional_ptr<sjsu::drivers::h_bridge>
+  hal::v5::strong_ptr<sjsu::drivers::h_bridge>
     m_h_bridge;  // idk if this can be copied trivially.
-  hal::v5::optional_ptr<hal::rotation_sensor>
+  hal::v5::strong_ptr<hal::rotation_sensor>
     m_encoder;            // idk if these are supposed to be pointers or what
   float m_clamped_speed;
   float m_clamped_accel;

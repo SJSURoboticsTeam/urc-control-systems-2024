@@ -41,10 +41,10 @@ hal::u16 bldc_perseus::get_target_position()
   return m_target.position;
 }
 
-hal::u16 bldc_perseus::get_current_position()
+float bldc_perseus::get_current_position()
 {
 
-  m_current.position = static_cast<hal::u16>(m_encoder->read().angle);
+  m_current.position = m_encoder->read().angle;
   return m_current.position;
 }
 
@@ -155,9 +155,9 @@ void bldc_perseus::get_current_velocity()
   auto clock = resources::clock();
 
   float cv = m_encoder->read().angle; 
-  hal::delay(*clock, 1ms);
+  hal::delay(*clock, 10ms);
   cv = cv - m_encoder->read().angle; 
-  hal::print<16>(*terminal, "deg/ms: %f\n", cv);
+  hal::print<32>(*terminal, "deg/ms: %.6f\n", cv);
 }
 
 void bldc_perseus::update()

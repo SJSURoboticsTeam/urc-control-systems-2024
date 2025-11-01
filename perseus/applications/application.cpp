@@ -8,6 +8,7 @@
 #include <libhal/pointers.hpp>
 
 #include <bldc_servo.hpp>
+#include <type_traits>
 
 #include "../hardware_map.hpp"
 
@@ -59,17 +60,18 @@ enum servo_address : hal::u16
 
 void process_can_message(hal::can_message const& p_message,
                          hal::v5::strong_ptr<bldc_perseus> bldc,
-                         hal::v5::optional_ptr<hal::can_message> response)
+                         [[maybe_unused]] hal::v5::strong_ptr<hal::can_message> response)
 {
   switch (static_cast<action>(p_message.payload[0])) {
-    case action::read_position: {
-      auto current_position = bldc->get_current_position();
-      response->payload[0] =
-        static_cast<hal::byte>(action::read_position) + 0x50;
-      response->payload[1] = (current_position >> 8) & 0xff;
-      response->payload[1] = current_position & 0xff;
-      break;
-    }
+    // case action::read_position: {
+    //   auto current_position = bldc->get_current_position();
+    //   response->length = 3;
+    //   response->payload[0] =
+    //     static_cast<hal::byte>(action::read_position) + 0x50;
+    //   response->payload[1] = (current_position >> 8) & 0xff;
+    //   response->payload[1] = current_position & 0xff;
+    //   break;
+    // }
     case action::set_position: {
       auto target_position = p_message.payload[1] << 8 | p_message.payload[2];
       bldc->set_target_position(target_position);
@@ -81,12 +83,12 @@ void process_can_message(hal::can_message const& p_message,
       break;
     }
     case action::read_velocity: {
-      auto current_velocity = bldc->get_current_velocity_percentage();
-      response->payload[0] =
-        static_cast<hal::byte>(action::read_velocity) + 0x50;
-      response->payload[1] =
-        (current_velocity >> 8) & 0xFF;  // HIGH BYTE FIRST // HIGH BYTE FIRST
-      response->payload[2] = current_velocity & 0xFF;  // LOW BYTE SECOND
+      // auto current_velocity = bldc->get_current_velocity_percentage();
+      // response->payload[0] =
+      //   static_cast<hal::byte>(action::read_velocity) + 0x50;
+      // response->payload[1] =
+      //   (current_velocity >> 8) & 0xFF;  // HIGH BYTE FIRST // HIGH BYTE FIRST
+      // response->payload[2] = current_velocity & 0xFF;  // LOW BYTE SECOND
       break;
     }
     case action::stop:
@@ -121,38 +123,44 @@ void process_can_message(hal::can_message const& p_message,
   }
 }
 
+// each rotation of the output shaft of the track servo is 8 mm of linear travel
+// so 1 degree of rotation is 8mm / 360 = 0.0222 mm of linear travel
+// 188:1 is for shoulder servo 5281.1 * 28
+// 188:1 elbow 1-2 reduction. 5281.1 * 2
 void application()
 {
   using namespace std::chrono_literals;
   using namespace hal::literals;
+  auto console = resources::console();
+  auto clock = resources::clock();
   auto h_bridge = resources::h_bridge();
   auto encoder = resources::encoder();
   auto can_transceiver = resources::can_transceiver();
   auto bus_manager = resources::can_bus_manager();
-  auto console = resources::console();
+  bus_manager->baud_rate(1.0_MHz);
+  auto can_id_filter = resources::can_identifier_filter();
   hal::u16 servo_address =
     servo_address::track_servo;
-  auto can_finder = resources::can_finder(can_transceiver, servo_address);
-  bus_manager->baud_rate(1.0_MHz);
-  auto servo = hal::v5::make_strong_ptr<bldc_perseus>(
-    resources::driver_allocator(), h_bridge, encoder);
+  hal::can_message_finder can_finder(*can_transceiver, 0x120);
+
+  can_id_filter->allow(servo_address);
+  hal::print(*console, "CAN message finder initialized...\n");
+  bldc_perseus servo(h_bridge, encoder);
+  hal::print(*console, "BLDC Servo created...\n");
+
+  auto servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
+  
+  hal::print(*console, "BLDC Servo initialized...\n");
 
   while (true) {
-    auto optional_message = can_finder->find();
+    auto optional_message = can_finder.find();
     if (optional_message) {
       hal::print<128>(*console, "%x%X Servo received a message", servo_address);
       print_can_message(*console, *optional_message);
-      hal::v5::optional_ptr<hal::can_message> response;
-      response->length = 8;
-      process_can_message(*optional_message, servo, response);
-      if (response) {
-        can_finder->transceiver().send(*response);
-      }
+      auto response = hal::v5::make_strong_ptr<hal::can_message>(resources::driver_allocator(), hal::can_message{});
+      process_can_message(*optional_message, servo_ptr, response);
+      can_finder.transceiver().send(*response);
     }
-    // // this is a very preliminary version
-    // servo->set_target_velocity(
-    //   (servo->get_target_position() - servo->get_current_position()));
-    servo->update(); // update the internal state of the servo
   } 
 }
 }  // namespace sjsu::perseus
