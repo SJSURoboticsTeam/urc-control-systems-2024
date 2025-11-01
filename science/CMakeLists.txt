@@ -6,25 +6,20 @@ project(application LANGUAGES CXX)
 libhal_build_demos(
     DEMOS
     application
-    pump_manager_demo
-
-    PACKAGES
-    libhal-util
-    libhal-soft
-    libhal-pca
-    # libhal-esp8266
-
-    LINK_LIBRARIES
-    libhal::util
-    libhal::soft
-    libhal::pca
-    # libhal::esp8266
 
     INCLUDES
     .
 
     SOURCES
     implementations/pump_manager.cpp
-    implementations/revolver.cpp
-    implementations/science_state_machine.cpp
+
+    PACKAGES
+    libhal-util
+    libhal-actuator
+
+
+    LINK_LIBRARIES
+    libhal::util
+    libhal-actuator
+
 ) 
