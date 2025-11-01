@@ -1,3 +1,4 @@
+#include "./application_serial_commands.hpp"
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -5,10 +6,9 @@
 #include <libhal/pointers.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timeout.hpp>
-#include <resource_list.hpp>
-#include <stdexcept>
 #include <string.h>
 
+namespace sjsu::drive {
 // just a convenience type
 using hal_serial = hal::v5::strong_ptr<hal::serial>;
 
@@ -23,7 +23,7 @@ int parse_int(std::span<hal::byte> s)
   char* end;
   int val = std::strtol(reinterpret_cast<char*>(s.begin().base()), &end, 10);
   if (end != reinterpret_cast<char*>(s.end().base())) {
-    throw std::runtime_error("integer parse failure");
+    throw hal::argument_out_of_domain(nullptr);
   }
   return val;
 }
@@ -33,7 +33,7 @@ float parse_float(std::span<hal::byte> s)
   char* end;
   float val = std::strtod(reinterpret_cast<char*>(s.begin().base()), &end);
   if (end != reinterpret_cast<char*>(s.end().base())) {
-    throw std::runtime_error("float parse failure");
+    throw hal::argument_out_of_domain(nullptr);
   }
   return val;
 }
@@ -68,11 +68,21 @@ class command_handler
     switch (line[cursor]) {
       // Ctrl-C (end-of-text)
       case 0x03:
+        view[0] = '\n';
+        console->write(view);
+
         cursor = 0;
         return 0;
       // backspace
       case '\b':
-        cursor--;
+        view[0] = ' ';
+        console->write(view);
+        view[0] = '\b';
+        console->write(view);
+
+        if (cursor > 0) {
+          cursor--;
+        }
         return 0;
       case '\n':
         cursor = 0;
@@ -118,6 +128,22 @@ class command_handler
     segments = segments.subspan(0, segment_cursor);
   }
 
+  bool prefix_match(char const* prefix, std::span<hal::byte> str)
+  {
+    for (size_t pi = 0;; pi++) {
+      char target_char = prefix[pi];
+      bool given_end = pi >= str.size();
+      bool target_end = target_char == '\0';
+      if (given_end || target_end) {
+        return given_end && target_end;
+      }
+      if (str[pi] != target_char) {
+        return false;
+      }
+    }
+    return false;
+  }
+
 public:
   // handle() reads the currently available bytes from the serial console and
   // executes a command if it is complete.
@@ -156,34 +182,29 @@ public:
 
     for (size_t i = 0; i < commands.size(); i++) {
       command_def cmd = commands[i];
-      bool equal = false;
-      for (size_t pi = 0;; pi++) {
-        char target_char = cmd.prefix[pi];
-        bool given_end = pi >= prefix.size();
-        bool target_end = target_char == '\0';
-        if (given_end || target_end) {
-          equal = given_end && target_end;
-          break;
-        }
-        if (prefix[pi] != target_char) {
-          equal = false;
-          break;
+      if (!prefix_match(cmd.prefix, prefix)) {
+        continue;
+      }
+
+      try {
+        cmd.callback(params);
+      } catch (hal::exception e) {
+        switch (e.error_code()) {
+          case std::errc::argument_out_of_domain:
+            hal::print(*console, "Error: invalid argument length or type\n");
+            break;
+          default:
+            hal::print<32>(*console, "Error code: %d\n", e.error_code());
+            break;
         }
       }
-      if (equal) {
-        try {
-          cmd.callback(params);
-        } catch (std::exception const& err) {
-          std::string_view str{ err.what() };
-          hal::print(*console, str);
-        }
-        break;
-      }
+      return;
     }
+
+    hal::print(*console, "Unknown command.\n");
   }
 };
 
-namespace sjsu::drive {
 void application()
 {
   using namespace std::chrono_literals;
@@ -197,9 +218,9 @@ void application()
     // the same fashion
     command_def{
       "fls",
-      [console](auto params) {
-        if (params.size() < 1) {
-          throw std::runtime_error("not enough arguments, want 1");
+      [&console](auto params) {
+        if (params.size() != 1) {
+          throw hal::argument_out_of_domain(nullptr);
         }
         float speed = parse_float(params[0]);
         hal::print<32>(*console, "FLS: %f\n", speed);
@@ -207,9 +228,9 @@ void application()
     },
     command_def{
       "brp",
-      [console](auto params) {
-        if (params.size() < 1) {
-          throw std::runtime_error("not enough arguments, want 1");
+      [&console](auto params) {
+        if (params.size() != 1) {
+          throw hal::argument_out_of_domain(nullptr);
         }
         float speed = parse_float(params[0]);
         hal::print<32>(*console, "BRP: %f\n", speed);
@@ -217,9 +238,9 @@ void application()
     },
     command_def{
       "drs",
-      [console](auto params) {
-        if (params.size() < 1) {
-          throw std::runtime_error("not enough arguments, want 1");
+      [&console](auto params) {
+        if (params.size() != 1) {
+          throw hal::argument_out_of_domain(nullptr);
         }
         float speed = parse_float(params[0]);
         hal::print<32>(*console, "DRS: %f\n", speed);
@@ -227,13 +248,18 @@ void application()
     },
     command_def{
       "noparam",
-      [console](auto) { hal::print(*console, "No parameter command\n"); },
+      [&console](auto params) {
+        if (params.size() != 0) {
+          throw hal::argument_out_of_domain(nullptr);
+        }
+        hal::print(*console, "Executed no parameter command\n");
+      },
     },
     command_def{
       "multiparam",
-      [console](auto params) {
-        if (params.size() < 3) {
-          throw std::runtime_error("not enough arguments, want 3");
+      [&console](auto params) {
+        if (params.size() != 3) {
+          throw hal::argument_out_of_domain(nullptr);
         }
         float p1 = parse_float(params[0]);
         int p2 = parse_int(params[1]);
@@ -254,6 +280,10 @@ void application()
     // to ensure that the client doesn't overflow the receive buffer in this
     // time, we echo every character the client sends so the client can wait
     // until we "ack" their command.
+    //
+    // this makes it awkward if your TTY client sends one character at a time
+    // instead of an entire line at a time, in these cases it makes more sense
+    // to simply reconfigure your TTY client
     cmd.handle(console, cmd_defs);
 
     // Toggle LED
