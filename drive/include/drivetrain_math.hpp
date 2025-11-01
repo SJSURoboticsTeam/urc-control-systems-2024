@@ -39,15 +39,6 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
     p_modules);
 
-// will likely be unused for this rover
-/**
- * @brief calculates a score that represents how much conflict there is between
- * the modules
- */
-float module_validity_strain_score(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
-  std::array<vector2d, module_count> p_vectors);
-
 /**
  * @brief calculates an estimate of the chassis velocities based on the cached
  * module states

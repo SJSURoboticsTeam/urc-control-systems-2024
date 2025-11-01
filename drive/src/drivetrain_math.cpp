@@ -48,48 +48,6 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   return vectors;
 }
 
-float module_validity_strain_score(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count>& p_modules,
-  std::array<vector2d, module_count> p_vectors)
-{
-  // current calculation only works if all modules are the same distance to the
-  // center
-  vector2d transition(0, 0);
-  // calc overall translation and remove from vectors
-  for (auto& v : p_vectors) {
-    transition = transition - (v / p_vectors.size());
-  }
-  for (auto& v : p_vectors) {
-    v = v - transition;
-  }
-  // calc overall turn and remove from vectors
-  float turn_speed = 0.0;  // in radians
-  for (int i = 0; i < module_count; i++) {
-    // get turn vector for 1 rad persec (reference)
-    vector2d ref_vector =
-      vector2d::rotate_90_cw(p_modules[i]->settings.position);
-    // get scale of turn vector projected onto refrence vector
-    turn_speed -=
-      vector2d::dot(ref_vector, p_vectors[i]) / vector2d::length(ref_vector);
-  }
-  turn_speed /= module_count;  // average it out
-  // remove from vectors
-  for (int i = 0; i < module_count; i++) {
-    // get turn vector for 1 rad persec (reference)
-    vector2d ref_vector =
-      vector2d::rotate_90_cw(p_modules[i]->settings.position);
-    // calc final vector
-    p_vectors[i] = p_vectors[i] - (ref_vector * turn_speed);
-  }
-  // the arbitrary function for strain
-  // TODO: get a better function for strain from mechanical
-  float strain = 0.0;
-  for (auto v : p_vectors) {
-    strain += vector2d::length_squared(v);
-  }
-  return strain;
-}
-
 chassis_velocities calc_estimated_chassis_velocities(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
     p_modules);

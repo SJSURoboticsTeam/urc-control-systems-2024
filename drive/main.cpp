@@ -15,7 +15,7 @@
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
-#include "applications/application.hpp"
+#include <resource_list.hpp>
 int main()
 {
   sjsu::drive::initialize_platform();
