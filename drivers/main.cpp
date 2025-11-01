@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,28 +11,70 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#include <libhal-exceptions/control.hpp>
+#include <libhal-util/serial.hpp>
+#include <libhal-util/steady_clock.hpp>
+
 #include "hardware_map.hpp"
 #include <libhal/error.hpp>
 
 #include <libhal-util/serial.hpp>
 int main()
 {
-  auto hardware_map = sjsu::drivers::initialize_platform();
-  try {
-
-    hal::print<1024>(*hardware_map.terminal, "huh?");
-    application(hardware_map);
-  } catch (...) {
-    hal::print<1024>(*hardware_map.terminal,
-                     "A resource was not found");
+  sjsu::drivers::initialize_platform();
+  sjsu::drivers::application();
+  std::terminate();
+}
+// libhal-arm-mcu specific APIs defined to reduce code size
+extern "C"
+{
+  // This gets rid of an issue with libhal-exceptions in Debug mode.
+  void __assert_func()  // NOLINT
+  {
   }
-
-  return 0;
 }
 
-// namespace boost {
-// void throw_exception(std::exception const&)
-// {
-//   hal::halt();
-// }
-// }  // namespace boost
+// Override global new operator
+void* operator new(std::size_t)
+{
+  throw std::bad_alloc();
+}
+
+// Override global new[] operator
+void* operator new[](std::size_t)
+{
+  throw std::bad_alloc();
+}
+
+void* operator new(unsigned int, std::align_val_t)
+{
+  throw std::bad_alloc();
+}
+
+// Override global delete operator
+void operator delete(void*) noexcept
+{
+}
+
+// Override global delete[] operator
+void operator delete[](void*) noexcept
+{
+}
+
+// Optional: Override sized delete operators (C++14 and later)
+void operator delete(void*, std::size_t) noexcept
+{
+}
+
+void operator delete[](void*, std::size_t) noexcept
+{
+}
+
+void operator delete[](void*, std::align_val_t) noexcept
+{
+}
+
+void operator delete(void*, std::align_val_t) noexcept
+{
+}

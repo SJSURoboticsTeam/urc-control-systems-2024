@@ -7,4 +7,5 @@ libhal_build_demos(
     DEMOS
     application
 
+SOURCES
 )

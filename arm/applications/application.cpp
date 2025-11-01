@@ -7,7 +7,6 @@
 
 #include "./application.hpp"
 
-
 namespace sjsu::arm {
 void application(hardware_map_t& hardware_map)
 {
@@ -35,6 +34,5 @@ void application(hardware_map_t& hardware_map)
   hal::print(console, "Resetting!\n");
   hal::delay(clock, 100ms);
   hardware_map.reset();
-
 }
-}
+}  // namespace sjsu::arm

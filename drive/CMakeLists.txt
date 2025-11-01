@@ -1,29 +1,23 @@
+cmake_minimum_required(VERSION 3.25)
 
-cmake_minimum_required(VERSION 3.20)
-
+# Set project name to demos
 project(application LANGUAGES CXX)
 
 libhal_build_demos(
-    DEMOS
-    application
 
-    PACKAGES
-    libhal-util
-    libhal-actuator
-    # libhal-pca
+DEMOS
+    application
+INCLUDES
+    include
+    .
+SOURCE
+    src
+
+PACKAGES
+#    libhal-__device__
+libhal-actuator
 
     LINK_LIBRARIES
-    libhal::util
-    libhal::actuator
-    # libhal::pca
-
-
-    INCLUDES
-    ./include
-
-    SOURCES
-    implementations/ackermann_steering.cpp
-    implementations/drive_configuration_updater.cpp
-    implementations/wheel_router.cpp
-    implementations/homing.cpp
-) 
+#    libhal::__device__
+libhal::actuator
+)
