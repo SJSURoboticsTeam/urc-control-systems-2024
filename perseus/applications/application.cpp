@@ -141,9 +141,9 @@ void application()
   auto can_id_filter = resources::can_identifier_filter();
   hal::u16 servo_address =
     servo_address::track_servo;
-  hal::can_message_finder can_finder(*can_transceiver, 0x120);
+  hal::can_message_finder can_finder(*can_transceiver, 0x110);
 
-  can_id_filter->allow(servo_address);
+  can_id_filter->allow(0x110);
   hal::print(*console, "CAN message finder initialized...\n");
   bldc_perseus servo(h_bridge, encoder);
   hal::print(*console, "BLDC Servo created...\n");

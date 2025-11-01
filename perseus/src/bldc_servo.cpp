@@ -27,8 +27,8 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
                           // -0.2, even if our target velocity changes to -0.2
   current_encoder_value = m_encoder->read().angle;
   // prev pid values 
-  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0}; 
-  m_PID_prev_position_values = {.integral = 0, .last_error = 0}; 
+  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0};
+  m_PID_prev_position_values = { .integral = 0, .last_error = 0 };
 }
 
 void bldc_perseus::set_target_position(hal::u16 target_position)
@@ -158,29 +158,5 @@ void bldc_perseus::get_current_velocity()
   hal::delay(*clock, 10ms);
   cv = cv - m_encoder->read().angle; 
   hal::print<32>(*terminal, "deg/ms: %.6f\n", cv);
-}
-
-void bldc_perseus::update()
-{
-  auto position_error = m_target.position - m_current.position;
-  auto velocity_error = m_target.velocity - m_current.velocity;
-  total_position_error += position_error;
-  total_velocity_error += velocity_error;
-  // PID calculations
-  auto p_term_position = m_current_position_settings.kp * position_error;
-  auto i_term_position = m_current_position_settings.ki * position_error;
-  auto d_term_position = m_current_position_settings.kd * (position_error - last_position_error);
-
-  auto p_term_velocity = m_current_velocity_settings.kp * velocity_error;
-  auto i_term_velocity = m_current_velocity_settings.ki * velocity_error;
-  auto d_term_velocity =
-    m_current_velocity_settings.kd * (velocity_error - last_velocity_error);
-
-  auto output_position = p_term_position + i_term_position + d_term_position;
-  auto output_velocity = p_term_velocity + i_term_velocity + d_term_velocity;
-
-  output_position =  output_position + output_velocity; // just to get conan off my back
-
-  // servo->h_bridge->power()
 }
 }  // namespace sjsu::perseus

@@ -110,12 +110,6 @@ public:
   void update_pid_velocity(PID_settings settings);
 
   /**
-    * @brief Update the internal state of the servo.
-    * This should be called periodically to update the current position and velocity, and to apply the PID control.
-  */
-  void update();
-
-  /**
     * @brief Remembers the current position of the encoder as the home position.
     * This should be called when the servo is homed.
   */

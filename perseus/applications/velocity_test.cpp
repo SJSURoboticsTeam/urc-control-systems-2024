@@ -45,7 +45,7 @@ void application()
   
   hal::print(*console, "BLDC Servo initialized...\n");
   int time = 0;
-  int prev_reading = 0;
+  float prev_reading = 0;
   while (true) {
     servo.m_h_bridge->power(-0.3);
     // auto read = servo.m_encoder->read().angle;
