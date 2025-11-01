@@ -183,7 +183,7 @@ hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_0()
 hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_1()
 {
   static auto timer_old_pwm =
-    timer1().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
+    timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
   return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
     driver_allocator(), std::move(timer_old_pwm));
 }
@@ -233,7 +233,43 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 {
   throw hal::operation_not_supported(nullptr);
 }
+// Watchdog implementation using global function pattern from original
+class stm32f103c8_watchdog : public custom::watchdog
+{
+public:
+  void start() override
+  {
+    m_stm_watchdog.start();
+  }
 
+  void reset() override
+  {
+    m_stm_watchdog.reset();
+  }
+
+  void set_countdown_time(hal::time_duration p_wait_time) override
+  {
+    m_stm_watchdog.set_countdown_time(p_wait_time);
+  }
+
+  bool check_flag() override
+  {
+    return m_stm_watchdog.check_flag();
+  }
+
+  void clear_flag() override
+  {
+    m_stm_watchdog.clear_flag();
+  }
+
+private:
+  hal::stm32f1::independent_watchdog m_stm_watchdog{};
+};
+
+hal::v5::strong_ptr<custom::watchdog> watchdog()
+{
+  return hal::v5::make_strong_ptr<stm32f103c8_watchdog>(driver_allocator());
+}
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {

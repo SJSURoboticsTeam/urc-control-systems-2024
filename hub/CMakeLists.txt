@@ -26,7 +26,7 @@ SOURCES
     # platforms/micromod.cpp
     platforms/stm32f103c8.cpp
     src/gimbal.cpp
-    src/beacon.cpp
+    #src/beacon.cpp
 
 
     PACKAGES
