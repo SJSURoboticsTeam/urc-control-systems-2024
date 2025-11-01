@@ -4,8 +4,21 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 
-namespace sjsu::hub {
+// Pulse width range for FT5325M
+#define MIN_PULSEWIDTH_RANGE 900
+#define MAX_PULSEWIDTH_RANGE 2100
+static hal::time_duration const wd_countdown_timer =
+  std::chrono::nanoseconds(5000000000);  // 5 secs
 
+// static hal::time_duration const wd_countdown_timer = <recovery - expr>(5);
+namespace sjsu::hub {
+hal::actuator::rc_servo::settings const gimbal_servo_settings{
+  .frequency = 50,
+  .min_angle = 0,
+  .max_angle = 180,
+  .min_microseconds = MIN_PULSEWIDTH_RANGE,
+  .max_microseconds = MAX_PULSEWIDTH_RANGE,
+};
 void print_can_message(hal::serial& p_console,
                        hal::can_message const& p_message)
 {
@@ -34,6 +47,45 @@ void application()
   auto can_id_filter = resources::can_identifier_filter();
   auto console = resources::console();
 
+  //   auto mast_servo_pwm_channel_0 = resources::mast_servo_pwm_channel_0();
+  //   auto mast_servo_pwm_channel_1 = resources::mast_servo_pwm_channel_1();
+  //   auto i2c = resources::i2c();
+
+  // Initializing ICM
+  hal::sensor::icm20948 icm(*i2c);
+
+  hal::print(*console, "test1\n");
+
+  // List of watchdog commands to use
+  hal::stm32f1::independent_watchdog hub_watchdog{};
+  hub_watchdog.set_countdown_time(wd_countdown_timer);
+  // hub_watchdog.start(); // Start watchdog countdown
+  // hub_watchdog.reset();  // Reset watchdog countdown
+  // hub_watchdog.check_flag(); // True if it reaches countdown; False if its
+  // still during the countdown
+  // hub_watchdog.clear_flag();  // Clears the flag
+
+  // Initializing the servos for the gimbal (takes in pwm not pwm16_channel)
+  // Ensure the connections to servo are correct
+  //   hal::actuator::rc_servo p_x_servo(*mast_servo_pwm_channel_0,
+  //                                     gimbal_servo_settings);
+  //   hal::actuator::rc_servo p_y_servo(*mast_servo_pwm_channel_1,
+  //                                     gimbal_servo_settings);
+
+  // Initializing Watchdog
+
+  //   hal::print(*console, "Starting Application!\n");
+  //   hal::print(*console, "Will reset after ~10 seconds\n");
+
+  //   for (int i = 0; i < 10; i++) {
+  //     // Print message
+  //     hal::print(*console, "Hello, World\n");
+  //   }
+
+  //   hal::print(*console, "Resetting!\n");
+  //   hal::delay(*clock, 100ms);
+  //   resources::reset();
+
   static constexpr auto baudrate = 100.0_kHz;
 
   can_bus_manager->baud_rate(baudrate);
@@ -50,15 +102,15 @@ void application()
   hal::can_message_finder message_finder(*can_transceiver, 0x300);
 
   while (true) {
-    
+
     for (auto m = message_finder.find(); m.has_value();
          m = message_finder.find()) {
       print_can_message(*console, *m);
       auto& msg = *m;
-        //if(m.hasvalue) reset watchdog timer
+      // if(m.hasvalue) reset watchdog timer
       if (msg.length == 2) {
         uint8_t position = msg.payload[0];
-        //uint8_t offset = msg.payload[1];
+        // uint8_t offset = msg.payload[1];
         switch (position) {
           case 0x00:
             // move left
@@ -73,8 +125,8 @@ void application()
             // move down
             break;
         }
+      }
     }
   }
-}
 }
 }  // namespace sjsu::hub

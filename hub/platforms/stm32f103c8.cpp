@@ -23,7 +23,7 @@
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/output_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/pin.hpp>
-//#include <libhal-arm-mcu/stm32f1/spi.hpp>
+// #include <libhal-arm-mcu/stm32f1/spi.hpp>
 #include <libhal-arm-mcu/stm32f1/timer.hpp>
 #include <libhal-arm-mcu/stm32f1/uart.hpp>
 #include <libhal-arm-mcu/stm32f1/usart.hpp>
@@ -99,10 +99,10 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-//adc1-15- pc5
-//adc2-12 - pc2
-//adc3-11 - pc1
-//adc4- 9 - pb1
+// adc1-15- pc5
+// adc2-12 - pc2
+// adc3-11 - pc1
+// adc4- 9 - pb1
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
 {
   static hal::atomic_spin_lock adc_lock0;
@@ -117,7 +117,6 @@ hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1()
   return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
 }
 
-
 hal::v5::strong_ptr<hal::i2c> i2c()
 {
   static auto sda_output_pin = gpio_b().acquire_output_pin(7);
@@ -131,14 +130,13 @@ hal::v5::strong_ptr<hal::i2c> i2c()
                                                      *clock);
 }
 
-
-hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0() //G0 -> PA0
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()  // G0 -> PA0
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
     driver_allocator(), gpio_a().acquire_output_pin(0));
 }
 
-hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1() //G1 ->PA15
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
     driver_allocator(), gpio_a().acquire_output_pin(15));
@@ -156,24 +154,41 @@ auto& timer2()
   return timer2;
 }
 
-//pwm0 - 32 -> ch8
-//pwm1 - 47 -> ch1
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
+// pwm0 - 32 -> ch8
+// pwm1 - 47 -> ch1
+// hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
+// {
+//   auto timer_pwm_channel =
+//     timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
+//   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+//     driver_allocator(), std::move(timer_pwm_channel));
+// }
+
+// hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
+// {
+//   auto timer_pwm_channel =
+//     timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
+//   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+//     driver_allocator(), std::move(timer_pwm_channel));
+// }
+
+hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_0()
 {
-  auto timer_pwm_channel =
-    timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  static auto timer_old_pwm =
+    timer1().acquire_pwm(hal::stm32f1::timer1_pin::pa8);
+  return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
+    driver_allocator(), std::move(timer_old_pwm));
 }
 
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
+hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_1()
 {
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  static auto timer_old_pwm =
+    timer1().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
+  return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
+    driver_allocator(), std::move(timer_old_pwm));
 }
-//PA5_SPI1_SCK will be used for pwm2, this is here as a holder
+
+// PA5_SPI1_SCK will be used for pwm2, this is here as a holder
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
 {
   auto timer_pwm_channel =
@@ -277,9 +292,9 @@ void initialize_platform()
       },
     },
   });
-  //pwm0 uses pa8
-  //hal::stm32f1::activate_mco_pa8(
-  // hal::stm32f1::mco_source::pll_clock_divided_by_2);
+  // pwm0 uses pa8
+  // hal::stm32f1::activate_mco_pa8(
+  //  hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
