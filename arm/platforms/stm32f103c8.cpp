@@ -19,6 +19,7 @@
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
 #include <perseus_bldc.hpp>
+#include "can_ids.hpp"
 
 namespace sjsu::arm::resources {
 using namespace hal::literals;
@@ -106,25 +107,42 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   initialize_can();
   return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
 }
-
-arm_can_finders can_finders(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver,
-  hal::u16 home,
-  hal::u16 arm,
-  hal::u16 endeffector)
+hal::v5::strong_ptr<hal::can_message_finder> get_can_finder(hal::v5::strong_ptr<hal::can_transceiver> transceiver, arm_addresses addr)
 {
-  return { .home_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
-             driver_allocator(),
-             *transceiver,
-             home),  // finds message with address for home
-           .arm_finder = hal::v5::make_strong_ptr<hal::can_message_finder>(
-             driver_allocator(), *transceiver, arm),
-           .endeffector_finder =
-             hal::v5::make_strong_ptr<hal::can_message_finder>(
-               driver_allocator(), *transceiver, endeffector) };
+  return hal::v5::make_strong_ptr<hal::can_message_finder>(
+    driver_allocator(), *transceiver, addr);
 }
 
-hal::v5::strong_ptr<arm_joints> arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+hal::v5::optional_ptr<arm_can_finders> can_ids; 
+hal::v5::strong_ptr<arm_can_finders> can_finders(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver)
+{
+  if (not can_ids) {
+    arm_can_finders arm_can_finders = {
+      .home = get_can_finder(transceiver, arm_addresses::home),
+      .arm_get = get_can_finder(transceiver, arm_addresses::arm_get),
+      .arm_set = get_can_finder(transceiver, arm_addresses::arm_set),
+      .endeffector_get = get_can_finder(transceiver, arm_addresses::end_effector_get),
+      .endeffector_set = get_can_finder(transceiver, arm_addresses::end_effector_set),
+      .stop = get_can_finder(transceiver, arm_addresses::stop),
+      .heartbeat = get_can_finder(transceiver, arm_addresses::heartbeat),
+      .pid = get_can_finder(transceiver, arm_addresses::pid_params),
+      .track = get_can_finder(transceiver, arm_addresses::track),
+      .shoulder = get_can_finder(transceiver, arm_addresses::shoulder),
+      .elbow = get_can_finder(transceiver, arm_addresses::elbow),
+      .wrist_1 = get_can_finder(transceiver, arm_addresses::wrist_1),
+      .wrist_2 = get_can_finder(transceiver, arm_addresses::wrist_2),
+      .clamp = get_can_finder(transceiver, arm_addresses::clamp),
+    };
+    can_ids = hal::v5::make_strong_ptr<decltype(arm_can_finders)>(
+      driver_allocator(), arm_can_finders);
+  };
+
+  return can_ids;
+  
+}
+
+arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver)
 {
   auto idf1 = hal::acquire_can_identifier_filter(driver_allocator(), can_manager); // each filter returns 4 ids
   auto idf2 =
@@ -136,47 +154,47 @@ hal::v5::strong_ptr<arm_joints> arm_servos(hal::v5::strong_ptr<hal::can_transcei
       idf1[0],
       clock(),
       753,
-      0x120),
+      arm_addresses::track),
     hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // shoulder
       driver_allocator(),
       transceiver,
       idf1[1],
       clock(),
       753,
-      0x121),
+      arm_addresses::shoulder),
     hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // elbow
       driver_allocator(),
       transceiver,
       idf1[2],
       clock(),
       753,
-      0x122),
+      arm_addresses::elbow),
     hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // wrist pitch 1
       driver_allocator(),
       transceiver,
       idf1[3],
       clock(),
       753,
-      0x123),
+      arm_addresses::wrist_1),
     hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // wrist pitch 2
       driver_allocator(),
       transceiver,
       idf2[0],
       clock(),
       753,
-      0x124),
+      arm_addresses::wrist_2),
     hal::v5::make_strong_ptr<sjsu::drivers::perseus_bldc>(  // clamp
       driver_allocator(),
       transceiver,
       idf2[1],
       clock(),
       753,
-      0x125)
+      arm_addresses::clamp)
   };
-  return hal::make_strong_ptr<arm_joints>(driver_allocator(), arm_servos);
+  return arm_servos;
 }
 
-hal::v5::strong_ptr<limit_pins> arm_home_pins()
+limit_pins arm_home_pins()
 {
   // limit_pins pins = {
   //   hal::v5::make_strong_ptr<decltype(gpio_a().acquire_input_pin(0))>(
@@ -202,8 +220,29 @@ hal::v5::strong_ptr<limit_pins> arm_home_pins()
     nullptr,
     nullptr
   };
-  return hal::make_strong_ptr<limit_pins>(driver_allocator(), pins);
+  return pins;
 }
+
+id_filters can_filters()
+{
+  auto filter =
+    hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
+  auto filter2 = hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
+  // id_filters idfs = { filter[0], filter[1], filter[2]};
+  id_filters idfs = { filter[0],  filter[1],  filter[2],  filter[3],
+                      filter2[0], filter2[1], filter2[2], filter2[3] };
+  idfs[0]->allow(arm_addresses::home);
+  idfs[1]->allow(arm_addresses::arm_get);
+  idfs[2]->allow(arm_addresses::arm_set);
+  idfs[3]->allow(arm_addresses::end_effector_get);
+  idfs[4]->allow(arm_addresses::end_effector_set);
+  idfs[5]->allow(arm_addresses::stop);
+  idfs[6]->allow(arm_addresses::heartbeat);
+  idfs[7]->allow(arm_addresses::pid_params);
+  return idfs;
+}
+
+
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {
@@ -261,9 +300,7 @@ void initialize_platform()
       },
     },
   });
-  // hal::stm32f1::activate_mco_pa8(
-  //   hal::stm32f1::mco_source::pll_clock_divided_by_2);
-
+  
   hal::stm32f1::release_jtag_pins();
 }
 }  // namespace sjsu::arm

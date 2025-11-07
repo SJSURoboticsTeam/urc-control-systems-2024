@@ -14,4 +14,5 @@ libhal_build_demos(
     SOURCES
     src/home.cpp
     ../drivers/src/perseus_bldc.cpp
+    src/can_message_processor.cpp
 )

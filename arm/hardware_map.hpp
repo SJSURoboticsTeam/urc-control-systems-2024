@@ -76,13 +76,28 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 struct arm_can_finders
 {
-  hal::v5::strong_ptr<hal::can_message_finder> home_finder;
-  hal::v5::strong_ptr<hal::can_message_finder> arm_finder;
-  hal::v5::strong_ptr<hal::can_message_finder> endeffector_finder;
+  hal::v5::strong_ptr<hal::can_message_finder> home;
+  hal::v5::strong_ptr<hal::can_message_finder> arm_get;
+  hal::v5::strong_ptr<hal::can_message_finder> arm_set;
+  hal::v5::strong_ptr<hal::can_message_finder> endeffector_get;
+  hal::v5::strong_ptr<hal::can_message_finder> endeffector_set;
+  hal::v5::strong_ptr<hal::can_message_finder> stop;
+  hal::v5::strong_ptr<hal::can_message_finder> heartbeat;
+  hal::v5::strong_ptr<hal::can_message_finder> pid;
+  hal::v5::strong_ptr<hal::can_message_finder> track;
+  hal::v5::strong_ptr<hal::can_message_finder> shoulder;
+  hal::v5::strong_ptr<hal::can_message_finder> elbow;
+  hal::v5::strong_ptr<hal::can_message_finder> wrist_1;
+  hal::v5::strong_ptr<hal::can_message_finder> wrist_2;
+  hal::v5::strong_ptr<hal::can_message_finder> clamp;
 };
 
 using arm_joints = std::array<hal::v5::strong_ptr<sjsu::drivers::perseus_bldc>, 6>;
 using limit_pins = std::array<hal::v5::optional_ptr<hal::input_pin>, 6>;
+using id_filters = std::array<hal::v5::strong_ptr<hal::can_identifier_filter>,
+                              8>;  // the other 5 (for receiving bldc stuff) are
+                                   // already initialized in teh arm_servos code
+
 
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
@@ -92,15 +107,11 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
-hal::v5::strong_ptr<limit_pins> arm_home_pins();
-
-arm_can_finders can_finders(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver,
-  hal::u16 home,
-  hal::u16 arm,
-  hal::u16 endeffector);
-
-hal::v5::strong_ptr<arm_joints> arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver);
+hal::v5::strong_ptr<arm_can_finders> can_finders(
+  hal::v5::strong_ptr<hal::can_transceiver> transceiver);
+limit_pins arm_home_pins();
+id_filters can_filters();
+arm_joints arm_servos(hal::v5::strong_ptr<hal::can_transceiver> transceiver);
 
 inline void reset()
 {

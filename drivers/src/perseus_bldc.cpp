@@ -1,4 +1,5 @@
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/can.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <perseus_bldc.hpp>
@@ -31,17 +32,17 @@ perseus_bldc::perseus_bldc(
   m_max_response_time = 500ms;
 }
 
-void perseus_bldc::send_message(std::array<hal::byte, 8> const& p_payload)
-{
-  hal::can_message const payload{
-    .id = m_device_id,
-    .length = 8,
-    .payload = p_payload,
-  };
+// void perseus_bldc::send_message(std::array<hal::byte, 8> const& p_payload)
+// {
+//   hal::can_message const payload{
+//     .id = m_device_id,
+//     .length = 8,
+//     .payload = p_payload,
+//   };
 
-  // Send payload
-  m_can.transceiver().send(payload);
-}
+//   // Send payload
+//   m_can.transceiver().send(payload);// not sure if we can actually get this information
+// }
 
 void perseus_bldc::receive_message(std::array<hal::byte, 8>& buffer)
 {
@@ -53,29 +54,38 @@ void perseus_bldc::receive_message(std::array<hal::byte, 8>& buffer)
   }
   hal::safe_throw(hal::timed_out(this));
 }
-hal::u16 perseus_bldc::get_position()
-{
-  std::array<hal::byte, 8> payload = { static_cast<hal::byte>(
-    perseus_bldc::read::position) };
-  perseus_bldc::send_message(payload);
-  std::array<hal::byte, 8> buffer;
-  perseus_bldc::receive_message(buffer);
 
-  // manipulate bytes in the buffer to get correct angle
-  return buffer[0] << 8 |
-         buffer[1];  // maximum 2 bytes will be used to represent the answer
-}
 
 void perseus_bldc::set_position(hal::u16 degrees)
 {
   std::array<hal::byte, 8> payload = {
-    static_cast<hal::byte>(perseus_bldc::read::position),
+    static_cast<hal::byte>(perseus_bldc::actuate::position),
     static_cast<hal::byte>(degrees >> 8), // high byte
     static_cast<hal::byte>(degrees & 0x00FF), // low byte
   };
-
-  perseus_bldc::send_message(payload);
-  // doesn't need to return anything back
+  hal::can_message msg = {
+    .id = m_device_id,
+    .length = 3,
+    .payload = payload
+  };
+  m_can.transceiver().send(msg);
 }
+
+void perseus_bldc::set_velocity(hal::i16 velocity, hal::u8 exp_bits)
+{
+  std::array<hal::byte, 8> payload = {
+    static_cast<hal::byte>(perseus_bldc::actuate::velocity),
+    static_cast<hal::byte>(exp_bits),
+    static_cast<hal::byte>(velocity >> 8), // high byte
+    static_cast<hal::byte>(velocity & 0x00FF), // low byte
+  };
+  hal::can_message msg = {
+    .id = m_device_id,
+    .length = 4,
+    .payload = payload
+  };
+  m_can.transceiver().send(msg);
+}
+
 
 }  // namespace sjsu::drivers

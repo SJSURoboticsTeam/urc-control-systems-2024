@@ -38,10 +38,8 @@ public:
 
   enum class read : hal::byte
   {
-    // absolute_degrees = 0x20,
-    // degrees_from_home = 0x21,  // not sure if this is required
     position = 0x20,
-    velocity = 0x21  // not sure if we can actually get this information
+    velocity = 0x21 
   };
 
   // needs to take in can_transceiver and idf so that our CAN network can
@@ -55,12 +53,6 @@ public:
                int gear_ratio,  // kind of like gear ratio
                hal::u16 servo_address);
 
-  // make appropriate move, copy etc constructors in order to make a
-  // strong_pointer of this
-
-  void set_encoder_zero();  // make the encoder be 0 at this position should be
-                            // used when homing
-  void set_percent_voltage(float percent); 
   void set_pid(PidSettings const& p_settings);
   hal::u16 get_position();
   /**
@@ -70,7 +62,7 @@ public:
   // when we say position we mean angle from homing position
   void set_position(hal::u16 degrees);
 
-  void set_velocity(hal::i16 velocity_percentage);
+  void set_velocity(hal::i16 velocity, hal::u8 exp_bits);
   // insread of set position and set_velocity i could just do a get_feedback and
   // parse position and velocity
   // this depends on whether I can get velocity (in rpm as apposed to percent
@@ -88,7 +80,7 @@ configuration
   void send_message(std::array<hal::byte, 8> const& p_payload);
   void receive_message(std::array<hal::byte, 8>& buffer);
 
-// private:
+private:
   int m_gear_ratio;
   hal::can_message_finder m_can;
   hal::v5::optional_ptr<hal::steady_clock> m_clock;
