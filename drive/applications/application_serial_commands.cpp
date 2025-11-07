@@ -11,25 +11,26 @@
 namespace sjsu::drive {
 struct command_def
 {
-  char const* prefix;
-  std::function<void(std::span<std::span<hal::byte>>)> callback;
+  char const* m_prefix;
+  std::function<void(std::span<std::span<hal::byte>>)> m_callback;
 };
 
-int parse_int(std::span<hal::byte> s)
+int parse_int(std::span<hal::byte> p_str)
 {
   char* end;
-  int val = std::strtol(reinterpret_cast<char*>(s.begin().base()), &end, 10);
-  if (end != reinterpret_cast<char*>(s.end().base())) {
+  int val =
+    std::strtol(reinterpret_cast<char*>(p_str.begin().base()), &end, 10);
+  if (end != reinterpret_cast<char*>(p_str.end().base())) {
     throw hal::argument_out_of_domain(nullptr);
   }
   return val;
 }
 
-float parse_float(std::span<hal::byte> s)
+float parse_float(std::span<hal::byte> p_str)
 {
   char* end;
-  float val = std::strtod(reinterpret_cast<char*>(s.begin().base()), &end);
-  if (end != reinterpret_cast<char*>(s.end().base())) {
+  float val = std::strtod(reinterpret_cast<char*>(p_str.begin().base()), &end);
+  if (end != reinterpret_cast<char*>(p_str.end().base())) {
     throw hal::argument_out_of_domain(nullptr);
   }
   return val;
@@ -37,8 +38,8 @@ float parse_float(std::span<hal::byte> s)
 
 class command_handler
 {
-  std::array<hal::byte, 256> line;
-  size_t cursor;
+  std::array<hal::byte, 256> m_line;
+  size_t m_cursor;
 
   enum class read_byte_stat : hal::byte
   {
@@ -48,58 +49,58 @@ class command_handler
     overflow
   };
 
-  read_byte_stat read_byte(hal::serial& console)
+  read_byte_stat read_byte(hal::serial& p_console)
   {
-    if (cursor >= line.size()) {
-      hal::print(console,
+    if (m_cursor >= m_line.size()) {
+      hal::print(p_console,
                  "\nError: exceeded max command length 256 characters\n");
-      cursor = 0;
+      m_cursor = 0;
       return read_byte_stat::overflow;
     }
 
-    std::span<hal::byte> view{ line.begin() + cursor, 1 };
-    auto n = console.read(view).data.size();
+    std::span<hal::byte> view{ m_line.begin() + m_cursor, 1 };
+    auto n = p_console.read(view).data.size();
     if (n < 1) {
       return read_byte_stat::noread;
     }
     // echo received key back to client console->write(view);
 
-    switch (line[cursor]) {
+    switch (m_line[m_cursor]) {
       // Ctrl-C (end-of-text)
       case 0x03:
         view[0] = '\n';
-        console.write(view);
+        p_console.write(view);
 
-        cursor = 0;
+        m_cursor = 0;
         return read_byte_stat::success;
       // backspace
       case '\b':
         view[0] = ' ';
-        console.write(view);
+        p_console.write(view);
         view[0] = '\b';
-        console.write(view);
+        p_console.write(view);
 
-        if (cursor > 0) {
-          cursor--;
+        if (m_cursor > 0) {
+          m_cursor--;
         }
         return read_byte_stat::success;
       case '\n':
-        cursor = 0;
+        m_cursor = 0;
         return read_byte_stat::eol;
     }
 
-    cursor++;
+    m_cursor++;
     return read_byte_stat::success;
   }
 
   // parse() parses the current line
-  void parse(std::span<std::span<hal::byte>> segments)
+  void parse(std::span<std::span<hal::byte>> p_segments)
   {
     size_t segment_cursor = 0;
     size_t start = 0;
 
-    for (size_t i = 0; i < line.size(); i++) {
-      char c = line[i];
+    for (size_t i = 0; i < m_line.size(); i++) {
+      char c = m_line[i];
 
       if (c != '\n' && c != ' ') {
         continue;
@@ -108,8 +109,8 @@ class command_handler
       // if some non-space chars have been found in-between last separator and
       // current
       if (i - start > 0) {
-        std::span<hal::byte> view{ line.begin() + start, i - start };
-        segments[segment_cursor] = view;
+        std::span<hal::byte> view{ m_line.begin() + start, i - start };
+        p_segments[segment_cursor] = view;
         segment_cursor++;
       }
 
@@ -124,19 +125,19 @@ class command_handler
       }
     }
 
-    segments = segments.subspan(0, segment_cursor);
+    p_segments = p_segments.subspan(0, segment_cursor);
   }
 
-  bool prefix_match(char const* prefix, std::span<hal::byte> str)
+  bool prefix_match(char const* p_prefix, std::span<hal::byte> p_str)
   {
     for (size_t pi = 0;; pi++) {
-      char target_char = prefix[pi];
-      bool given_end = pi >= str.size();
+      char target_char = p_prefix[pi];
+      bool given_end = pi >= p_str.size();
       bool target_end = target_char == '\0';
       if (given_end || target_end) {
         return given_end && target_end;
       }
-      if (str[pi] != target_char) {
+      if (p_str[pi] != target_char) {
         return false;
       }
     }
@@ -146,11 +147,10 @@ class command_handler
 public:
   // handle() reads the currently available bytes from the serial console and
   // executes a command if it is complete.
-  void handle(hal::serial& console,
-              std::span<command_def> commands)
+  void handle(hal::serial& p_console, std::span<command_def> p_commands)
   {
     while (true) {
-      switch (read_byte(console)) {
+      switch (read_byte(p_console)) {
         case read_byte_stat::success:
           continue;
         case read_byte_stat::eol:
@@ -177,15 +177,15 @@ public:
       std::span<std::span<hal::byte>> params{ segments.begin() + 1,
                                               segview.size() - 1 };
 
-      for (size_t i = 0; i < commands.size(); i++) {
-        command_def cmd = commands[i];
-        if (!prefix_match(cmd.prefix, prefix)) {
+      for (size_t i = 0; i < p_commands.size(); i++) {
+        command_def cmd = p_commands[i];
+        if (!prefix_match(cmd.m_prefix, prefix)) {
           continue;
         }
         cmd.callback(params);
         return;
       }
-      hal::print(*console, "Unknown command.\n");
+      hal::print(*p_console, "Unknown command.\n");
     }
   }
 };
