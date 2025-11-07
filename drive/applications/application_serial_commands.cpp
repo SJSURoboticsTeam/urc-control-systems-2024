@@ -1,4 +1,3 @@
-#include "./application_serial_commands.hpp"
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -7,11 +6,9 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/timeout.hpp>
 #include <string.h>
+#include <system_error>
 
 namespace sjsu::drive {
-// just a convenience type
-using hal_serial = hal::v5::strong_ptr<hal::serial>;
-
 struct command_def
 {
   char const* prefix;
@@ -43,24 +40,27 @@ class command_handler
   std::array<hal::byte, 256> line;
   size_t cursor;
 
-  // readline() reads one byte to the current line and returns:
-  // 0) read one char successfully
-  // 1) reached EOL
-  // 2) no bytes to read & not reached EOL
-  // 3) buffer overflow
-  hal::byte readline(hal_serial& console)
+  enum class read_byte_stat : hal::byte
+  {
+    success,
+    eol,
+    noread,
+    overflow
+  };
+
+  read_byte_stat read_byte(hal::v5::strong_ptr<hal::serial>& console)
   {
     if (cursor >= line.size()) {
       hal::print(*console,
                  "\nError: exceeded max command length 256 characters\n");
       cursor = 0;
-      return 3;
+      return read_byte_stat::overflow;
     }
 
     std::span<hal::byte> view{ line.begin() + cursor, 1 };
     auto n = console->read(view).data.size();
     if (n < 1) {
-      return 2;
+      return read_byte_stat::noread;
     }
     // echo received key back to client
     console->write(view);
@@ -72,7 +72,7 @@ class command_handler
         console->write(view);
 
         cursor = 0;
-        return 0;
+        return read_byte_stat::success;
       // backspace
       case '\b':
         view[0] = ' ';
@@ -83,14 +83,14 @@ class command_handler
         if (cursor > 0) {
           cursor--;
         }
-        return 0;
+        return read_byte_stat::success;
       case '\n':
         cursor = 0;
-        return 1;
+        return read_byte_stat::eol;
     }
 
     cursor++;
-    return 0;
+    return read_byte_stat::success;
   }
 
   // parse() parses the current line
@@ -147,61 +147,47 @@ class command_handler
 public:
   // handle() reads the currently available bytes from the serial console and
   // executes a command if it is complete.
-  void handle(hal_serial& console, std::span<command_def> commands)
+  void handle(hal::v5::strong_ptr<hal::serial>& console,
+              std::span<command_def> commands)
   {
     while (true) {
-      switch (readline(console)) {
-        case 0:
+      switch (read_byte(console)) {
+        case read_byte_stat::success:
+          continue;
+        case read_byte_stat::eol:
           break;
-        case 1:
-          goto stop_reading;
-        case 2:
-        case 3:
+        case read_byte_stat::noread:
+        case read_byte_stat::overflow:
           return;
       }
-    }
 
-  stop_reading:
-
-    // size = maximum # of segments
-    //
-    // supposing the prefix is 1 char and each param is 1 char -> 1/2 of the
-    // line must be spaces.
-    //
-    // thus, max # of segments = 256/2 = 128
-    std::array<std::span<hal::byte>, 128> segments;
-    std::span<std::span<hal::byte>> segview{ segments };
-    parse(segview);
-    if (segview.size() == 0) {
-      return;
-    }
-
-    std::span<hal::byte> prefix = segments[0];
-    std::span<std::span<hal::byte>> params{ segments.begin() + 1,
-                                            segview.size() - 1 };
-
-    for (size_t i = 0; i < commands.size(); i++) {
-      command_def cmd = commands[i];
-      if (!prefix_match(cmd.prefix, prefix)) {
-        continue;
+      // size = maximum # of segments
+      //
+      // supposing the prefix is 1 char and each param is 1 char -> 1/2 of the
+      // line must be spaces.
+      //
+      // thus, max # of segments = 256/2 = 128
+      std::array<std::span<hal::byte>, 128> segments;
+      std::span<std::span<hal::byte>> segview{ segments };
+      parse(segview);
+      if (segview.size() == 0) {
+        return;
       }
 
-      try {
-        cmd.callback(params);
-      } catch (hal::exception e) {
-        switch (e.error_code()) {
-          case std::errc::argument_out_of_domain:
-            hal::print(*console, "Error: invalid argument length or type\n");
-            break;
-          default:
-            hal::print<32>(*console, "Error code: %d\n", e.error_code());
-            break;
+      std::span<hal::byte> prefix = segments[0];
+      std::span<std::span<hal::byte>> params{ segments.begin() + 1,
+                                              segview.size() - 1 };
+
+      for (size_t i = 0; i < commands.size(); i++) {
+        command_def cmd = commands[i];
+        if (!prefix_match(cmd.prefix, prefix)) {
+          continue;
         }
+        cmd.callback(params);
+        return;
       }
-      return;
+      hal::print(*console, "Unknown command.\n");
     }
-
-    hal::print(*console, "Unknown command.\n");
   }
 };
 
@@ -284,7 +270,18 @@ void application()
     // this makes it awkward if your TTY client sends one character at a time
     // instead of an entire line at a time, in these cases it makes more sense
     // to simply reconfigure your TTY client
-    cmd.handle(console, cmd_defs);
+    try {
+      cmd.handle(console, cmd_defs);
+    } catch (hal::exception e) {
+      switch (e.error_code()) {
+        case std::errc::argument_out_of_domain:
+          hal::print(*console, "Error: invalid argument length or type\n");
+          break;
+        default:
+          hal::print<32>(*console, "Error code: %d\n", e.error_code());
+          break;
+      }
+    }
 
     // Toggle LED
     led->level(true);
