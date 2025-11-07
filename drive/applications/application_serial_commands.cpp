@@ -40,57 +40,59 @@ class command_handler
 {
   std::array<hal::byte, 256> m_line;
   size_t m_cursor;
+  hal::v5::strong_ptr<hal::serial> m_console;
 
-  enum class read_byte_stat : hal::byte
+  enum class read_stat : hal::byte
   {
-    success,
-    eol,
-    noread,
+    complete,
+    incomplete,
     overflow
   };
 
-  read_byte_stat read_byte(hal::serial& p_console)
+  read_stat read(hal::serial& p_console)
   {
-    if (m_cursor >= m_line.size()) {
-      hal::print(p_console,
-                 "\nError: exceeded max command length 256 characters\n");
-      m_cursor = 0;
-      return read_byte_stat::overflow;
-    }
-
-    std::span<hal::byte> view{ m_line.begin() + m_cursor, 1 };
-    auto n = p_console.read(view).data.size();
-    if (n < 1) {
-      return read_byte_stat::noread;
-    }
-    // echo received key back to client console->write(view);
-
-    switch (m_line[m_cursor]) {
-      // Ctrl-C (end-of-text)
-      case 0x03:
-        view[0] = '\n';
-        p_console.write(view);
-
+    while (true) {
+      if (m_cursor >= m_line.size()) {
+        hal::print(p_console,
+                   "\nError: exceeded max command length 256 characters\n");
         m_cursor = 0;
-        return read_byte_stat::success;
-      // backspace
-      case '\b':
-        view[0] = ' ';
-        p_console.write(view);
-        view[0] = '\b';
-        p_console.write(view);
+        return read_stat::overflow;
+      }
 
-        if (m_cursor > 0) {
-          m_cursor--;
-        }
-        return read_byte_stat::success;
-      case '\n':
-        m_cursor = 0;
-        return read_byte_stat::eol;
+      std::span<hal::byte> view{ m_line.begin() + m_cursor, 1 };
+      auto n = p_console.read(view).data.size();
+      if (n < 1) {
+        return read_stat::incomplete;
+      }
+      // echo received key back to client
+
+      switch (m_line[m_cursor]) {
+        // Ctrl-C (end-of-text)
+        case 0x03:
+          view[0] = '\n';
+          p_console.write(view);
+          m_cursor = 0;
+          continue;
+        // backspace
+        case '\b':
+          view[0] = ' ';
+          p_console.write(view);
+          view[0] = '\b';
+          p_console.write(view);
+          if (m_cursor > 0) {
+            m_cursor--;
+          }
+          continue;
+        case '\n':
+          p_console.write(view);
+          m_cursor = 0;
+          return read_stat::complete;
+        default:
+          p_console.write(view);
+          break;
+      }
+      m_cursor++;
     }
-
-    m_cursor++;
-    return read_byte_stat::success;
   }
 
   // parse() parses the current line
@@ -145,48 +147,49 @@ class command_handler
   }
 
 public:
+  command_handler(hal::v5::strong_ptr<hal::serial> p_console)
+    : m_console{ p_console }
+  {
+  }
+
   // handle() reads the currently available bytes from the serial console and
   // executes a command if it is complete.
   void handle(hal::serial& p_console, std::span<command_def> p_commands)
   {
-    while (true) {
-      switch (read_byte(p_console)) {
-        case read_byte_stat::success:
-          continue;
-        case read_byte_stat::eol:
-          break;
-        case read_byte_stat::noread:
-        case read_byte_stat::overflow:
-          return;
-      }
-
-      // size = maximum # of segments
-      //
-      // supposing the prefix is 1 char and each param is 1 char -> 1/2 of the
-      // line must be spaces.
-      //
-      // thus, max # of segments = 256/2 = 128
-      std::array<std::span<hal::byte>, 128> segments;
-      std::span<std::span<hal::byte>> segview{ segments };
-      parse(segview);
-      if (segview.size() == 0) {
+    switch (read(p_console)) {
+      case read_stat::complete:
+        break;
+      case read_stat::incomplete:
+      case read_stat::overflow:
         return;
-      }
-
-      std::span<hal::byte> prefix = segments[0];
-      std::span<std::span<hal::byte>> params{ segments.begin() + 1,
-                                              segview.size() - 1 };
-
-      for (size_t i = 0; i < p_commands.size(); i++) {
-        command_def cmd = p_commands[i];
-        if (!prefix_match(cmd.m_prefix, prefix)) {
-          continue;
-        }
-        cmd.callback(params);
-        return;
-      }
-      hal::print(*p_console, "Unknown command.\n");
     }
+
+    // size = maximum # of segments
+    //
+    // supposing the prefix is 1 char and each param is 1 char -> 1/2 of the
+    // line must be spaces.
+    //
+    // thus, max # of segments = 256/2 = 128
+    std::array<std::span<hal::byte>, 128> segments;
+    std::span<std::span<hal::byte>> segview{ segments };
+    parse(segview);
+    if (segview.size() == 0) {
+      return;
+    }
+
+    std::span<hal::byte> prefix = segments[0];
+    std::span<std::span<hal::byte>> params{ segments.begin() + 1,
+                                            segview.size() - 1 };
+
+    for (size_t i = 0; i < p_commands.size(); i++) {
+      command_def cmd = p_commands[i];
+      if (!prefix_match(cmd.m_prefix, prefix)) {
+        continue;
+      }
+      cmd.m_callback(params);
+      return;
+    }
+    hal::print(p_console, "Unknown command.\n");
   }
 };
 
