@@ -48,37 +48,36 @@ class command_handler
     overflow
   };
 
-  read_byte_stat read_byte(hal::v5::strong_ptr<hal::serial>& console)
+  read_byte_stat read_byte(hal::serial& console)
   {
     if (cursor >= line.size()) {
-      hal::print(*console,
+      hal::print(console,
                  "\nError: exceeded max command length 256 characters\n");
       cursor = 0;
       return read_byte_stat::overflow;
     }
 
     std::span<hal::byte> view{ line.begin() + cursor, 1 };
-    auto n = console->read(view).data.size();
+    auto n = console.read(view).data.size();
     if (n < 1) {
       return read_byte_stat::noread;
     }
-    // echo received key back to client
-    console->write(view);
+    // echo received key back to client console->write(view);
 
     switch (line[cursor]) {
       // Ctrl-C (end-of-text)
       case 0x03:
         view[0] = '\n';
-        console->write(view);
+        console.write(view);
 
         cursor = 0;
         return read_byte_stat::success;
       // backspace
       case '\b':
         view[0] = ' ';
-        console->write(view);
+        console.write(view);
         view[0] = '\b';
-        console->write(view);
+        console.write(view);
 
         if (cursor > 0) {
           cursor--;
@@ -94,7 +93,7 @@ class command_handler
   }
 
   // parse() parses the current line
-  void parse(std::span<std::span<hal::byte>>& segments)
+  void parse(std::span<std::span<hal::byte>> segments)
   {
     size_t segment_cursor = 0;
     size_t start = 0;
@@ -147,7 +146,7 @@ class command_handler
 public:
   // handle() reads the currently available bytes from the serial console and
   // executes a command if it is complete.
-  void handle(hal::v5::strong_ptr<hal::serial>& console,
+  void handle(hal::serial& console,
               std::span<command_def> commands)
   {
     while (true) {
