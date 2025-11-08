@@ -12,9 +12,13 @@
 
 #include "../hardware_map.hpp"
 
+#include "../include/can_messaging.hpp"
+#include "../include/bldc_servo.hpp"
+
+
 using namespace std::chrono_literals;
 namespace sjsu::perseus {
-
+/*
 void print_can_message(hal::serial& p_console,
                        hal::can_message const& p_message)
 {
@@ -122,7 +126,7 @@ void process_can_message(hal::can_message const& p_message,
       hal::operation_not_supported(nullptr);
   }
 }
-
+*/
 // each rotation of the output shaft of the track servo is 8 mm of linear travel
 // so 1 degree of rotation is 8mm / 360 = 0.0222 mm of linear travel
 // 188:1 is for shoulder servo 5281.1 * 28
@@ -139,14 +143,15 @@ void application()
   auto bus_manager = resources::can_bus_manager();
   bus_manager->baud_rate(1.0_MHz);
   auto can_id_filter = resources::can_identifier_filter();
-  hal::u16 servo_address =
-    servo_address::track_servo;
+  hal::u16 servo_address = can_perseus::servo_address::track_servo;
   hal::can_message_finder can_finder(*can_transceiver, 0x110);
 
   can_id_filter->allow(0x110);
   hal::print(*console, "CAN message finder initialized...\n");
   bldc_perseus servo(h_bridge, encoder);
   hal::print(*console, "BLDC Servo created...\n");
+  can_perseus servo_can(servo_address); 
+  hal::print(*console, "Servo can creature setup...\n");
 
   auto servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
   
@@ -156,9 +161,9 @@ void application()
     auto optional_message = can_finder.find();
     if (optional_message) {
       hal::print<128>(*console, "%x%X Servo received a message", servo_address);
-      print_can_message(*console, *optional_message);
+      servo_can.print_can_message(*console, *optional_message);
       auto response = hal::v5::make_strong_ptr<hal::can_message>(resources::driver_allocator(), hal::can_message{});
-      process_can_message(*optional_message, servo_ptr, response);
+      servo_can.can_perseus::process_can_message(*optional_message, servo_ptr, response);
       can_finder.transceiver().send(*response);
     }
   } 
