@@ -5,6 +5,7 @@
 #include <libhal/pointers.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timeout.hpp>
+#include <resource_list.hpp>
 #include <string.h>
 #include <system_error>
 
@@ -49,54 +50,52 @@ class command_handler
     overflow
   };
 
-  read_stat read(hal::serial& p_console)
+  read_stat read()
   {
     while (true) {
       if (m_cursor >= m_line.size()) {
-        hal::print(p_console,
+        hal::print(*m_console,
                    "\nError: exceeded max command length 256 characters\n");
         m_cursor = 0;
         return read_stat::overflow;
       }
 
       std::span<hal::byte> view{ m_line.begin() + m_cursor, 1 };
-      auto n = p_console.read(view).data.size();
+      auto n = m_console->read(view).data.size();
       if (n < 1) {
         return read_stat::incomplete;
       }
-      // echo received key back to client
 
-      switch (m_line[m_cursor]) {
+      // echo received key back to client
+      m_console->write(view);
+
+      switch (view[0]) {
         // Ctrl-C (end-of-text)
         case 0x03:
           view[0] = '\n';
-          p_console.write(view);
+          m_console->write(view);
           m_cursor = 0;
           continue;
         // backspace
         case '\b':
           view[0] = ' ';
-          p_console.write(view);
+          m_console->write(view);
           view[0] = '\b';
-          p_console.write(view);
+          m_console->write(view);
           if (m_cursor > 0) {
             m_cursor--;
           }
           continue;
         case '\n':
-          p_console.write(view);
           m_cursor = 0;
           return read_stat::complete;
-        default:
-          p_console.write(view);
-          break;
       }
       m_cursor++;
     }
   }
 
   // parse() parses the current line
-  void parse(std::span<std::span<hal::byte>> p_segments)
+  void parse(std::span<std::span<hal::byte>>& p_segments)
   {
     size_t segment_cursor = 0;
     size_t start = 0;
@@ -108,8 +107,7 @@ class command_handler
         continue;
       }
 
-      // if some non-space chars have been found in-between last separator and
-      // current
+      // if found parameter
       if (i - start > 0) {
         std::span<hal::byte> view{ m_line.begin() + start, i - start };
         p_segments[segment_cursor] = view;
@@ -148,15 +146,16 @@ class command_handler
 
 public:
   command_handler(hal::v5::strong_ptr<hal::serial> p_console)
-    : m_console{ p_console }
+    : m_cursor{ 0 }
+    , m_console{ p_console }
   {
   }
 
   // handle() reads the currently available bytes from the serial console and
   // executes a command if it is complete.
-  void handle(hal::serial& p_console, std::span<command_def> p_commands)
+  void handle(std::span<command_def> p_commands)
   {
-    switch (read(p_console)) {
+    switch (read()) {
       case read_stat::complete:
         break;
       case read_stat::incomplete:
@@ -189,7 +188,7 @@ public:
       cmd.m_callback(params);
       return;
     }
-    hal::print(p_console, "Unknown command.\n");
+    hal::print(*m_console, "Unknown command.\n");
   }
 };
 
@@ -258,7 +257,9 @@ void application()
     },
   };  // namespace sjsu::drive
 
-  command_handler cmd{};
+  command_handler cmd{ console };
+
+  bool led_stat = true;
 
   while (true) {
     // we tradeoff responsiveness for performance, effectively batching a bunch
@@ -273,7 +274,7 @@ void application()
     // instead of an entire line at a time, in these cases it makes more sense
     // to simply reconfigure your TTY client
     try {
-      cmd.handle(console, cmd_defs);
+      cmd.handle(cmd_defs);
     } catch (hal::exception e) {
       switch (e.error_code()) {
         case std::errc::argument_out_of_domain:
@@ -286,13 +287,9 @@ void application()
     }
 
     // Toggle LED
-    led->level(true);
+    led->level(led_stat);
     hal::delay(*clock, 500ms);
-
-    cmd.handle(console, cmd_defs);
-
-    led->level(false);
-    hal::delay(*clock, 500ms);
+    led_stat = !led_stat;
   }
 }
 }  // namespace sjsu::drive
