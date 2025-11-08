@@ -158,6 +158,16 @@ void application()
   hal::print(*console, "BLDC Servo initialized...\n");
 
   while (true) {
+
+    // print velocity 
+    hal::u64 curr_time = clock->uptime(); 
+    float curr_angle = servo.get_current_position();
+    hal::u64 dt = curr_time - servo.m_last_clock_check; 
+    float da = curr_angle - servo.m_prev_encoder_value; 
+    float da_dt = 10 * da / static_cast<float>(dt); 
+    hal::print<128>(*console, "VELOCITY: %x", da_dt);
+      
+
     auto optional_message = can_finder.find();
     if (optional_message) {
       hal::print<128>(*console, "%x%X Servo received a message", servo_address);
@@ -166,6 +176,8 @@ void application()
       servo_can.can_perseus::process_can_message(*optional_message, servo_ptr, response);
       can_finder.transceiver().send(*response);
     }
+    servo.m_last_clock_check = curr_time; 
+    servo.m_prev_encoder_value = curr_angle; 
   } 
 }
 }  // namespace sjsu::perseus

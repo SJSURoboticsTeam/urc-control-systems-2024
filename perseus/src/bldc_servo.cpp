@@ -25,11 +25,13 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   m_clamped_accel = 0.1;  // if we are currently at a velocity of +0.2, we must
                           // not immediately change our current velocity to
                           // -0.2, even if our target velocity changes to -0.2
-  current_encoder_value = m_encoder->read().angle;
+  m_prev_encoder_value = m_encoder->read().angle;
   // inital/prev pid values 
   auto clock = resources::clock(); 
-  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = clock->uptime() };
-  m_PID_prev_position_values = { .integral = 0, .last_error = 0, .prev_dt_time = clock->uptime() };
+  m_last_clock_check = clock->uptime(); 
+  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_check };
+  m_PID_prev_position_values = { .integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_Check };
+
 }
 
 void bldc_perseus::set_target_position(hal::u16 target_position)
@@ -103,24 +105,26 @@ void bldc_perseus::update_velocity_noff()
 {
   // pid is pid-ing 
   // assuming in degrees/ms, need to multiply by 0.25 
-  auto error = m_target.velocity*0.25 - m_current.velocity*0.25; 
+  auto error = m_target.velocity - m_current.velocity; 
   auto clock = resources::clock(); 
-  double dt = clock->uptime() - m_PID_prev_velocity_values.prev_dt_time; 
+  auto curr_time = clock->uptime();
+  double dt = curr_time - m_PID_prev_velocity_values.prev_dt_time; 
   m_PID_prev_velocity_values.integral += error * dt; 
   auto derivative = (error - m_PID_prev_velocity_values.last_error) / dt; 
   auto pTerm = m_current_velocity_settings.kp * error; 
   auto iTerm  = m_current_velocity_settings.ki * m_PID_prev_velocity_values.integral; 
   auto dTerm = m_current_velocity_settings.kd * derivative; 
   m_PID_prev_velocity_values.last_error = error; 
+  m_PID_prev_velocity_values.prev_dt_time = curr_time; 
 
   // calculate velocity/ratio 
   // or if this is supposed to just return the PID values
   // edit to just return the summed terms 
-  auto proj_vel = ((pTerm + iTerm + dTerm) * m_current.velocity); 
+  // auto proj_vel = ((pTerm + iTerm + dTerm) * m_current.velocity); 
 
   // return to h-bridge 
   // check if this is the right h_bridge 
-  m_h_bridge->power(proj_vel/360); 
+  // m_h_bridge->power(proj_vel/360); 
 }
 
 // position, no feedforward 
@@ -128,25 +132,27 @@ void bldc_perseus::update_position_noff()
 {
   // pid is pid-ing 
   // assuming in degrees
-  auto error = m_target.position - m_current.position*0.25; 
+  auto error = m_target.position - m_current.position; 
   auto clock = resources::clock(); 
-  double dt = clock->uptime() - m_PID_prev_velocity_values.prev_dt_time; 
+  auto curr_time = clock->uptime();
+  double dt = curr_time - m_PID_prev_position_values.prev_dt_time; 
   m_PID_prev_position_values.integral += error * dt; 
   auto derivative = (error - m_PID_prev_position_values.last_error) / dt; 
   auto pTerm = m_current_position_settings.kp * error; 
   auto iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
   auto dTerm = m_current_position_settings.kd * derivative; 
   m_PID_prev_position_values.last_error = error; 
-
+  m_PID_prev_position_values.prev_dt_time = curr_time; 
+  
   // unsure of the next part for position, might increase velocity more than expected 
   // calculate velocity/ratio 
   // or if this is supposed to just return the PID values
   // edit to just return the summed terms 
-  auto proj_vel = ((pTerm + iTerm + dTerm) * m_current.velocity); 
+  auto proj_pos = ((pTerm + iTerm + dTerm) * m_current.position); 
 
   // return to h-bridge 
   // check if this is the right h_bridge 
-  m_h_bridge->power(proj_vel/360); 
+  m_h_bridge->power(proj_pos/360); 
 }
 
 // doing this straight from the encoder? 

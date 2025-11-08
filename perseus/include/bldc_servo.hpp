@@ -149,7 +149,8 @@ public:
     m_encoder;            // idk if these are supposed to be pointers or what
   float m_clamped_speed;
   float m_clamped_accel;
-  float current_encoder_value;
+  float m_prev_encoder_value;
+  hal::u64 m_last_clock_check; 
   PID_prev_values m_PID_prev_velocity_values; 
   PID_prev_values m_PID_prev_position_values; 
   // I think below can be commented out? 
