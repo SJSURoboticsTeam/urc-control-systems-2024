@@ -58,6 +58,7 @@ void application()
   // move enough to counter the torque.
   bool isHomed = false;
   while (true) {
+    if (!isHomed)
     home.home_all_joints();
   }
 }
