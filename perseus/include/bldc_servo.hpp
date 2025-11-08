@@ -141,6 +141,7 @@ public:
 public:
   status m_current;
   status m_target;
+  
   PID_settings m_current_position_settings;
   PID_settings m_current_velocity_settings;
   hal::v5::strong_ptr<sjsu::drivers::h_bridge>
@@ -158,6 +159,7 @@ public:
   float total_velocity_error;
   float last_position_error;
   float last_velocity_error;
+  float home_encoder_value;
 };
 
 }  // namespace sjsu::perseus

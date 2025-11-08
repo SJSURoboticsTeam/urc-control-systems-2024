@@ -30,7 +30,7 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   auto clock = resources::clock(); 
   m_last_clock_check = clock->uptime(); 
   m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_check };
-  m_PID_prev_position_values = { .integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_Check };
+  m_PID_prev_position_values = { .integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_check };
 
 }
 
@@ -87,7 +87,7 @@ void bldc_perseus::update_pid_velocity(PID_settings settings)
 }
 void bldc_perseus::home_encoder()
 {
-  current_encoder_value = m_encoder->read().angle;
+  home_encoder_value = m_encoder->read().angle;
   m_current.position = 0;
 }
 // get_velocity ( previous position, curernt , dt) => ticks per ms
@@ -105,8 +105,9 @@ void bldc_perseus::update_velocity_noff()
 {
   // pid is pid-ing 
   // assuming in degrees/ms, need to multiply by 0.25 
-  auto error = m_target.velocity - m_current.velocity; 
-  auto clock = resources::clock(); 
+  auto error = m_target.velocity - m_current.velocity;
+  auto clock = resources::clock();
+  auto console = resources::console();
   auto curr_time = clock->uptime();
   double dt = curr_time - m_PID_prev_velocity_values.prev_dt_time; 
   m_PID_prev_velocity_values.integral += error * dt; 
@@ -115,13 +116,15 @@ void bldc_perseus::update_velocity_noff()
   auto iTerm  = m_current_velocity_settings.ki * m_PID_prev_velocity_values.integral; 
   auto dTerm = m_current_velocity_settings.kd * derivative; 
   m_PID_prev_velocity_values.last_error = error; 
-  m_PID_prev_velocity_values.prev_dt_time = curr_time; 
+  m_PID_prev_velocity_values.prev_dt_time = curr_time;
+
 
   // calculate velocity/ratio 
   // or if this is supposed to just return the PID values
   // edit to just return the summed terms 
-  // auto proj_vel = ((pTerm + iTerm + dTerm) * m_current.velocity); 
-
+  auto proj_vel = ((pTerm + iTerm + dTerm) * m_current.velocity); 
+  hal::print<128>(*console, "P: %.6f, I: %.6f, D: %.6f\n", pTerm, iTerm, dTerm);
+  hal::print<128>(*console, "Projected Velocity: %.6f\n", proj_vel);
   // return to h-bridge 
   // check if this is the right h_bridge 
   // m_h_bridge->power(proj_vel/360); 

@@ -59,7 +59,7 @@ void application()
       prev_reading = reading;
       
     }
-    hal::delay(*clock, 100ms);
+    hal::delay(*clock, 10ms);
     time += 100;
 
   } 
