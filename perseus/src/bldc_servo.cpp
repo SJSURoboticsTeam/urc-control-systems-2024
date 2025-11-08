@@ -26,9 +26,10 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
                           // not immediately change our current velocity to
                           // -0.2, even if our target velocity changes to -0.2
   current_encoder_value = m_encoder->read().angle;
-  // prev pid values 
-  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0};
-  m_PID_prev_position_values = { .integral = 0, .last_error = 0 };
+  // inital/prev pid values 
+  auto clock = resources::clock(); 
+  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = clock->uptime() };
+  m_PID_prev_position_values = { .integral = 0, .last_error = 0, .prev_dt_time = clock->uptime() };
 }
 
 void bldc_perseus::set_target_position(hal::u16 target_position)
@@ -98,18 +99,18 @@ void bldc_perseus::home_encoder()
 // function: m_h_bridge->power(output);
 
 // velocity, no feedforward 
-void bldc_perseus::update_velocity_noff(PID_settings settings) 
+void bldc_perseus::update_velocity_noff() 
 {
   // pid is pid-ing 
   // assuming in degrees/ms, need to multiply by 0.25 
   auto error = m_target.velocity*0.25 - m_current.velocity*0.25; 
-  // 1 ms? bc measuring in ticks per ms 
-  double dt = 1 * 10e-3; // or is it = 736 / 360 * 10e-3 bc gear ratio? 
+  auto clock = resources::clock(); 
+  double dt = clock->uptime() - m_PID_prev_velocity_values.prev_dt_time; 
   m_PID_prev_velocity_values.integral += error * dt; 
   auto derivative = (error - m_PID_prev_velocity_values.last_error) / dt; 
-  auto pTerm = settings.kp * error; 
-  auto iTerm  = settings.ki * m_PID_prev_velocity_values.integral; 
-  auto dTerm = settings.kd * derivative; 
+  auto pTerm = m_current_velocity_settings.kp * error; 
+  auto iTerm  = m_current_velocity_settings.ki * m_PID_prev_velocity_values.integral; 
+  auto dTerm = m_current_velocity_settings.kd * derivative; 
   m_PID_prev_velocity_values.last_error = error; 
 
   // calculate velocity/ratio 
@@ -123,18 +124,18 @@ void bldc_perseus::update_velocity_noff(PID_settings settings)
 }
 
 // position, no feedforward 
-void bldc_perseus::update_position_noff(PID_settings settings) 
+void bldc_perseus::update_position_noff() 
 {
   // pid is pid-ing 
   // assuming in degrees
   auto error = m_target.position - m_current.position*0.25; 
-  // 1 ms? bc measuring in ticks per ms 
-  double dt = 1 * 10e-3; // or is it = 736 / 360 * 10e-3 bc gear ratio? 
+  auto clock = resources::clock(); 
+  double dt = clock->uptime() - m_PID_prev_velocity_values.prev_dt_time; 
   m_PID_prev_position_values.integral += error * dt; 
   auto derivative = (error - m_PID_prev_position_values.last_error) / dt; 
-  auto pTerm = settings.kp * error; 
-  auto iTerm  = settings.ki * m_PID_prev_position_values.integral; 
-  auto dTerm = settings.kd * derivative; 
+  auto pTerm = m_current_position_settings.kp * error; 
+  auto iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
+  auto dTerm = m_current_position_settings.kd * derivative; 
   m_PID_prev_position_values.last_error = error; 
 
   // unsure of the next part for position, might increase velocity more than expected 

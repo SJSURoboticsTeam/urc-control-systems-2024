@@ -41,6 +41,7 @@ public:
   {
     float integral; 
     float last_error; 
+    hal::u64 prev_dt_time; 
   }; 
   /**
     * @brief Set the target position of the servo.
@@ -125,12 +126,12 @@ public:
     * @brief Update velocity 
     * @param settings PID values 
   */
-  void update_velocity_noff(PID_settings settings); 
+  void update_velocity_noff(); 
   /**
     * @brief Update position 
     * @param settings PID values 
   */
-  void update_position_noff(PID_settings settings); 
+  void update_position_noff(); 
    /**
     * @brief get velocity from encoder values 
     * prints to terminal

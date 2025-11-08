@@ -58,9 +58,9 @@ void can_perseus::process_can_message(hal::can_message const& p_message,
       bldc->set_target_position(target_position);
       break;
     }
-    case action::set_velocity: { //TODO
-      auto target_position = p_message.payload[1] << 8 | p_message.payload[2];
-      // bldc->set_target_position(target_position);
+    case action::set_velocity: { 
+      auto target_velocity = p_message.payload[1] << 8 | p_message.payload[2];
+      bldc->set_target_velocity(target_velocity);
       break;
     }
     case action::clamp_speed: {
@@ -100,9 +100,9 @@ void can_perseus::process_can_message(hal::can_message const& p_message,
       // float val_kd = static_cast<float>(b_kd >> p_message.payload[1]) + (static_cast<float>(flip_kd) / pow(2, p_message.payload[1])); 
       
       // decimal shift way 
-      float val_kp = static_cast<float>(b_kp >> p_message.payload[1]) + static_cast<float>(b_kp & (0xff >> (16 - p_message.payload[1]))) / pow(10, payload[1]);
-      float val_ki = static_cast<float>(b_ki >> p_message.payload[1]) + static_cast<float>(b_ki & (0xff >> (16 - p_message.payload[1]))) / pow(10, payload[1]);
-      float val_kd = static_cast<float>(b_kd >> p_message.payload[1]) + static_cast<float>(b_kd & (0xff >> (16 - p_message.payload[1]))) / pow(10, payload[1]);
+      float val_kp = static_cast<float>(b_kp >> p_message.payload[1]) + static_cast<float>(b_kp & (0xff >> (16 - p_message.payload[1]))) / pow(10, p_message.payload[1]);
+      float val_ki = static_cast<float>(b_ki >> p_message.payload[1]) + static_cast<float>(b_ki & (0xff >> (16 - p_message.payload[1]))) / pow(10, p_message.payload[1]);
+      float val_kd = static_cast<float>(b_kd >> p_message.payload[1]) + static_cast<float>(b_kd & (0xff >> (16 - p_message.payload[1]))) / pow(10, p_message.payload[1]);
 
       bldc_perseus::PID_settings settings = {
         .kp = val_kp,
@@ -138,9 +138,9 @@ void can_perseus::process_can_message(hal::can_message const& p_message,
       // float val_kd = static_cast<float>(b_kd >> p_message.payload[1]) + (static_cast<float>(flip_kd) / pow(2, p_message.payload[1])); 
       
       // decimal shift way 
-      float val_kp = static_cast<float>(b_kp >> p_message.payload[1]) + static_cast<float>(b_kp & (0xff >> (16 - p_message.payload[1]))) / pow(10, payload[1]);
-      float val_ki = static_cast<float>(b_ki >> p_message.payload[1]) + static_cast<float>(b_ki & (0xff >> (16 - p_message.payload[1]))) / pow(10, payload[1]);
-      float val_kd = static_cast<float>(b_kd >> p_message.payload[1]) + static_cast<float>(b_kd & (0xff >> (16 - p_message.payload[1]))) / pow(10, payload[1]);
+      float val_kp = static_cast<float>(b_kp >> p_message.payload[1]) + static_cast<float>(b_kp & (0xff >> (16 - p_message.payload[1]))) / pow(10, p_message.payload[1]);
+      float val_ki = static_cast<float>(b_ki >> p_message.payload[1]) + static_cast<float>(b_ki & (0xff >> (16 - p_message.payload[1]))) / pow(10, p_message.payload[1]);
+      float val_kd = static_cast<float>(b_kd >> p_message.payload[1]) + static_cast<float>(b_kd & (0xff >> (16 - p_message.payload[1]))) / pow(10, p_message.payload[1]);
 
       bldc_perseus::PID_settings settings = {
         .kp = val_kp,
