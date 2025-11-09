@@ -6,6 +6,7 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <libhal/pointers.hpp>
+#include "drivetrain_math.hpp"
 
 using namespace std::chrono_literals;
 using namespace hal::literals;
@@ -22,6 +23,7 @@ swerve_module::swerve_module(
   , m_propulsion_motor(p_propulsion_motor)
   , m_limit_switch(p_limit_switch)
   , m_clock(p_clock)
+  , m_tolerance_last_changed()
 {
   // TODO: verify settings were initalized
 }
@@ -30,6 +32,13 @@ void swerve_module::stop()
 {
   m_steer_motor->velocity_control(0);
   m_propulsion_motor->velocity_control(0);
+}
+
+bool swerve_module::stopped() const
+{
+  return m_target_state == swerve_module_state(0, 0) &&
+         std::abs(m_actual_state_cache.steer_angle) <=
+           settings.velocity_tolerance;
 }
 
 void swerve_module::set_target_state(swerve_module_state const& p_target_state)
@@ -79,6 +88,48 @@ swerve_module_state swerve_module::refresh_actual_state_cache()
   return m_actual_state_cache;
 }
 
+swerve_module_state swerve_module::get_target_state() const
+{
+  return m_target_state;
+}
+
+void swerve_module::update_tolerance_debouncer()
+{
+  // tolerance is error from target
+  bool angle_out_of_tolerance =
+    fabs(m_actual_state_cache.steer_angle - m_target_state.steer_angle) >
+      settings.position_tolerance ||
+    m_actual_state_cache.steer_angle < settings.min_angle ||
+    m_actual_state_cache.steer_angle > settings.max_angle;
+
+  bool velocity_out_of_tolerance =
+    fabs(m_actual_state_cache.propulsion_velocity -
+         m_target_state.propulsion_velocity) > settings.velocity_tolerance ||
+    m_actual_state_cache.propulsion_velocity > settings.max_speed;
+
+  // true if out of tolerance
+  bool current_state = angle_out_of_tolerance || velocity_out_of_tolerance;
+
+  auto current_time = get_clock_time(*m_clock);
+
+  // if deviated from stable
+  if (m_stable_tolerance_state != current_state) {
+    m_tolerance_last_changed = current_time;
+    return;
+  }
+
+  sec dt = hal_time_duration_to_sec(current_time - m_tolerance_last_changed);
+  // if stayed stable for timeout time
+  if (dt > settings.tolerance_timeout) {
+    m_stable_tolerance_state = current_state;
+  }
+}
+
+bool swerve_module::tolerance_timed_out() const
+{
+  return m_stable_tolerance_state;
+}
+
 void swerve_module::hard_home()
 {
   // auto console = resources::console();
@@ -98,7 +149,7 @@ void swerve_module::hard_home()
   }
   m_steer_motor->velocity_control(0);  // stops
   // hal::print<128>(*console, "Final level: %d\n", m_limit_switch->level());
-  
+
   m_steer_motor->feedback_request(
     hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
   float stop_angle = m_steer_motor->feedback().angle();
