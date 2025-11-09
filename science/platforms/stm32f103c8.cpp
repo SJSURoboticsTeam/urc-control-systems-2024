@@ -71,6 +71,7 @@ auto& gpio_c()
   return gpio;
 }
 
+
 hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
 hal::v5::strong_ptr<hal::steady_clock> clock()
 {
@@ -130,6 +131,7 @@ hal::v5::strong_ptr<hal::i2c> i2c()
                                                      },
                                                      *clock);
 }
+
 
 hal::v5::strong_ptr<hal::input_pin> input_pin_0()
 {
@@ -197,10 +199,34 @@ auto& timer3()
   return timer3;
 }
 
+hal::v5::strong_ptr<hal::pwm> pwm0(){
+  static auto timer_old_pwm = timer1().acquire_pwm(hal::stm32f1::timer1_pin::pa8);
+  return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
+    driver_allocator(), std::move(timer_old_pwm));
+}
+
+hal::v5::optional_ptr<hal::actuator::rc_servo> carousel_servo_ptr;
+hal::v5::strong_ptr<hal::actuator::rc_servo> m_carousel_servo()
+{
+  if (not carousel_servo_ptr) {
+    auto carousel_servo_pwm = pwm0();
+    hal::actuator::rc_servo::settings carousel_servo_settings{
+      .frequency = 50,
+      .min_angle = 0,
+      .max_angle = 180,
+      .min_microseconds = 600,
+      .max_microseconds = 2400
+    };
+    carousel_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
+      driver_allocator(), *carousel_servo_pwm, carousel_servo_settings);
+  }
+  return carousel_servo_ptr;
+}
+
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   auto timer_pwm_channel =
-    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
+    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6); // should this be pa8 for carousel
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }

@@ -31,6 +31,8 @@
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
+#include <libhal-actuator/rc_servo.hpp>
+
 namespace sjsu::science {
 
 namespace resources {
@@ -70,6 +72,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
+hal::v5::strong_ptr<hal::actuator::rc_servo> m_carousel_servo();
 
 inline void reset()
 {
