@@ -7,6 +7,7 @@ libhal_build_demos(
 
 DEMOS
     application
+    application_serial_commands
     sequential_homing_demo
     
 INCLUDES
