@@ -7,11 +7,7 @@ libhal_build_demos(
 
 DEMOS
     application
-    # can_stability_test
-    chassis_vel_demo
-    iterate_state
-    # poll_motor_connections
-    prop_motor_test
+    application_serial_commands
     sequential_homing_demo
     serial_command_demo
     simple_can_reply_demo
@@ -42,3 +38,4 @@ LINK_LIBRARIES
 #    libhal::__device__
     libhal::actuator
 )
+
