@@ -18,8 +18,9 @@ void application()
     hal::print(*console, "starting homing!\n");
     for (int i = 0; i < 4; i++) {
       try {
-        (*swerve_modules)[i]->hard_home();
+        swerve_modules->at(i)->hard_home();
         hal::print<64>(*console, "Homed wheel: %d\n", i);
+        // swerve_modules->at(i)->set_target_state(swerve_module_state(0, 0));
       } catch (hal::exception e) {
         hal::print<64>(
           *console, "Wheel %d throwing error %d\n", i, e.error_code());
