@@ -24,14 +24,16 @@ struct swerve_module_settings
   vector2d position = vector2d(NAN, NAN);
   meters_per_sec max_speed = 10;
   meters_per_sec_per_sec acceleration = 4.0;
-  deg_per_sec turn_speed = 36000.0;
-  hal::degrees min_angle = -std::numeric_limits<float>::infinity();
-  hal::degrees max_angle = std::numeric_limits<float>::infinity();
+  deg_per_sec turn_speed = 360.0;
+  hal::degrees min_angle = -135.0;
+  hal::degrees max_angle = 135.0;
+  hal::degrees limit_switch_position = NAN;
   hal::degrees position_tolerance = 5.0;
   meters_per_sec velocity_tolerance = 0.5;
-  float mps_to_rpm = 1600;
+  float mps_to_rpm = 60;
   sec tolerance_timeout = 0.5;
   // If motor turns clockwise inorder to home
+  bool home_clockwise = true;
   bool drive_forward_clockwise = true;
 };
 

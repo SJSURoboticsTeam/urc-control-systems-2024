@@ -150,12 +150,14 @@ hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
 {
   if (can_filters_index >= can_identifier_filters.size()) {
     throw hal::unknown(nullptr);  // TODO: look for better exception
+    throw hal::unknown(nullptr);  // TODO: look for better exception
   }
   if (can_filters_index % 4 == 0) {
     initialize_can();
     auto filter_batch =
       hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
     for (unsigned int i = 0; i < filter_batch.size(); i++) {
+      can_identifier_filters[i + can_filters_index] = filter_batch[i];
       can_identifier_filters[i + can_filters_index] = filter_batch[i];
     }
   }
@@ -186,35 +188,66 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return can_bus_manager_ptr;
 }
 
-constexpr uint16_t front_left_steer_can_id = 0x03;
-constexpr uint16_t front_left_prop_can_id = 0x143;
+hal::v5::optional_ptr<hal::input_pin> front_left_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> front_left_limit_switch()
+{
+  if (not front_left_limit_switch_ptr) {
+    auto front_left_limit_switch = gpio_b().acquire_input_pin(12);  // 4
+    front_left_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(front_left_limit_switch)>(
+        driver_allocator(), std::move(front_left_limit_switch));
+  }
+  return front_left_limit_switch_ptr;
+}
+
+hal::v5::optional_ptr<hal::input_pin> front_right_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> front_right_limit_switch()
+{
+  if (not front_right_limit_switch_ptr) {
+    auto front_right_limit_switch = gpio_b().acquire_input_pin(13);  // 5
+    front_right_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(front_right_limit_switch)>(
+        driver_allocator(), std::move(front_right_limit_switch));
+  }
+  return front_right_limit_switch_ptr;
+}
+
+hal::v5::optional_ptr<hal::input_pin> back_left_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> back_left_limit_switch()
+{
+  if (not back_left_limit_switch_ptr) {
+    auto back_left_limit_switch = gpio_b().acquire_input_pin(14);  // 6
+    back_left_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(back_left_limit_switch)>(
+        driver_allocator(), std::move(back_left_limit_switch));
+  }
+  return back_left_limit_switch_ptr;
+}
+
+hal::v5::optional_ptr<hal::input_pin> back_right_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch()
+{
+  if (not back_right_limit_switch_ptr) {
+    auto back_right_limit_switch = gpio_b().acquire_input_pin(15);  // 7
+    back_right_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(back_right_limit_switch)>(
+        driver_allocator(), std::move(back_right_limit_switch));
+  }
+  return back_right_limit_switch_ptr;
+}
+
+constexpr uint16_t front_left_steer_can_id = 0x14C;
+constexpr uint16_t front_left_prop_can_id = 0x141;
 constexpr uint16_t front_right_steer_can_id = 0x142;
 constexpr uint16_t front_right_prop_can_id = 0x145;
 constexpr uint16_t back_left_steer_can_id = 0x144;
 constexpr uint16_t back_left_prop_can_id = 0x148;
 constexpr uint16_t back_right_steer_can_id = 0x14F;
 constexpr uint16_t back_right_prop_can_id = 0x153;
-constexpr swerve_module_settings front_left_settings{ .position =
-                                                        vector2d(0.487, 0.340),
-                                                      .drive_forward_clockwise =
-                                                        true };
-static constexpr swerve_module_settings front_right_settings{
-  .position = vector2d(0.487, -0.340),
-  .drive_forward_clockwise = false
-};
-static constexpr swerve_module_settings back_left_settings{
-  .position = vector2d(-0.487, 0.340),
-  .drive_forward_clockwise = true
-};
-static constexpr swerve_module_settings back_right_settings{
-  .position = vector2d(-0.487, -0.340),
-  .drive_forward_clockwise = false
-};
 
-hal::v5::strong_ptr<steer_controller> make_steer_controller(
-  swerve_module_settings p_settings [[maybe_unused]],
-  uint16_t p_address [[maybe_unused]])
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> make_rmd(uint16_t p_address)
 {
+  auto console_ref = resources::console();
   auto clock_ref = resources::clock();
   auto can_transceiver_ref = resources::can_transceiver();
   // auto perseus = hal::v5::make_strong_ptr<drivers::perseus_bldc>(
@@ -256,8 +289,8 @@ hal::v5::strong_ptr<steer_controller> front_left_steer()
 {
   if (not front_left_steer_ptr) {
     try {
-      front_left_steer_ptr =
-        make_steer_controller(front_left_settings, front_left_steer_can_id);
+      front_left_steer_ptr = make_rmd(front_left_steer_can_id);
+      front_left_steer_ptr->velocity_control(0);
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
@@ -268,13 +301,32 @@ hal::v5::strong_ptr<steer_controller> front_left_steer()
   }
   return front_left_steer_ptr;
 }
-static hal::v5::optional_ptr<steer_controller> front_right_steer_ptr;
-hal::v5::strong_ptr<steer_controller> front_right_steer()
+
+hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop_ptr;
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop()
+{
+  if (not front_left_prop_ptr) {
+    try {
+      front_left_prop_ptr = make_rmd(front_left_prop_can_id);
+      front_left_prop_ptr->velocity_control(0);
+    } catch (hal::exception e) {
+      auto console_ref = console();
+      print<64>(*console_ref,
+                "Front left prop failed, error code: %d\n",
+                e.error_code());
+      throw e;
+    }
+  }
+  return front_left_prop_ptr;
+}
+
+hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer_ptr;
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
 {
   if (not front_right_steer_ptr) {
     try {
-      front_right_steer_ptr =
-        make_steer_controller(front_right_settings, front_right_steer_can_id);
+      front_right_steer_ptr = make_rmd(front_right_steer_can_id);
+      front_right_steer_ptr->velocity_control(0);
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
@@ -343,8 +395,8 @@ hal::v5::strong_ptr<propulsion_controller> front_right_prop()
 {
   if (not front_right_prop_ptr) {
     try {
-      front_right_prop_ptr = make_propulsion_controller(
-        front_right_settings, front_right_prop_can_id);
+      front_right_prop_ptr = make_rmd(front_right_prop_can_id);
+      front_right_prop_ptr->velocity_control(0);
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
@@ -356,19 +408,37 @@ hal::v5::strong_ptr<propulsion_controller> front_right_prop()
   return front_right_prop_ptr;
 }
 
-static hal::v5::optional_ptr<propulsion_controller> back_left_prop_ptr;
-hal::v5::strong_ptr<propulsion_controller> back_left_prop()
+hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer_ptr;
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer()
+{
+  if (not back_left_steer_ptr) {
+    try {
+      back_left_steer_ptr = make_rmd(back_left_steer_can_id);
+      back_left_steer_ptr->velocity_control(0);
+    } catch (hal::exception e) {
+      auto console_ref = console();
+      print<64>(*console_ref,
+                "back left steer failed, error code: %d\n",
+                e.error_code());
+      throw e;
+    }
+  }
+  return back_left_steer_ptr;
+}
+
+hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop_ptr;
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop()
 {
   if (not back_left_prop_ptr) {
     try {
-      back_left_prop_ptr =
-        make_propulsion_controller(back_left_settings, back_left_prop_can_id);
+      back_left_prop_ptr = make_rmd(back_left_prop_can_id);
+      back_left_prop_ptr->velocity_control(0);
     } catch (hal::exception e) {
       auto console_ref = resources::console();
       print<64>(*console_ref,
                 "back left prop failed, error code: %d\n",
                 e.error_code());
-      throw;
+      throw e;
     }
   }
   return back_left_prop_ptr;
@@ -379,20 +449,62 @@ hal::v5::strong_ptr<propulsion_controller> back_right_prop()
 {
   if (not back_right_prop_ptr) {
     try {
-      back_right_prop_ptr =
-        make_propulsion_controller(back_right_settings, back_right_prop_can_id);
+      back_right_steer_ptr = make_rmd(back_right_steer_can_id);
+      back_right_steer_ptr->velocity_control(0);
     } catch (hal::exception e) {
       auto console_ref = console();
       print<64>(*console_ref,
                 "back right prop failed, error code: %d\n",
                 e.error_code());
-      throw;
+      throw e;
+    }
+  }
+  return back_right_steer_ptr;
+}
+
+hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop_ptr;
+hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop()
+{
+  if (not back_right_prop_ptr) {
+    try {
+      back_right_prop_ptr = make_rmd(back_right_prop_can_id);
+      back_right_prop_ptr->velocity_control(0);
+    } catch (hal::exception e) {
+      auto console_ref = console();
+      print<64>(*console_ref,
+                "back right prop failed, error code: %d\n",
+                e.error_code());
+      throw e;
     }
   }
   return back_right_prop_ptr;
 }
 
-static hal::v5::optional_ptr<swerve_module> front_left_swerve_module_ptr;
+constexpr swerve_module_settings front_left_settings{
+  .position = vector2d(1, 1),
+  .limit_switch_position = 135.0,
+  .home_clockwise = false,
+  .drive_forward_clockwise = true
+};
+constexpr swerve_module_settings front_right_settings{
+  .position = vector2d(1, -1),
+  .limit_switch_position = -135.0,
+  .home_clockwise = true,
+  .drive_forward_clockwise = false
+};
+constexpr swerve_module_settings back_left_settings{
+  .position = vector2d(-1, 1),
+  .limit_switch_position = 135.0,
+  .home_clockwise = false,
+  .drive_forward_clockwise = true
+};
+constexpr swerve_module_settings back_right_settings{
+  .position = vector2d(-1, -1),
+  .limit_switch_position = -135.0,
+  .home_clockwise = true,
+  .drive_forward_clockwise = false
+};
+hal::v5::optional_ptr<swerve_module> front_left_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> front_left_swerve_module()
 {
   if (not front_left_swerve_module_ptr) {
