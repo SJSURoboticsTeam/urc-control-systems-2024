@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <libhal-actuator/rc_servo.hpp>
@@ -38,6 +39,10 @@ static constexpr auto heartbeat_reply_id = 0x0f;
 static constexpr auto imu_accel_reply_id = 0x301;
 static constexpr auto imu_gyro_reply_id = 0x302;
 static constexpr auto imu_mag_reply_id = 0x303;
+
+// Heartbeat status
+static uint8_t imu_status = 0x0;
+static uint8_t lcd_status = 0x0;
 
 // Initializing the servo settings for the gimbal
 hal::actuator::rc_servo::settings const gimbal_servo_settings{
@@ -194,6 +199,10 @@ void application()
     // Get current current time
     auto now_time = clock->uptime();
 
+    // Reset heartbeat status
+    imu_status = 0x0;
+    lcd_status = 0x0;
+
     // Determine the dt of the loop
     float dt = std::chrono::duration<float>(now_time - last_time).count();
     if (dt <= 0.0f)
@@ -215,10 +224,79 @@ void application()
     auto raw_gyro = icm_device->read_gyroscope();
     auto raw_mag = icm_device->read_magnetometer();
 
+    imu_status = 0x1;
+
     auto raw_accel_int16 =
       round_clamp_int16(raw_accel.x, raw_accel.y, raw_accel.z);
     auto raw_gyro_int16 = round_clamp_int16(raw_gyro.x, raw_gyro.y, raw_gyro.z);
     auto raw_mag_int16 = round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z);
+
+    std::array<hal::byte, 8> accel_can_payload = {
+      static_cast<uint8_t>(raw_accel_int16.x & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_accel_int16.x) >> 8) &
+                           0xFF),
+      static_cast<uint8_t>(raw_accel_int16.y & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_accel_int16.y) >> 8) &
+                           0xFF),
+      static_cast<uint8_t>(raw_accel_int16.z & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_accel_int16.z) >> 8) &
+                           0xFF)
+    };
+
+    std::array<hal::byte, 8> gyro_can_payload = {
+      static_cast<uint8_t>(raw_gyro_int16.x & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_gyro_int16.x) >> 8) &
+                           0xFF),
+      static_cast<uint8_t>(raw_gyro_int16.y & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_gyro_int16.y) >> 8) &
+                           0xFF),
+      static_cast<uint8_t>(raw_accel_int16.z & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_gyro_int16.z) >> 8) &
+                           0xFF)
+    };
+
+    std::array<hal::byte, 8> mag_can_payload = {
+      static_cast<uint8_t>(raw_accel_int16.x & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_mag_int16.x) >> 8) &
+                           0xFF),
+      static_cast<uint8_t>(raw_accel_int16.y & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_mag_int16.y) >> 8) &
+                           0xFF),
+      static_cast<uint8_t>(raw_accel_int16.z & 0xFF),
+      static_cast<uint8_t>((static_cast<uint16_t>(raw_mag_int16.z) >> 8) & 0xFF)
+    };
+
+    std::array<hal::byte, 8> heartbeart_can_payload = { imu_status,
+                                                        lcd_status };
+
+    can_transceiver->send(hal::can_message{ .id = imu_accel_reply_id,
+                                            .extended = false,
+                                            .remote_request = false,
+                                            .length = 6,
+                                            .reserved0 = 0,
+                                            .payload = accel_can_payload });
+
+    can_transceiver->send(hal::can_message{ .id = imu_accel_reply_id,
+                                            .extended = false,
+                                            .remote_request = false,
+                                            .length = 6,
+                                            .reserved0 = 0,
+                                            .payload = gyro_can_payload });
+
+    can_transceiver->send(hal::can_message{ .id = imu_accel_reply_id,
+                                            .extended = false,
+                                            .remote_request = false,
+                                            .length = 6,
+                                            .reserved0 = 0,
+                                            .payload = mag_can_payload });
+
+    can_transceiver->send(
+      hal::can_message{ .id = imu_accel_reply_id,
+                        .extended = false,
+                        .remote_request = false,
+                        .length = 2,
+                        .reserved0 = 0,
+                        .payload = heartbeart_can_payload });
 
     // Update the pitch servo
     mast.update_y_servo(dt);
