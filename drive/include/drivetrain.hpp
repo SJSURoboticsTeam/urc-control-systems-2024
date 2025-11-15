@@ -24,6 +24,7 @@ public:
    */
   bool set_target_state(chassis_velocities p_target_state,
                         bool p_resolve_module_conflicts);
+  chassis_velocities get_target_state();
   /**
    * @brief calculates an estimate of the drivetrain velocities based on module
    * readings
@@ -55,6 +56,11 @@ public:
    * within tolerance of that)
    */
   bool aligned();
+  /**
+   * @brief with run homing in a fixed loop (will not update other motors or get
+   * interupted)
+   */
+  void hard_home();
 
 private:
   hal::v5::strong_ptr<
