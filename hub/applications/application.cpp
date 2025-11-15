@@ -1,10 +1,14 @@
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <libhal-actuator/rc_servo.hpp>
 #include <libhal-sensor/imu/icm20948.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
-
+#include <optional>
+#include <sys/types.h>
 
 #include "../hardware_map.hpp"
 #include "../include/gimbal.hpp"
@@ -16,7 +20,55 @@
 // static hal::time_duration const wd_countdown_timer = <recovery - expr>(5);
 namespace sjsu::hub {
 
-void handle_can_command(gimbal& gimbal, hal::can_message& msg)
+using namespace hal::literals;
+using namespace std::chrono_literals;
+
+// Watchdog Countdown Time
+static constexpr auto wait_time = 5s;
+
+// CAN Baudrate
+static constexpr auto baudrate = 100.0_kHz;
+
+// CAN IDs we want to read from
+static constexpr auto gimbal_read_id = 0x300;
+static constexpr auto heartbeat_read_id = 0x0e;
+
+// CAN IDs we want to use to send to MC
+static constexpr auto heartbeat_reply_id = 0x0f;
+static constexpr auto imu_accel_reply_id = 0x301;
+static constexpr auto imu_gyro_reply_id = 0x302;
+static constexpr auto imu_mag_reply_id = 0x303;
+
+// Initializing the servo settings for the gimbal
+hal::actuator::rc_servo::settings const gimbal_servo_settings{
+  .frequency = 50,
+  .min_angle = 0,
+  .max_angle = 180,
+  .min_microseconds = MIN_PULSEWIDTH_RANGE,
+  .max_microseconds = MAX_PULSEWIDTH_RANGE,
+};
+
+struct int16_t_axis
+{
+  int16_t x;
+  int16_t y;
+  int16_t z;
+};
+
+int16_t_axis round_clamp_int16(float init_x, float init_y, float init_z)
+{
+  long const x_long = lroundf(init_x);
+  long const y_long = lroundf(init_y);
+  long const z_long = lroundf(init_z);
+
+  return int16_t_axis{
+    .x = static_cast<int16_t>(std::clamp<long>(x_long, -32768L, 32767L)),
+    .y = static_cast<int16_t>(std::clamp<long>(y_long, -32768L, 32767L)),
+    .z = static_cast<int16_t>(std::clamp<long>(z_long, -32768L, 32767L))
+  };
+}
+
+void handle_gimbal_can_command(gimbal& gimbal, hal::can_message& msg)
 {
   if (msg.length < 2) {
     return;
@@ -40,10 +92,13 @@ void handle_can_command(gimbal& gimbal, hal::can_message& msg)
       break;
   }
 }
+
+void handal_hearbeat_can_command(hal::can_message& msg);
+
 void application()
 {
-  using namespace hal::literals;
-  using namespace std::chrono_literals;
+  // using namespace hal::literals;
+  // using namespace std::chrono_literals;
 
   auto clock = resources::clock();
   auto console = resources::console();
@@ -54,8 +109,75 @@ void application()
   auto can_transceiver = resources::can_transceiver();
   auto can_bus_manager = resources::can_bus_manager();
   auto can_id_filter = resources::can_identifier_filter();
+  auto can_range_filter = resources::can_range_filter();
 
-  constexpr auto wait_time = 5s;
+  // constexpr auto wait_time = 5s;
+  // if (watchdog->check_flag()) {
+  //   hal::print(*console, "Reset by watchdog\n");
+  //   watchdog->clear_flag();
+  // } else {
+  //   hal::print(*console, "Non-watchdog reset\n");
+  // }
+
+  // watchdog->set_countdown_time(wait_time);
+  // watchdog->start();
+
+  // Initialize ICM
+  auto icm_device = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
+    resources::driver_allocator(), *i2c);
+  icm_device->init_mag();
+  icm_device->auto_offsets();
+
+  // hal::actuator::rc_servo::settings const gimbal_servo_settings{
+  //   .frequency = 50,
+  //   .min_angle = 0,
+  //   .max_angle = 180,
+  //   .min_microseconds = MIN_PULSEWIDTH_RANGE,
+  //   .max_microseconds = MAX_PULSEWIDTH_RANGE,
+  // };
+
+  // Initialize servos
+  auto p_x_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
+    resources::driver_allocator(),
+    *mast_servo_pwm_channel_0,
+    gimbal_servo_settings);
+
+  auto p_y_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
+    resources::driver_allocator(),
+    *mast_servo_pwm_channel_1,
+    gimbal_servo_settings);
+
+  // auto y_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
+  //   resources::driver_allocator(),
+  //   *mast_servo_pwm_channel_1,
+  //   gimbal_servo_settings);
+
+  // Initialize Gimbal
+  gimbal mast(p_x_servo,
+              p_y_servo,
+              icm_device,
+              gimbal_servo_settings.min_angle,
+              gimbal_servo_settings.max_angle);
+
+  // static constexpr auto baudrate = 100.0_kHz;
+
+  can_bus_manager->baud_rate(baudrate);
+  // constexpr auto allowed_id = 0x300;
+
+  // Allowing these specific IDs to read
+  can_id_filter->allow(gimbal_read_id);
+  can_id_filter->allow(heartbeat_read_id);
+  hal::print<64>(
+    *console,
+    "Allowing ID to read [0x%lX] and [0x%lX] through the filter!\n",
+    gimbal_read_id,
+    heartbeat_read_id);
+
+  hal::can_message_finder gimbal_msg_finder(*can_transceiver, gimbal_read_id);
+  hal::can_message_finder heartbeat_msg_finder(*can_transceiver,
+                                               heartbeat_read_id);
+
+  // constexpr auto wait_time = 5s;
   if (watchdog->check_flag()) {
     hal::print(*console, "Reset by watchdog\n");
     watchdog->clear_flag();
@@ -66,55 +188,42 @@ void application()
   watchdog->set_countdown_time(wait_time);
   watchdog->start();
 
-  auto icm_device = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
-    resources::driver_allocator(), *i2c);
-  icm_device->init_mag();
-  icm_device->auto_offsets();
-
-  hal::actuator::rc_servo::settings const gimbal_servo_settings{
-    .frequency = 50,
-    .min_angle = 0,
-    .max_angle = 180,
-    .min_microseconds = MIN_PULSEWIDTH_RANGE,
-    .max_microseconds = MAX_PULSEWIDTH_RANGE,
-  };
-  auto p_x_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
-    resources::driver_allocator(),
-    *mast_servo_pwm_channel_0,
-    gimbal_servo_settings);
-
-  auto y_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
-    resources::driver_allocator(),
-    *mast_servo_pwm_channel_1,
-    gimbal_servo_settings);
-
-  gimbal mast(p_x_servo,
-              p_x_servo,
-              icm_device,
-              gimbal_servo_settings.min_angle,
-              gimbal_servo_settings.max_angle);
-
-  static constexpr auto baudrate = 100.0_kHz;
-
-  can_bus_manager->baud_rate(baudrate);
-  constexpr auto allowed_id = 0x300;
-  can_id_filter->allow(allowed_id);
-  hal::print<64>(
-    *console, "Allowing ID [0x%lX] through the filter!\n", allowed_id);
-
-  hal::can_message_finder message_finder(*can_transceiver, 0x300);
-
   auto last_time = clock->uptime();
+
   while (true) {
+    // Get current current time
     auto now_time = clock->uptime();
+
+    // Determine the dt of the loop
     float dt = std::chrono::duration<float>(now_time - last_time).count();
-    if (dt <= 0.0f) dt = 1e-6f;
+    if (dt <= 0.0f)
+      dt = 1e-6f;
+
+    // Record the time as previous
     last_time = now_time;
-    for (auto m = message_finder.find(); m.has_value();
-         m = message_finder.find()) {
+
+    // Find incoming CAN msgs
+    for (auto m = gimbal_msg_finder.find(); m.has_value();
+         m = gimbal_msg_finder.find()) {
     }
+    for (auto m = heartbeat_msg_finder.find(); m.has_value();
+         m = heartbeat_msg_finder.find()) {
+    }
+
+    // Data to send to MC
+    auto raw_accel = icm_device->read_acceleration();
+    auto raw_gyro = icm_device->read_gyroscope();
+    auto raw_mag = icm_device->read_magnetometer();
+
+    auto raw_accel_int16 =
+      round_clamp_int16(raw_accel.x, raw_accel.y, raw_accel.z);
+    auto raw_gyro_int16 = round_clamp_int16(raw_gyro.x, raw_gyro.y, raw_gyro.z);
+    auto raw_mag_int16 = round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z);
+
+    // Update the pitch servo
     mast.update_y_servo(dt);
-    
+
+    // Reset the Watchdog countdown timer
     watchdog->reset();
 
     hal::delay(*clock, 2ms);

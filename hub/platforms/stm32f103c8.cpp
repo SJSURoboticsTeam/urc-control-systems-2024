@@ -35,6 +35,8 @@
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/can.hpp>
+#include <libhal/error.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
@@ -225,6 +227,11 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 }
 
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
+{
+  throw hal::operation_not_supported(nullptr);
+}
+
+hal::v5::strong_ptr<hal::can_range_filter> can_range_filter()
 {
   throw hal::operation_not_supported(nullptr);
 }
