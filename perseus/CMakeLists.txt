@@ -20,6 +20,8 @@ libhal_build_demos(
   DEMOS
   application
   velocity_test
+  h_bridge_demo
+  pid_position_test
   INCLUDES
   ../drivers/include/
   include
@@ -30,6 +32,7 @@ SOURCES
     ../drivers/src/h_bridge.cpp
     src/bldc_servo.cpp
     src/can_messaging.cpp
+    
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import

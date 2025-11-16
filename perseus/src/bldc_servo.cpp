@@ -1,12 +1,16 @@
 #include "../include/bldc_servo.hpp"
+#include <cstdio>
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/units.hpp>
 #include "../hardware_map.hpp"
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
-
+#include <libhal/steady_clock.hpp>
+#include <libhal/units.hpp>
 #include <sys/types.h>
 using namespace std::chrono_literals;
+using sec = float;
+
 namespace sjsu::perseus {
 
 // ...existing code...
@@ -18,8 +22,9 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   m_current = {
     .position = 0,
     .velocity = 0,  // 0-100
+    .power = 0.1f, // 
   };
-  m_target = { .position = 0, .velocity = 0 };
+  m_target = { .position = 0, .velocity = 0, .power = 0.0f };
   m_clamped_speed =
     0.3;  // 40*0.3 = 12V which is the maximum this servo can be drivern
   m_clamped_accel = 0.1;  // if we are currently at a velocity of +0.2, we must
@@ -29,14 +34,20 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   // inital/prev pid values 
   auto clock = resources::clock(); 
   m_last_clock_check = clock->uptime(); 
-  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_check };
-  m_PID_prev_position_values = { .integral = 0, .last_error = 0, .prev_dt_time = m_last_clock_check };
+  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = 0.0 };
+  m_PID_prev_position_values = { .integral = 0,
+                                 .last_error = 0,
+                                 .prev_dt_time = 0.0 };
+  max_proj_power = 15; // initial max power assuming kp = 0.5
 
 }
 
-void bldc_perseus::set_target_position(hal::u16 target_position)
+void bldc_perseus::set_target_position(float target_position)
 {
   m_target.position = target_position;
+  // update the maximum possible power we nee
+  
+  
 }
 
 hal::u16 bldc_perseus::get_target_position()
@@ -127,39 +138,70 @@ void bldc_perseus::update_velocity_noff()
   hal::print<128>(*console, "Projected Velocity: %.6f\n", proj_vel);
   // return to h-bridge 
   // check if this is the right h_bridge 
-  // m_h_bridge->power(proj_vel/360); 
+  // m_h_bridge->power(proj_vel/360);
 }
 
-// position, no feedforward 
-void bldc_perseus::update_position_noff() 
+constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
 {
-  // pid is pid-ing 
+  return static_cast<hal::time_duration>(static_cast<long long>(p_time * 1e9f));
+}
+}
+constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
+{
+  return static_cast<float>(p_time.count()) * 1e-9f;
+}
+
+hal::time_duration get_clock_time(hal::steady_clock& p_clock)
+{
+  hal::time_duration const period =
+    sjsu::perseus::sec_to_hal_time_duration(1.0 / p_clock.frequency());
+  return period * p_clock.uptime();
+}
+// position, no feedforward 
+void sjsu::perseus::bldc_perseus::update_position_noff() 
+{
+  // pid is pid-ing
   // assuming in degrees
-  auto error = m_target.position - m_current.position; 
-  auto clock = resources::clock(); 
-  auto curr_time = clock->uptime();
-  double dt = curr_time - m_PID_prev_position_values.prev_dt_time; 
+  m_current.position = m_encoder->read().angle;
+  auto error = m_target.position - m_current.position;
+  auto clock = resources::clock();
+  auto console = resources::console();
+  auto curr_time = hal_time_duration_to_sec(get_clock_time(*clock));
+  sec dt = curr_time - m_PID_prev_position_values.prev_dt_time;
+  hal::print<128>(*console, "DT: %.6f\n", dt);
+  // float k_step = 1;
   m_PID_prev_position_values.integral += error * dt; 
   auto derivative = (error - m_PID_prev_position_values.last_error) / dt; 
   auto pTerm = m_current_position_settings.kp * error; 
   auto iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
   auto dTerm = m_current_position_settings.kd * derivative; 
   m_PID_prev_position_values.last_error = error; 
-  m_PID_prev_position_values.prev_dt_time = curr_time; 
-  
-  // unsure of the next part for position, might increase velocity more than expected 
-  // calculate velocity/ratio 
-  // or if this is supposed to just return the PID values
-  // edit to just return the summed terms 
-  auto proj_pos = ((pTerm + iTerm + dTerm) * m_current.position); 
+  m_PID_prev_position_values.prev_dt_time = curr_time;
 
-  // return to h-bridge 
-  // check if this is the right h_bridge 
-  m_h_bridge->power(proj_pos/360); 
+  // unsure of the next part for position, might increase velocity more than
+  // expected calculate velocity/ratio or if this is supposed to just return the
+  // PID values edit to just return the summed terms
+  auto proj_pos = ((pTerm + iTerm + dTerm) * std::abs(m_current.power));
+  hal::print<128>(
+    *console, "P: %.6f, I: %.6f, D: %.6f\n", pTerm, iTerm, dTerm);
+  hal::print<128>(*console, "Projected Position: %.6f\n", proj_pos);
+  auto proj_power = std::clamp(
+    proj_pos / std::abs(max_proj_power), -1 * m_clamped_speed, m_clamped_speed);
+  m_current.power = proj_power;
+  if (m_current.power == 0.0f) {
+    m_current.power = 0.01f;
+  }
+  m_current.power = m_current.power * (error >= 0 ? -1 : 1); // this needs to be changed depending on servo 
+  hal::print<128>(*console, "Projected Power: %.6f\n, Max Power: %.6f", m_current.power, max_proj_power);
+
+  // return to h-bridge
+  // check if this is the right h_bridge
+  
+  m_h_bridge->power(m_current.power);
 }
 
 // doing this straight from the encoder? 
-void bldc_perseus::get_current_velocity() 
+void sjsu::perseus::bldc_perseus::get_current_velocity() 
 {
   auto terminal = resources::console();
   auto clock = resources::clock();
@@ -168,5 +210,4 @@ void bldc_perseus::get_current_velocity()
   hal::delay(*clock, 10ms);
   cv = cv - m_encoder->read().angle; 
   hal::print<32>(*terminal, "deg/ms: %.6f\n", cv);
-}
-}  // namespace sjsu::perseus
+}// namespace sjsu::perseus

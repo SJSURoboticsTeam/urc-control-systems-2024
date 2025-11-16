@@ -4,7 +4,7 @@
 #include <libhal-util/steady_clock.hpp>
 
 using namespace std::chrono_literals;
-namespace sjsu::drivers {
+namespace sjsu::perseus {
 void application()
 {
   auto h_bridge = perseus::resources::h_bridge();

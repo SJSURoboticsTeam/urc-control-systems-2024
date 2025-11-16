@@ -148,7 +148,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-hal::v5::strong_ptr<hal::rotation_sensor> encoder()
+hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
 {
   return timer2().acquire_quadrature_encoder(
     driver_allocator(),

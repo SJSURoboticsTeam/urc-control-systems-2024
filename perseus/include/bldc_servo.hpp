@@ -19,8 +19,9 @@ public:
   */
   struct status 
   {
-    hal::u16 position;
+    float position;
     hal::i16 velocity;
+    float power;
   };
 
   /**
@@ -41,13 +42,13 @@ public:
   {
     float integral; 
     float last_error; 
-    hal::u64 prev_dt_time; 
+    float prev_dt_time; 
   }; 
   /**
     * @brief Set the target position of the servo.
     * @param target_position The target position to set, it is a hal::u16 value. This is relative to the home position. 
   */
-  void set_target_position(hal::u16 target_position);
+  void set_target_position(float target_position);
   /**
     * @brief Get the target position of the servo.
     * @return Gets the position relative to the home position.
@@ -141,7 +142,7 @@ public:
 public:
   status m_current;
   status m_target;
-  
+  float max_proj_power; // this changes every time a new target position is set
   PID_settings m_current_position_settings;
   PID_settings m_current_velocity_settings;
   hal::v5::strong_ptr<sjsu::drivers::h_bridge>
