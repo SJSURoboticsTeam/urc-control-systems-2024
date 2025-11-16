@@ -1,4 +1,4 @@
-#include "../include/serial_commands.hpp"
+#include <serial_commands.hpp>
 
 namespace sjsu::drivers::serial_commands {
 
@@ -23,20 +23,20 @@ float parse_float(std::span<hal::byte> p_str)
   return val;
 }
 
-handler::read_stat handler::read()
+handler::read_status handler::read()
 {
   while (true) {
     if (m_cursor >= m_line.size()) {
       hal::print(*m_console,
                  "\nError: exceeded max command length 256 characters\n");
       m_cursor = 0;
-      return read_stat::overflow;
+      return read_status::overflow;
     }
 
     std::span<hal::byte> view{ m_line.begin() + m_cursor, 1 };
     auto n = m_console->read(view).data.size();
     if (n < 1) {
-      return read_stat::incomplete;
+      return read_status::incomplete;
     }
 
     // echo received key back to client
@@ -65,7 +65,7 @@ handler::read_stat handler::read()
 		[[fallthrough]];
       case '\n':
         m_cursor = 0;
-        return read_stat::complete;
+        return read_status::complete;
     }
     m_cursor++;
   }
@@ -132,10 +132,10 @@ handler::handler(hal::v5::strong_ptr<hal::serial> p_console)
 void handler::handle(std::span<def> p_commands)
 {
   switch (read()) {
-    case read_stat::complete:
+    case read_status::complete:
       break;
-    case read_stat::incomplete:
-    case read_stat::overflow:
+    case read_status::incomplete:
+    case read_status::overflow:
       return;
   }
 

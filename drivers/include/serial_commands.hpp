@@ -3,8 +3,6 @@
 #include <libhal/error.hpp>
 #include <libhal/pointers.hpp>
 #include <string.h>
-// #include <libhal-exceptions/control.hpp>
-// #include <libhal/timeout.hpp>
 
 namespace sjsu::drivers::serial_commands {
 struct def
@@ -19,14 +17,14 @@ class handler
   size_t m_cursor;
   hal::v5::strong_ptr<hal::serial> m_console;
 
-  enum class read_stat : hal::byte
+  enum class read_status : hal::byte
   {
     complete,
     incomplete,
     overflow
   };
 
-  read_stat read();
+  read_status read();
   void parse(std::span<std::span<hal::byte>>& p_segments);
   bool prefix_match(char const* p_prefix, std::span<hal::byte> p_str);
 
