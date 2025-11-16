@@ -44,7 +44,7 @@ handler::read_status handler::read()
 
     switch (view[0]) {
       // Ctrl-C (end-of-text)
-      case 0x03:
+      case 3:
         view[0] = '\n';
         m_console->write(view);
         m_cursor = 0;
