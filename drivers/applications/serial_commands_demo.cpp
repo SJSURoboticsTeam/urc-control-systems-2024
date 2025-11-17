@@ -22,6 +22,10 @@ void application()
     // Where `fls` is the prefix, `2.3` is some float value for the first
     // parameter, and `\n` is a newline to designate the end of a command.
     // There can be any number of whitespaces separating the two.
+    //
+    // Deletion of command characters with the backspace character `\b` is
+    // supported, the clearing of the current command buffer with `control+C`
+    // is also supported.
     drivers::serial_commands::def{
       "fls",
       [&console](auto params) {
