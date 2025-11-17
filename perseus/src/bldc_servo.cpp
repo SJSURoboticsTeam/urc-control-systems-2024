@@ -109,7 +109,13 @@ void bldc_perseus::home_encoder()
 // when you don't) PID separately for position and velocity at end of each
 // function: m_h_bridge->power(output);
 
-// velocity, no feedforward 
+// velocity, no feedforward
+
+// ff clamped from -0.1 + 0.1
+// pid power = -0.2 ->
+// pid power other direction = 0.2 -0.1 = 0.1
+
+// final answer also clamped from -0.3 to 0.3
 void bldc_perseus::update_velocity_noff() 
 {
   // pid is pid-ing 
@@ -126,17 +132,17 @@ void bldc_perseus::update_velocity_noff()
   auto dTerm = m_current_velocity_settings.kd * derivative; 
   m_PID_prev_velocity_values.last_error = error; 
   m_PID_prev_velocity_values.prev_dt_time = curr_time;
-
-
   // calculate velocity/ratio 
   // or if this is supposed to just return the PID values
   // edit to just return the summed terms 
   auto proj_vel = ((pTerm + iTerm + dTerm) * m_current.velocity); 
   hal::print<128>(*console, "P: %.6f, I: %.6f, D: %.6f\n", pTerm, iTerm, dTerm);
   hal::print<128>(*console, "Projected Velocity: %.6f\n", proj_vel);
+
+
   // return to h-bridge 
   // check if this is the right h_bridge 
-  // m_h_bridge->power(proj_vel/360);
+  // m_h_bridge->power(proj_vel +  ff);
 }
 
 constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
@@ -169,7 +175,7 @@ void bldc_perseus::update_position_noff()
   hal::print<128>(*console, "DT: %.6f\n", dt);
   // float k_step = 1;
   m_PID_prev_position_values.integral += error * dt; 
-  auto derivative = (error - m_PID_prev_position_values.last_error) / dt; 
+  auto derivative = (error - m_PID_prev_position_values.last_error) / dt; // this turns out to be negative because hopefully your current error is less than your last error
   auto pTerm = m_current_position_settings.kp * error; 
   auto iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
   auto dTerm = m_current_position_settings.kd * derivative; 
@@ -180,19 +186,33 @@ void bldc_perseus::update_position_noff()
   // expected calculate velocity/ratio or if this is supposed to just return the
   // PID values edit to just return the summed terms
   auto proj_pos = pTerm + iTerm + dTerm;
-  // hal::print<128>(
-  //   *console, "P: %.6f, I: %.6f, D: %.6f\n", pTerm, iTerm, dTerm);
-  // hal::print<128>(*console, "Projected Position: %.6f\n", proj_pos);
   auto proj_power = std::clamp(
     proj_pos, -1 * m_clamped_speed, m_clamped_speed);
   m_current.power = proj_power;
-  // hal::print<128>(*console, "Projected Power: %.6f\n", m_current.power);
-
   // return to h-bridge
   // check if this is the right h_bridge
-  
+  print_csv_format(pTerm, iTerm, dTerm, proj_power);
   m_h_bridge->power(m_current.power);
 }
+
+void sjsu::perseus::bldc_perseus::print_csv_format(float pTerm, float iTerm, float dTerm, float proj_power)
+{
+  auto console = resources::console();
+  hal::print<256>(
+    *console,
+    "%.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n",
+    pTerm,
+    iTerm,
+    dTerm,
+    proj_power,
+    m_current.power,
+    m_current.position,
+    m_target.position,
+    m_current_position_settings.kp,
+    m_current_position_settings.ki,
+    m_current_position_settings.kd);
+};
+    
 
 // doing this straight from the encoder? 
 void bldc_perseus::get_current_velocity() 

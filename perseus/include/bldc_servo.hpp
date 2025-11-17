@@ -137,7 +137,15 @@ public:
     * @brief get velocity from encoder values 
     * prints to terminal
   */
-  void get_current_velocity(); 
+  void get_current_velocity();
+
+  /**
+   * @brief Print in CSV format.
+   * Format: P, I, D, Projected Power, Clamped_power, current_position, target_position, Kp, Ki, Kd
+   */
+  void print_csv_format(float pTerm, float iTerm, float dTerm, float proj_power);
+
+
 
 public:
   status m_current;

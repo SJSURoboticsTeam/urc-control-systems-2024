@@ -35,7 +35,7 @@ void application()
   
   hal::print(*console, "BLDC Servo initialized...\n");
   bldc_perseus::PID_settings pid_settings = {
-    .kp = 0.0025,
+    .kp = 0.01,
     // .ki = 0.05,
     .ki = 0,
     .kd = 0,
@@ -46,8 +46,6 @@ void application()
   while (true) {
     // csv output for easy graphing
     servo_ptr->update_position_noff();
-    hal::print<128>(*console, "Current Position: %.2f\n", servo_ptr->get_current_position());
-
     hal::delay(*clock, 10ms);
 
   } 
