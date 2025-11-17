@@ -21,7 +21,7 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
 {
   m_current = {
     .position = 0,
-    .velocity = 0,  // 0-100
+    .velocity = 0,  
     .power = 0.1f, // 
   };
   m_target = { .position = 0, .velocity = 0, .power = 0.0f };
@@ -38,8 +38,6 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   m_PID_prev_position_values = { .integral = 0,
                                  .last_error = 0,
                                  .prev_dt_time = 0.0 };
-  max_proj_power = 15; // initial max power assuming kp = 0.5
-
 }
 
 void bldc_perseus::set_target_position(float target_position)
@@ -74,7 +72,7 @@ hal::u16 bldc_perseus::get_current_velocity_in_tps()
 
 hal::u16 bldc_perseus::get_current_velocity_percentage()
 {
-  return m_current.velocity;
+  return m_current.power;
 }
 void bldc_perseus::set_current_velocity(hal::i16 current_velocity)
 {
@@ -181,18 +179,14 @@ void sjsu::perseus::bldc_perseus::update_position_noff()
   // unsure of the next part for position, might increase velocity more than
   // expected calculate velocity/ratio or if this is supposed to just return the
   // PID values edit to just return the summed terms
-  auto proj_pos = ((pTerm + iTerm + dTerm) * std::abs(m_current.power));
-  hal::print<128>(
-    *console, "P: %.6f, I: %.6f, D: %.6f\n", pTerm, iTerm, dTerm);
-  hal::print<128>(*console, "Projected Position: %.6f\n", proj_pos);
+  auto proj_pos = pTerm + iTerm + dTerm;
+  // hal::print<128>(
+  //   *console, "P: %.6f, I: %.6f, D: %.6f\n", pTerm, iTerm, dTerm);
+  // hal::print<128>(*console, "Projected Position: %.6f\n", proj_pos);
   auto proj_power = std::clamp(
-    proj_pos / std::abs(max_proj_power), -1 * m_clamped_speed, m_clamped_speed);
+    proj_pos, -1 * m_clamped_speed, m_clamped_speed);
   m_current.power = proj_power;
-  if (m_current.power == 0.0f) {
-    m_current.power = 0.01f;
-  }
-  m_current.power = m_current.power * (error >= 0 ? -1 : 1); // this needs to be changed depending on servo 
-  hal::print<128>(*console, "Projected Power: %.6f\n, Max Power: %.6f", m_current.power, max_proj_power);
+  // hal::print<128>(*console, "Projected Power: %.6f\n", m_current.power);
 
   // return to h-bridge
   // check if this is the right h_bridge
