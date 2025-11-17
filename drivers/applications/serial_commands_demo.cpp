@@ -19,8 +19,9 @@ void application()
     //
     // fls 2.3\n
     //
-    // Where `fls` is the prefix and `2.3` is some float value for the first
-    // parameter. There can be any number of whitespaces separating the two.
+    // Where `fls` is the prefix, `2.3` is some float value for the first
+    // parameter, and `\n` is a newline to designate the end of a command.
+    // There can be any number of whitespaces separating the two.
     drivers::serial_commands::def{
       "fls",
       [&console](auto params) {
