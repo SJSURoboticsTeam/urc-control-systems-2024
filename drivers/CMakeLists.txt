@@ -17,6 +17,20 @@ cmake_minimum_required(VERSION 3.20)
 project(demos LANGUAGES CXX)
 
 libhal_build_demos(
+<<<<<<< HEAD
+=======
+    DEMOS
+    color_sensor_demo
+    led_strip_demo
+    h_bridge_demo
+    pressure_sensor_demo
+    scd40_demo
+  soil_sensor_demo
+  tla2528_output_pin_demo
+  tla2528_input_pin_demo
+  tla2528_analog_input_demo
+  serial_commands_demo
+>>>>>>> 123b9cd (Migrate serial commands demo to a library (#70))
 
 DEMOS
   adc1283_demo
@@ -39,6 +53,11 @@ INCLUDES
   .
 
 SOURCES
+<<<<<<< HEAD
+=======
+    # platforms/micromod.cpp
+    platforms/stm32f103c8.cpp
+>>>>>>> 123b9cd (Migrate serial commands demo to a library (#70))
     src/serial_commands.cpp
     src/color_sensor_opt4048.cpp
     src/mq4.cpp
