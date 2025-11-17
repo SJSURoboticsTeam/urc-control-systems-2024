@@ -48,15 +48,7 @@ void application()
   float prev_reading = 0;
   // float temp = 0.0;
   while (true) {
-    // std::array<hal::byte, 8> data{};
-    // temp += 0.1;
-    // if (temp > 5.0) {
-    //   temp = -1.0;
-    // }
-    // if (temp < -5.0) {
-    //   temp = 0.0;
-    // }
-    // float value = static_cast<int>(console->read(data).data[0]) / 10.0f;
+    
     servo.m_h_bridge->power(-0.3);
     // auto read = servo.m_encoder->read().angle;
     // hal::print<128>(*console, "Encoder reaxding: %f\n", read);
