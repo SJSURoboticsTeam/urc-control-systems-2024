@@ -93,7 +93,8 @@ void application()
     },
     command_def{ "" }
   };
-  sjsu::drivers::serial_commands::handler cmd {console};
+  sjsu::drivers::serial_commands::handler cmd{ console };
+  
   while (true) {
     // csv output for easy graphing
     
