@@ -144,8 +144,8 @@ public:
    * Format: P, I, D, Projected Power, Clamped_power, current_position, target_position, Kp, Ki, Kd
    */
   void print_csv_format(float pTerm, float iTerm, float dTerm, float proj_power);
-
-
+  void set_max_power(float power);
+  bldc_perseus::PID_settings get_pid_settings();
 
 public:
   status m_current;

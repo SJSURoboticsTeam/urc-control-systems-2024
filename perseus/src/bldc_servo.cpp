@@ -86,6 +86,10 @@ void bldc_perseus::set_clamped_speed(hal::u16 clamped_speed)
 {
   m_clamped_speed = clamped_speed;
 }
+bldc_perseus::PID_settings bldc_perseus::get_pid_settings()
+{
+  return m_current_position_settings;
+}
 void bldc_perseus::update_pid_position(PID_settings settings)
 {
   m_current_position_settings = settings;
@@ -154,7 +158,10 @@ constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
 {
   return static_cast<float>(p_time.count()) * 1e-9f;
 }
-
+void bldc_perseus::set_max_power(float power)
+{
+  m_clamped_speed = power; 
+}
 hal::time_duration get_clock_time(hal::steady_clock& p_clock)
 {
   hal::time_duration const period =

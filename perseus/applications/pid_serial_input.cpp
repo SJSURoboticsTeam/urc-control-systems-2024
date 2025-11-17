@@ -11,10 +11,12 @@
 
 #include "../hardware_map.hpp"
 
+#include <serial_commands.hpp>
 #include "../include/bldc_servo.hpp"
 
 
 using namespace std::chrono_literals;
+
 namespace sjsu::perseus {
 
 void application()
@@ -41,57 +43,68 @@ void application()
   servo_ptr->update_pid_position(pid_settings);
   servo_ptr->set_target_position(-30);
   std::array cmd_defs = {
-    command_def{
+    drivers::serial_commands::def{
       "setpos",
       [&console, &servo_ptr](auto params) {
         if (params.size() != 1) {
           throw hal::argument_out_of_domain(nullptr);
         }
-        float position = parse_float(params[0]);
+        float position = drivers::serial_commands::parse_float(params[0]);
         servo_ptr->set_target_position(position);
         hal::print<32>(*console, "Set Position to: %f\n", position);
       },
     },
-    command_def{
+    drivers::serial_commands::def{
       "setkp",
       [&console, &servo_ptr](auto params) {
         if (params.size() != 1) {
           throw hal::argument_out_of_domain(nullptr);
         }
-        float kp = parse_float(params[0]);
+        float kp = drivers::serial_commands::parse_float(params[0]);
         auto current_settings = servo_ptr->get_pid_settings();
         current_settings.kp = kp;
         servo_ptr->update_pid_position(current_settings);
         hal::print<32>(*console, "Set Kp to: %f\n", kp);
       },
     },
-    command_def{
+    drivers::serial_commands::def{
       "setki",
       [&console, &servo_ptr](auto params) {
         if (params.size() != 1) {
           throw hal::argument_out_of_domain(nullptr);
         }
-        float ki = parse_float(params[0]);
+        float ki = drivers::serial_commands::parse_float(params[0]);
         auto current_settings = servo_ptr->get_pid_settings();
         current_settings.ki = ki;
         servo_ptr->update_pid_position(current_settings);
         hal::print<32>(*console, "Set Ki to: %f\n", ki);
       },
     },
-    command_def{
+    drivers::serial_commands::def{
       "setkd",
       [&console, &servo_ptr](auto params) {
         if (params.size() != 1) {
           throw hal::argument_out_of_domain(nullptr);
         }
-        float kd = parse_float(params[0]);
+        float kd = drivers::serial_commands::parse_float(params[0]);
         auto current_settings = servo_ptr->get_pid_settings();
         current_settings.kd = kd;
         servo_ptr->update_pid_position(current_settings);
         hal::print<32>(*console, "Set Kd to: %f\n", kd);
       },
     },
-    command_def{ "" }
+    drivers::serial_commands::def{
+      "maxpower",
+      [&console, &servo_ptr](auto params) {
+        if (params.size() != 1) {
+          throw hal::argument_out_of_domain(nullptr);
+        }
+        float power = drivers::serial_commands::parse_float(params[0]);
+        servo_ptr->set_max_power(power);
+        hal::print<32>(*console, "Set max power: %f\n", power);
+      },
+    },
+    // drivers::serial_commands::def{ "" },
   };
   sjsu::drivers::serial_commands::handler cmd{ console };
   
