@@ -12,14 +12,15 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-  // reduce motor commands
-  // add commands to toggle LED lighting
-
   bool flashing = true;
 
   std::array cmd_defs = {
-    // not going to include all variations of {F/B/D}{L/R}{S/P}, they work in
-    // the same fashion
+    // This command would be called by inputting into serial:
+    //
+    // fls 2.3\n
+    //
+    // Where `fls` is the prefix and `2.3` is some float value for the first
+    // parameter. There can be any number of whitespaces separating the two.
     drivers::serial_commands::def{
       "fls",
       [&console](auto params) {
@@ -30,6 +31,9 @@ void application()
         hal::print<32>(*console, "Set FLS: %f\n", speed);
       },
     },
+    // This command would be called by inputting into serial:
+    //
+    // toggle-flash\n
     drivers::serial_commands::def{
       "toggle-flash",
       [&console, &flashing](auto params) {
@@ -40,15 +44,9 @@ void application()
         hal::print(*console, "Toggled flashing.\n");
       },
     },
-    drivers::serial_commands::def{
-      "noparam",
-      [&console](auto params) {
-        if (params.size() != 0) {
-          throw hal::argument_out_of_domain(nullptr);
-        }
-        hal::print(*console, "Executed no parameter command\n");
-      },
-    },
+    // This command would be called by inputting into serial:
+    //
+    // multiparam -4.3 4 -5\n
     drivers::serial_commands::def{
       "multiparam",
       [&console](auto params) {
