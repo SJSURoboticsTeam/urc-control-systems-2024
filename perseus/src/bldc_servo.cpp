@@ -143,7 +143,7 @@ constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
 {
   return static_cast<hal::time_duration>(static_cast<long long>(p_time * 1e9f));
 }
-}
+
 constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
 {
   return static_cast<float>(p_time.count()) * 1e-9f;
@@ -156,7 +156,7 @@ hal::time_duration get_clock_time(hal::steady_clock& p_clock)
   return period * p_clock.uptime();
 }
 // position, no feedforward 
-void sjsu::perseus::bldc_perseus::update_position_noff() 
+void bldc_perseus::update_position_noff() 
 {
   // pid is pid-ing
   // assuming in degrees
@@ -195,7 +195,7 @@ void sjsu::perseus::bldc_perseus::update_position_noff()
 }
 
 // doing this straight from the encoder? 
-void sjsu::perseus::bldc_perseus::get_current_velocity() 
+void bldc_perseus::get_current_velocity() 
 {
   auto terminal = resources::console();
   auto clock = resources::clock();
@@ -205,3 +205,5 @@ void sjsu::perseus::bldc_perseus::get_current_velocity()
   cv = cv - m_encoder->read().angle; 
   hal::print<32>(*terminal, "deg/ms: %.6f\n", cv);
 }// namespace sjsu::perseus
+
+}
