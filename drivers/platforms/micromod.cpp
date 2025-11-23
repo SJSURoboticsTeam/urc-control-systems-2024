@@ -1,7 +1,7 @@
 #include <libhal-arm-mcu/stm32f1/timer.hpp>
 #include <libhal-micromod/micromod.hpp>
 
-#include "../hardware_map.hpp"
+#include <resource_list.hpp>
 
 namespace sjsu::drivers {
 

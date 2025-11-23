@@ -1,7 +1,7 @@
-#include "../hardware_map.hpp"
-#include <serial_commands.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/steady_clock.hpp>
+#include <resource_list.hpp>
+#include <serial_commands.hpp>
 
 namespace sjsu::drivers {
 void application()
