@@ -112,7 +112,7 @@ hal::time_duration bldc_perseus::get_clock_time(hal::steady_clock& p_clock)
     sec_to_hal_time_duration(1.0 / p_clock.frequency());
   return period * p_clock.uptime();
 }
-// position, no feedforward 
+// position 
 void bldc_perseus::update_position() 
 {
   m_current.position = m_encoder->read().angle;
@@ -121,7 +121,6 @@ void bldc_perseus::update_position()
   auto console = resources::console();
   auto curr_time = hal_time_duration_to_sec(get_clock_time(*clock));
   sec dt = curr_time - m_PID_prev_position_values.prev_dt_time;
-
   m_PID_prev_position_values.integral += error * dt; 
   auto derivative = (error - m_PID_prev_position_values.last_error) / dt; // this turns out to be negative because hopefully your current error is less than your last error
   auto pTerm = m_current_position_settings.kp * error; 
@@ -131,10 +130,57 @@ void bldc_perseus::update_position()
   m_PID_prev_position_values.prev_dt_time = curr_time;
 
   auto proj_pos = pTerm + iTerm + dTerm;
-  auto proj_power = std::clamp(proj_pos, -1 * m_clamped_speed, m_clamped_speed);
+  float ff_clamp =0.2;
+  auto ff = bldc_perseus::position_feedforward() * ff_clamp; // print this? maybe consider as another csv print
   
-  m_current.power = proj_power; // + ff;
+  auto proj_power = std::clamp(proj_pos, -1 * m_clamped_speed, m_clamped_speed);
+
+  m_current.power = proj_power; 
+  print_csv_format(pTerm, iTerm, dTerm, proj_power, ff);
   m_h_bridge->power(m_current.power);
 }
 
+float bldc_perseus::position_feedforward() 
+{
+  float length = 0.5715;  // elbow_bar=19in=48.26cm=0.4826m
+                          // shoulder_bar=22.5in=57.15cm=0.5715m
+                          // wrist_bar=12in=30.48cm=0.3048m + 14in=76.2cm=0.762m
+  float angle_offset = 0; // elbow=-20
+                          // shoulder=0
+                          // wrist=0
+  float weight_beam = 1600 * 9.8; // elbow=1000g
+                                  // shoulder=1600g
+                                  // wrist=600g
+  float weight_end = 1600 * 9.8;  // add together other parts
+  
+  float y_force = std::sin(std::numbers::pi/180 * (m_target.position + angle_offset)) 
+      * length * (weight_beam/2 + weight_end);
+  // for elbow 
+  y_force = -1 * y_force / (length * (weight_beam/2 + weight_end));
+  // // for wrist (might change)
+  // if (m_current.position >= 0) y_force = -1 * y_force / (length * (weight_beam/2 + weight_end));  // >= only for elbow, > for others 
+  // else if (m_current.position < 0) y_force =  y_force / (length * (weight_beam/2 + weight_end)); 
+  return y_force; 
 }
+
+void bldc_perseus::print_csv_format(float pTerm, float iTerm, float dTerm, float proj_power, float ff)
+{
+  auto console = resources::console();
+  hal::print<256>(
+    *console,
+    "%.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n",
+    pTerm,
+    iTerm,
+    dTerm,
+    proj_power,
+    m_current.power,
+    m_current.position,
+    m_target.position,
+    m_current_position_settings.kp,
+    m_current_position_settings.ki,
+    m_current_position_settings.kd,
+    ff);
+} 
+
+
+}// namespace sjsu::perseus
