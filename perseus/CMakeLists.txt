@@ -19,9 +19,6 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
   DEMOS
   application
-  h_bridge_demo
-  pid_position_test
-  pid_serial_input
   
   INCLUDES
   ../drivers/include/
