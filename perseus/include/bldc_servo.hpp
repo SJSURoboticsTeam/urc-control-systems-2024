@@ -161,21 +161,21 @@ public:
   hal::time_duration get_clock_time(hal::steady_clock& p_clock);
 
 private:
+  hal::v5::strong_ptr<sjsu::drivers::h_bridge>
+    m_h_bridge;
+  hal::v5::strong_ptr<hal::rotation_sensor> m_encoder;
+  hal::u64 m_last_clock_check; 
   status m_current;
   status m_target;
   PID_settings m_current_position_settings;
   PID_settings m_current_velocity_settings;
-  hal::v5::strong_ptr<sjsu::drivers::h_bridge>
-    m_h_bridge;
-  hal::v5::strong_ptr<hal::rotation_sensor>
-    m_encoder;     
+  PID_prev_values m_PID_prev_velocity_values;
+  PID_prev_values m_PID_prev_position_values;
   float m_clamped_speed;
   float m_clamped_accel;
   float m_prev_encoder_value;
-  hal::u64 m_last_clock_check; 
-  PID_prev_values m_PID_prev_velocity_values; 
-  PID_prev_values m_PID_prev_position_values; 
   float home_encoder_value;
+
 };
 
 }  // namespace sjsu::perseus
