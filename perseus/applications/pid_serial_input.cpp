@@ -34,14 +34,22 @@ void application()
   auto servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
   
   hal::print(*console, "BLDC Servo initialized...\n");
+  // shoulder settings
+  // bldc_perseus::PID_settings pid_settings = {
+  //   .kp = 0.015,
+  //   // .ki = 0.05,
+  //   .ki = 0.002,
+  //   .kd = 0.02,
+  // };
   bldc_perseus::PID_settings pid_settings = {
-    .kp = 0.0025,
+    .kp = 5,
     // .ki = 0.05,
-    .ki = 0,
-    .kd = 0,
+    .ki = 0.0,
+    .kd = 0.0,
   };
+
   servo_ptr->update_pid_position(pid_settings);
-  servo_ptr->set_target_position(-30);
+  servo_ptr->set_target_position(50);
   std::array cmd_defs = {
     drivers::serial_commands::def{
       "setpos",
