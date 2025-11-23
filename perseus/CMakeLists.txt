@@ -29,7 +29,6 @@ SOURCES
     platforms/stm32f103c8.cpp
     ../drivers/src/h_bridge.cpp
     src/bldc_servo.cpp
-    src/can_messaging.cpp
     ../drivers/src/serial_commands.cpp
     
     PACKAGES
