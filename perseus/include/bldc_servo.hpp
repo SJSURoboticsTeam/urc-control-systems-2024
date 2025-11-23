@@ -1,9 +1,13 @@
 #pragma once
-#include "../../drivers/include/h_bridge.hpp"
-#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/units.hpp>
+#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
+#include <libhal-util/steady_clock.hpp>
+
+#include "../../drivers/include/h_bridge.hpp"
+
+using sec = float;
 
 namespace sjsu::perseus {
 
@@ -20,8 +24,8 @@ public:
   struct status 
   {
     float position;
-    hal::i16 velocity;
     float power;
+    hal::i16 velocity;
   };
 
   /**
@@ -53,7 +57,7 @@ public:
     * @brief Get the target position of the servo.
     * @return Gets the position relative to the home position.
   */
-  hal::u16 get_target_position();
+  float get_target_position();
   /**
    * @brief Get the current position of the servo.
    * @return Gets the position relative to the home position.
@@ -86,18 +90,18 @@ public:
     * @brief Get the current velocity of the servo.
     * @return The current velocity of the servo as a hal::u16 ticks per second.
   */
-  hal::u16 get_current_velocity_in_tps();
+  float get_current_velocity_in_tps();
 
   /**
     * @brief Get the current velocity of the servo as a percentage of maximum speed.
     * @return The current velocity of the servo as a hal::u16 value between -100 and 100.
   */
-  hal::u16 get_current_velocity_percentage();
+  float get_current_velocity_percentage();
   /**
     * @brief Get the target velocity of the servo.
     * @return The target velocity of the servo as a hal::u16 value between -100 and 100.
   */
-  hal::u16 get_target_velocity();
+  float get_target_velocity();
 
   /**
     * @brief Update the PID settings of the servo.
@@ -118,21 +122,13 @@ public:
   void home_encoder();
 
   /**
-    * @brief Set the maximum speed the servo is allowed to run at.
-    * @param target_clamped_speed The maximum speed as a float between 0.0 and 1.0, representing 0% to 100% of maximum speed.
+    * @brief Update velocity to the target velocity using PID control
   */
-  void set_clamped_speed(hal::u16 target_clamped_speed);
-
+  void update_velocity(); 
   /**
-    * @brief Update velocity 
-    * @param settings PID values 
+    * @brief Update position to the target position using PID control
   */
-  void update_velocity_noff(); 
-  /**
-    * @brief Update position 
-    * @param settings PID values 
-  */
-  void update_position_noff(); 
+  void update_position(); 
    /**
     * @brief get velocity from encoder values 
     * prints to terminal
@@ -140,36 +136,45 @@ public:
   void get_current_velocity();
 
   /**
-   * @brief Print in CSV format.
-   * Format: P, I, D, Projected Power, Clamped_power, current_position, target_position, Kp, Ki, Kd
-   */
-  void print_csv_format(float pTerm, float iTerm, float dTerm, float proj_power, float ff);
-  void set_max_power(float power);
+    * @brief Set the maximum power the PID controller is allowed to use.
+    * @param power The maximum power as a float between 0.0 and 1.0, representing 0% to 100% of maximum power.
+  */
+  void set_pid_clamped_power(float power);
+
+  /**
+    * @brief Get the current PID settings of the servo.
+    * @return The current PID settings of the servo.
+  */
   bldc_perseus::PID_settings get_pid_settings();
 
-  float position_feedforward();
+  // Helper conversion functions (copied from drivetrain_math.hpp)
+  constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
+  {
+    return static_cast<hal::time_duration>(static_cast<long long>(p_time * 1e9f));
+  }
 
-public:
+  constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
+  {
+    return static_cast<float>(p_time.count()) * 1e-9f;
+  }
+  
+  hal::time_duration get_clock_time(hal::steady_clock& p_clock);
+
+private:
   status m_current;
   status m_target;
-  float max_proj_power; // this changes every time a new target position is set
   PID_settings m_current_position_settings;
   PID_settings m_current_velocity_settings;
   hal::v5::strong_ptr<sjsu::drivers::h_bridge>
-    m_h_bridge;  // idk if this can be copied trivially.
+    m_h_bridge;
   hal::v5::strong_ptr<hal::rotation_sensor>
-    m_encoder;            // idk if these are supposed to be pointers or what
+    m_encoder;     
   float m_clamped_speed;
   float m_clamped_accel;
   float m_prev_encoder_value;
   hal::u64 m_last_clock_check; 
   PID_prev_values m_PID_prev_velocity_values; 
   PID_prev_values m_PID_prev_position_values; 
-  // I think below can be commented out? 
-  float total_position_error;
-  float total_velocity_error;
-  float last_position_error;
-  float last_velocity_error;
   float home_encoder_value;
 };
 

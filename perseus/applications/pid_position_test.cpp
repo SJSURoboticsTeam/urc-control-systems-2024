@@ -45,7 +45,7 @@ void application()
 
   while (true) {
     // csv output for easy graphing
-    servo_ptr->update_position_noff();
+    servo_ptr->update_position();
     hal::delay(*clock, 10ms);
 
   } 

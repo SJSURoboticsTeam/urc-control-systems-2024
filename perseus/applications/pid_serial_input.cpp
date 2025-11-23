@@ -108,7 +108,7 @@ void application()
           throw hal::argument_out_of_domain(nullptr);
         }
         float power = drivers::serial_commands::parse_float(params[0]);
-        servo_ptr->set_max_power(power);
+        servo_ptr->set_pid_clamped_power(power);
         hal::print<32>(*console, "Set max power: %f\n", power);
       },
     },
@@ -136,7 +136,7 @@ void application()
           break;
       }
     }
-    servo_ptr->update_position_noff();
+    servo_ptr->update_position();
   } 
 }
 }  // namespace sjsu::perseus
