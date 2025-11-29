@@ -201,14 +201,6 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
 }
 
-hal::v5::strong_ptr<hal::can_message_finder> can_finder(
-  hal::v5::strong_ptr<hal::can_transceiver> transceiver,
-  hal::u16 servo_address)
-{
-  return hal::v5::make_strong_ptr<hal::can_message_finder>(
-    driver_allocator(), *transceiver, servo_address);
-}
-
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 {
   initialize_can();
