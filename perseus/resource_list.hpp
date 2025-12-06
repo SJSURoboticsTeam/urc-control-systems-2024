@@ -13,9 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include <h_bridge.hpp>
+#include "h_bridge.hpp"
 #include <libhal-arm-mcu/system_control.hpp>
-#include <libhal-util/can.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 #include <libhal/functional.hpp>
@@ -25,11 +24,11 @@
 #include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/rotation_sensor.hpp>
+#include <libhal/rotation_sensor.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
-
-#include <resource_list.hpp>
+#include <libhal-util/can.hpp>
 
 namespace sjsu::perseus {
 namespace custom {
@@ -75,10 +74,9 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // to instantiate H-bridge
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge();
-hal::v5::strong_ptr<hal::rotation_sensor> encoder();
-// can instantiation
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::rotation_sensor> encoder();
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 
 inline void reset()
@@ -95,4 +93,5 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
+}  // namespace sjsu::perseus
 }  // namespace sjsu::perseus
