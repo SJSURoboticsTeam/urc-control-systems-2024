@@ -8,11 +8,8 @@
 #include <libhal/pointers.hpp>
 
 #include <bldc_servo.hpp>
+#include <hardware_map.hpp>
 #include <type_traits>
-
-#include "../hardware_map.hpp"
-
-#include "../include/bldc_servo.hpp"
 
 
 using namespace std::chrono_literals;

@@ -1,14 +1,14 @@
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
-#include <libhal/units.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <sys/types.h>
 
+
 #include <bldc_servo.hpp>
 
-#include "../hardware_map.hpp"
+#include <hardware_map.hpp>
 
 using namespace std::chrono_literals;
 
@@ -22,17 +22,19 @@ bldc_perseus::bldc_perseus(
   , m_encoder(p_encoder)
   , m_clock(resources::clock())
 {
-  m_last_clock_check = m_clock->uptime(); 
+  m_last_clock_check = m_clock->uptime();
 
   m_current = {
     .position = 0,
-    .power = 0, 
-    .velocity = 0,  
+    .power = 0,
+    .velocity = 0,
   };
-  m_target = { .position = 0, .power = 0.0f , .velocity = 0};
+  m_target = { .position = 0, .power = 0.0f, .velocity = 0 };
   m_clamped_speed = 0.3;
   m_prev_encoder_value = m_encoder->read().angle;
-  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = 0.0 };
+  m_PID_prev_velocity_values = { .integral = 0,
+                                 .last_error = 0,
+                                 .prev_dt_time = 0.0 };
   m_PID_prev_position_values = { .integral = 0,
                                  .last_error = 0,
                                  .prev_dt_time = 0.0 };
@@ -100,14 +102,16 @@ void bldc_perseus::home_encoder()
   m_current.position = 0;
 }
 
-void bldc_perseus::update_velocity() 
+void bldc_perseus::update_velocity()
 {
   // TODO : implement velocity PID control
 }
 
 void bldc_perseus::reset_time()
 {
-  m_PID_prev_velocity_values = {.integral = 0, .last_error = 0, .prev_dt_time = 0.0 };
+  m_PID_prev_velocity_values = { .integral = 0,
+                                 .last_error = 0,
+                                 .prev_dt_time = 0.0 };
   m_PID_prev_position_values = { .integral = 0,
                                  .last_error = 0,
                                  .prev_dt_time = 0.0 };
@@ -116,7 +120,7 @@ void bldc_perseus::reset_time()
 
 void bldc_perseus::set_pid_clamped_power(float power)
 {
-  m_clamped_speed = power; 
+  m_clamped_speed = power;
 }
 hal::time_duration bldc_perseus::get_clock_time()
 {
@@ -124,27 +128,31 @@ hal::time_duration bldc_perseus::get_clock_time()
     sec_to_hal_time_duration(1.0 / m_clock->frequency());
   return period * m_clock->uptime();
 }
-// position, no feedforward 
-void bldc_perseus::update_position() 
+// position, no feedforward
+void bldc_perseus::update_position()
 {
   m_current.position = m_encoder->read().angle;
   float error = m_target.position - m_current.position;
   sec curr_time = hal_time_duration_to_sec(get_clock_time());
   sec dt = curr_time - m_PID_prev_position_values.prev_dt_time;
 
-  m_PID_prev_position_values.integral += error * dt; 
-  float derivative = (error - m_PID_prev_position_values.last_error) / dt; // the math usually makes this in the oppostie direction of P and I
-  float pTerm = m_current_position_settings.kp * error; 
-  float iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
-  float dTerm = m_current_position_settings.kd * derivative; 
-  m_PID_prev_position_values.last_error = error; 
+  m_PID_prev_position_values.integral += error * dt;
+  float derivative =
+    (error - m_PID_prev_position_values.last_error) /
+    dt;  // the math usually makes this in the oppostie direction of P and I
+  float pTerm = m_current_position_settings.kp * error;
+  float iTerm =
+    m_current_position_settings.ki * m_PID_prev_position_values.integral;
+  float dTerm = m_current_position_settings.kd * derivative;
+  m_PID_prev_position_values.last_error = error;
   m_PID_prev_position_values.prev_dt_time = curr_time;
 
   float proj_pos = pTerm + iTerm + dTerm;
-  float proj_power = std::clamp(proj_pos, -1 * m_clamped_speed, m_clamped_speed);
-  
-  m_current.power = proj_power; // + ff;
+  float proj_power =
+    std::clamp(proj_pos, -1 * m_clamped_speed, m_clamped_speed);
+
+  m_current.power = proj_power;  // + ff;
   m_h_bridge->power(m_current.power);
 }
 
-}
+}  // namespace sjsu::perseus

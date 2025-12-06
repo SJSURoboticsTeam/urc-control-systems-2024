@@ -16,7 +16,7 @@
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 
-#include "hardware_map.hpp"
+#include <hardware_map.hpp>
 
 int main()
 {
