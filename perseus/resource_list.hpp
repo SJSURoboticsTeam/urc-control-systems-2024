@@ -29,6 +29,7 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
 
+#include <resource_list.hpp>
 
 namespace sjsu::perseus {
 namespace custom {

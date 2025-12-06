@@ -5,10 +5,9 @@
 #include <libhal/units.hpp>
 #include <sys/types.h>
 
-
 #include <bldc_servo.hpp>
 
-#include <hardware_map.hpp>
+#include <resource_list.hpp>
 
 using namespace std::chrono_literals;
 

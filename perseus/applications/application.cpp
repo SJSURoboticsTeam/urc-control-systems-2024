@@ -8,7 +8,7 @@
 #include <libhal/pointers.hpp>
 
 #include <bldc_servo.hpp>
-#include <hardware_map.hpp>
+#include <resource_list.hpp>
 #include <type_traits>
 
 

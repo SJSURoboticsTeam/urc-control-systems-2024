@@ -25,11 +25,12 @@
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
 
-#include <hardware_map.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
+#include <resource_list.hpp>
+
 
 namespace sjsu::perseus::resources {
 using namespace hal::literals;
