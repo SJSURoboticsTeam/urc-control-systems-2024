@@ -38,10 +38,16 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
+<<<<<<< HEAD
 
 #include <libhal/pointers.hpp>
 #include <optional>
 #include <resource_list.hpp>
+=======
+#include <libhal/pointers.hpp>
+#include <resource_list.hpp>
+
+>>>>>>> 2e19123 (Clean Up (#78))
 
 namespace sjsu::drivers::resources {
 using namespace hal::literals;
@@ -89,8 +95,11 @@ hal::v5::strong_ptr<hal::serial> console()
   if (not console_ptr) {
     console_ptr = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
     driver_allocator(), hal::port<1>, hal::buffer<128>);
+<<<<<<< HEAD
   }
   return console_ptr;
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 }
 
 static hal::v5::optional_ptr<hal::output_pin> led_ptr;

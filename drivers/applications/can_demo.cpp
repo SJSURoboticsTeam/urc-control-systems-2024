@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 #include <can_util.hpp>
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 #include <libhal-armcortex/dwt_counter.hpp>
 #include <libhal-armcortex/startup.hpp>
 #include <libhal-armcortex/system_control.hpp>
@@ -7,6 +10,10 @@
 #include <libhal/can.hpp>
 #include <libhal/units.hpp>
 #include <resource_list.hpp>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2e19123 (Clean Up (#78))
 
 namespace sjsu::drivers {
 void application()

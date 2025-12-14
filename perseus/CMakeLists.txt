@@ -23,10 +23,9 @@ libhal_build_demos(
   INCLUDES
   ../drivers/include/
   include
+  .
 
 SOURCES
-    # platforms/micromod.cpp
-    platforms/stm32f103c8.cpp
     ../drivers/src/h_bridge.cpp
     src/bldc_servo.cpp
     ../drivers/src/serial_commands.cpp

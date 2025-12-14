@@ -40,6 +40,10 @@
 
 #include <libhal/pointers.hpp>
 #include <resource_list.hpp>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2e19123 (Clean Up (#78))
 
 namespace sjsu::hub::resources {
 using namespace hal::literals;
@@ -107,7 +111,10 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
 // adc2-12 - pc2
 // adc3-11 - pc1
 // adc4- 9 - pb1
+<<<<<<< HEAD
 static hal::v5::optional_ptr<hal::adc> voltage_sensor_adc_0_ptr;
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
 {
   if (not voltage_sensor_adc_0_ptr) {
@@ -129,7 +136,10 @@ hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1()
   return temperature_sensor_adc_1_ptr;
 }
 
+<<<<<<< HEAD
 static hal::v5::optional_ptr<hal::i2c> i2c_ptr;
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 hal::v5::strong_ptr<hal::i2c> i2c()
 {
   if (not i2c_ptr) {
@@ -147,7 +157,10 @@ hal::v5::strong_ptr<hal::i2c> i2c()
   return i2c_ptr;
 }
 
+<<<<<<< HEAD
 static hal::v5::optional_ptr<hal::output_pin> beacon_output_pin_0_ptr;
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()  // G0 -> PA0
 {
   if (not beacon_output_pin_0_ptr) {
@@ -156,7 +169,11 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()  // G0 -> PA0
   }
   return beacon_output_pin_0_ptr;
 }
+<<<<<<< HEAD
 static hal::v5::optional_ptr<hal::output_pin> beacon_output_pin_1_ptr;
+=======
+
+>>>>>>> 2e19123 (Clean Up (#78))
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
 {
   if (not beacon_output_pin_1_ptr) {
@@ -180,7 +197,10 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
 
 // pwm0 - 32 -> ch8
 // pwm1 - 47 -> ch1
+<<<<<<< HEAD
 static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0_ptr;
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
 {
   if (not mast_servo_pwm_channel_0_ptr) {
@@ -206,7 +226,10 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
   return mast_servo_pwm_channel_1_ptr;
 }
 // PA5_SPI1_SCK will be used for pwm2, this is here as a holder
+<<<<<<< HEAD
 static hal::v5::optional_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2_ptr;
+=======
+>>>>>>> 2e19123 (Clean Up (#78))
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
 {
   if (not under_chassis_servo_pwm_channel_2_ptr) {

@@ -1,5 +1,9 @@
 #pragma once
 
+<<<<<<< HEAD
+=======
+#include <vector2d.hpp>
+>>>>>>> 2e19123 (Clean Up (#78))
 #include <cmath>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
 #include <libhal/motor.hpp>

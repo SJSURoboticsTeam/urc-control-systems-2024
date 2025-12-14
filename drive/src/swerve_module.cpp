@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+#include <swerve_module.hpp>
+#include <resource_list.hpp>
+>>>>>>> 2e19123 (Clean Up (#78))
 #include <cmath>
 #include <cstdlib>
 #include <drivetrain_math.hpp>

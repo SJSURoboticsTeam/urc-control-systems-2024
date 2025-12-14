@@ -1,4 +1,4 @@
-#include "swerve_module.hpp"
+#include <swerve_module.hpp>
 #include <drivetrain_math.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
