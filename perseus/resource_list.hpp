@@ -13,8 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include "h_bridge.hpp"
+#include <h_bridge.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/can.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 #include <libhal/functional.hpp>
@@ -27,7 +28,8 @@
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
-#include <libhal-util/can.hpp>
+
+#include <resource_list.hpp>
 
 namespace sjsu::perseus {
 namespace custom {

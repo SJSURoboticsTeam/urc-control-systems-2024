@@ -25,11 +25,12 @@
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
 
-#include "../hardware_map.hpp"
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
+#include <resource_list.hpp>
+
 
 namespace sjsu::perseus::resources {
 using namespace hal::literals;
@@ -71,10 +72,10 @@ hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
   if (not console_ptr) {
-    console_ptr  = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
-    driver_allocator(), hal::port<1>, hal::buffer<128>);
+    console_ptr = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
+      driver_allocator(), hal::port<1>, hal::buffer<128>);
   }
-  return console_ptr; 
+  return console_ptr;
 }
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
@@ -112,7 +113,6 @@ auto& timer2()
   return timer2;
 }
 
-
 hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
 {
   auto pin = gpio_a().acquire_output_pin(8);
@@ -148,7 +148,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
+hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 {
   return timer2().acquire_quadrature_encoder(
     driver_allocator(),

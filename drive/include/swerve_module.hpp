@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector2d.hpp"
+#include <vector2d.hpp>
 #include <cmath>
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>

@@ -2,7 +2,7 @@
 #include <libhal/adc.hpp>
 #include <libhal/input_pin.hpp>
 
-#include "../include/mq4.hpp"
+#include <mq4.hpp>
 
 namespace sjsu::drivers {
 
