@@ -2,26 +2,23 @@
 
 namespace sjsu::science {
 
-    pump_manager::pump_manager(
-        hal::steady_clock& p_clock,
-        hal::output_pin& p_deionized_water_pump, 
-        hal::output_pin& p_sample_pump, 
-        hal::output_pin& p_molisch_reagent_pump, 
-        hal::output_pin& p_sulfuric_acid_pump, 
-        hal::output_pin& p_biuret_reagent
-    ) : m_clock(p_clock) {
-        m_pumps[0] = &p_deionized_water_pump;
-        m_pumps[1] = &p_sample_pump;
-        m_pumps[2] = &p_molisch_reagent_pump;
-        m_pumps[3] = &p_sulfuric_acid_pump;
-        m_pumps[4] = &p_biuret_reagent;
-    };
+pump_manager::pump_manager(
+  hal::v5::strong_ptr<hal::steady_clock> p_clock,
+  hal::v5::strong_ptr<hal::output_pin> p_deionized_water_pump,
+  hal::v5::strong_ptr<hal::output_pin> p_benedict_reagent_pump,
+  hal::v5::strong_ptr<hal::output_pin> p_biuret_reagent,
+  hal::v5::strong_ptr<hal::output_pin> p_kalling_reagent_pump)
+  : m_clock(p_clock)
+  , m_pumps{ p_deionized_water_pump,
+             p_benedict_reagent_pump,
+             p_biuret_reagent,
+             p_kalling_reagent_pump} {};
 
-
-    void pump_manager::pump(pumps pump, hal::time_duration duration) {
-        (*(m_pumps[static_cast<int>(pump)])).level(true);
-        hal::delay(m_clock, duration);
-        (*(m_pumps[static_cast<int>(pump)])).level(false);
-    }
-
+void pump_manager::pump(pumps pump, hal::time_duration duration)
+{
+  (m_pumps[static_cast<int>(pump)])->level(true);
+  hal::delay(*m_clock, duration);
+  (m_pumps[static_cast<int>(pump)])->level(false);
 }
+
+}  // namespace sjsu::science
