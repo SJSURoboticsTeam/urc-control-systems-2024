@@ -32,7 +32,6 @@
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
 #include <libhal-actuator/rc_servo.hpp>
-#include <libhal-expander/pca9685.hpp>
 namespace sjsu::science {
 
 namespace resources {
@@ -57,28 +56,23 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
+hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::input_pin> input_pin_0();
 hal::v5::strong_ptr<hal::input_pin> input_pin_1();
 hal::v5::strong_ptr<hal::input_pin> input_pin_2();
 hal::v5::strong_ptr<hal::output_pin> status_led();
-hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch();
-hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch();
 hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> kalling_reagent_pump(); 
-hal::v5::strong_ptr<hal::output_pin> biuret_reagent_pump(); 
-hal::v5::strong_ptr<hal::output_pin> benedict_reagent_pump();
-hal::v5::strong_ptr<hal::output_pin> deionized_water_pump();
+hal::v5::strong_ptr<hal::output_pin> output_pin_1();
+hal::v5::strong_ptr<hal::output_pin> output_pin_2();
+hal::v5::strong_ptr<hal::output_pin> output_pin_3();
+hal::v5::strong_ptr<hal::output_pin> output_pin_4();
+hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
-hal::v5::strong_ptr<hal::actuator::rc_servo> mixer_servo();
-hal::v5::strong_ptr<hal::actuator::rc_servo> door_servo();
-hal::v5::strong_ptr<hal::actuator::rc_servo> trap_door_servo();
-hal::v5::strong_ptr<hal::actuator::rc_servo> arm_servo();
 hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo();
-hal::v5::strong_ptr<hal::actuator::rc_servo> cache_servo();
-hal::v5::strong_ptr<hal::expander::pca9685> pca();
-
+hal::v5::strong_ptr<hal::pwm> pwm0();
 
 inline void reset()
 {

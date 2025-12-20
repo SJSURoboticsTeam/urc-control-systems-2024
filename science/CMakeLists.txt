@@ -7,7 +7,6 @@ libhal_build_demos(
     DEMOS
     application
     carousel_demo
-    load_cell_demo
 
     INCLUDES
     .
@@ -15,17 +14,16 @@ libhal_build_demos(
     SOURCES
     implementations/pump_manager.cpp
     implementations/carousel.cpp
+    implementations/carousel.cpp
     implementations/science_state_machine.cpp
 
     PACKAGES
     libhal-util
     libhal-actuator
-    libhal-expander
 
 
     LINK_LIBRARIES
     libhal::util
     libhal::actuator
-    libhal::expander
 
 ) 
