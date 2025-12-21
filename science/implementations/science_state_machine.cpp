@@ -1,5 +1,5 @@
 #include "../include/science_state_machine.hpp"
-
+using namespace std::chrono_literals;
 namespace sjsu::science {
 science_state_machine::science_state_machine(
   hal::actuator::rc_servo p_arm_servo,
@@ -37,24 +37,24 @@ void science_state_machine::run_state_machine([[maybe_unused]] science_states st
       break;
     case science_state_machine::science_states::CUP_OUTSIDE:
       m_door.position(180);
-      hal::delay(*clock, 1000ms);
+      hal::delay(*m_clock, 1000ms);
       m_arm_servo.position(180);
-      hal::delay(*clock, 1000ms);
+      hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::CUP_INSIDE:
       m_arm_servo.position(0);
-      hal::delay(*clock, 1000ms);
+      hal::delay(*m_clock, 1000ms);
       m_door.position(0);
-      hal::delay(*clock, 1000ms);
+      hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::DUMP_SAMPLE: 
       // trapdoor servo deg: 0 close, 120 open)
       m_trap_door.position(0);
-      hal::delay(*clock, 1000ms);
+      hal::delay(*m_clock, 1000ms);
       m_trap_door.position(120); // keep open for 3s
-      hal::delay(*clock, 3000ms);
+      hal::delay(*m_clock, 3000ms);
       m_trap_door.position(0);
-      hal::delay(*clock, 1000ms);
+      hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::ADD_DI_WATER:
       break;
