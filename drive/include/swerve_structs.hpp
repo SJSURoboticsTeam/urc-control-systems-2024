@@ -17,11 +17,11 @@ struct swerve_module_state
 {
   hal::degrees steer_angle = 0.0f;
   meters_per_sec propulsion_velocity = 0.0f;
-  constexpr bool operator==(swerve_module_state const& b)
+  constexpr bool operator==(swerve_module_state const& b) const
   {
     return steer_angle == b.steer_angle && propulsion_velocity == b.propulsion_velocity;
   }
-  constexpr bool operator!=(swerve_module_state const& b)
+  constexpr bool operator!=(swerve_module_state const& b) const
   {
     return !(*this == b);
   }

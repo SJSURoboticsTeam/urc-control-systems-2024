@@ -38,8 +38,9 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
-#include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
+#include <resource_list.hpp>
+
 
 namespace sjsu::hub::resources {
 using namespace hal::literals;

@@ -6,7 +6,7 @@
 #include <libhal/can.hpp>
 
 
-#include "../hardware_map.hpp"
+#include <resource_list.hpp>
 #include "../include/gimbal.hpp"
 
 // Pulse width range for FT5325M

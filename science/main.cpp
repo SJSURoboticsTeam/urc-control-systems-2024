@@ -12,94 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <cstdarg>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-
-#include "applications/application.hpp"
-
-sjsu::science::hardware_map_t hardware_map{};
+#include <libhal-exceptions/control.hpp>
+#include <libhal-util/serial.hpp>
+#include <libhal-util/steady_clock.hpp>
+#include <resource_list.hpp>
 
 int main()
 {
-  // Step 1. Call the processor initializer. Setups up processor to run
-  // applications such as turning on a coprocessor, or copying memory from
-  // storage to memory.
-
-  try {
-    hardware_map = sjsu::science::initialize_platform();
-  } catch (...) {
-    hal::halt();
-  }
-
-  sjsu::science::application(hardware_map);
-  return 0;
+  sjsu::science::initialize_platform();
+  sjsu::science::application();
+  std::terminate();
 }
 
-// namespace boost {
-// void throw_exception([[maybe_unused]] std::exception const& p_error)
-// {
-//   std::abort();
-// }
-// }  // namespace boost
-
+// libhal-arm-mcu specific APIs defined to reduce code size
 extern "C"
 {
-  /// Dummy implementation of getpid
-  int _getpid_r()
+  // This gets rid of an issue with libhal-exceptions in Debug mode.
+  void __assert_func()  // NOLINT
   {
-    return 1;
   }
+}
 
-  /// Dummy implementation of kill
-  int _kill_r(int, int)
-  {
-    return -1;
-  }
+// Override global new operator
+void* operator new(std::size_t)
+{
+  throw std::bad_alloc();
+}
 
-  /// Dummy implementation of fstat, makes the assumption that the "device"
-  /// representing, in this case STDIN, STDOUT, and STDERR as character devices.
-  int _fstat_r([[maybe_unused]] int file, struct stat* status)
-  {
-    status->st_mode = S_IFCHR;
-    return 0;
-  }
+// Override global new[] operator
+void* operator new[](std::size_t)
+{
+  throw std::bad_alloc();
+}
 
-  int _write_r([[maybe_unused]] int file,
-               [[maybe_unused]] const char* ptr,
-               int length)
-  {
-    return length;
-  }
+void* operator new(unsigned int, std::align_val_t)
+{
+  throw std::bad_alloc();
+}
 
-  int _read_r([[maybe_unused]] FILE* file,
-              [[maybe_unused]] char* ptr,
-              int length)
-  {
-    return length;
-  }
+// Override global delete operator
+void operator delete(void*) noexcept
+{
+}
 
-  // Dummy implementation of _lseek
-  int _lseek_r([[maybe_unused]] int file,
-               [[maybe_unused]] int ptr,
-               [[maybe_unused]] int dir)
-  {
-    return 0;
-  }
+// Override global delete[] operator
+void operator delete[](void*) noexcept
+{
+}
 
-  // Dummy implementation of close
-  int _close_r([[maybe_unused]] int file)
-  {
-    return -1;
-  }
+// Optional: Override sized delete operators (C++14 and later)
+void operator delete(void*, std::size_t) noexcept
+{
+}
 
-  // Dummy implementation of isatty
-  int _isatty_r([[maybe_unused]] int file)
-  {
-    return 1;
-  }
+void operator delete[](void*, std::size_t) noexcept
+{
+}
+
+void operator delete[](void*, std::align_val_t) noexcept
+{
+}
+
+void operator delete(void*, std::align_val_t) noexcept
+{
 }

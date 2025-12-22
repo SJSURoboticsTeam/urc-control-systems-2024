@@ -22,7 +22,7 @@ class demos(ConanFile):
     python_requires_extend = "libhal-bootstrap.demo"
 
     def requirements(self):
-        self.requires("libhal-util/[^5.4.0]")
-        self.requires("libhal-arm-mcu/[1.15.0 || latest]")
+        self.requires("libhal-util/5.8.1")
+        self.requires("libhal-arm-mcu/1.19.1")
         self.requires("libhal-actuator/[^1.2.3]")
         self.requires("libhal-sensor/[1.1.2 || latest]")

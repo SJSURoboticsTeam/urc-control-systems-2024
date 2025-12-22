@@ -17,25 +17,29 @@ cmake_minimum_required(VERSION 3.20)
 project(demos LANGUAGES CXX)
 
 libhal_build_demos(
-  DEMOS
+DEMOS
   application
 
 INCLUDES
+  include
+  .
 
-SOURCES
-    # platforms/micromod.cpp
-    platforms/stm32f103c8.cpp
-    src/gimbal.cpp
-    #src/beacon.cpp
-
+#SOURCES
 
     PACKAGES
     libhal-actuator
     libhal-sensor
 
+    #Template for importing libhal packages is "libhal-__device__"
+    #replace "__device__" with the libhal device you wish to import
+    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal-rmd"
 
     LINK_LIBRARIES
     libhal::actuator
     libhal::sensor
+    
+    #Template for linking libhal namespaces is "libhal::__device__"
+    #replace "__device__" with the libhal device you wish to import
+    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
     
 )
