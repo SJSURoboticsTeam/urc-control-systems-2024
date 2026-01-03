@@ -19,14 +19,17 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
   DEMOS
   application
-
+  
   INCLUDES
+  ../drivers/include/
   include
+  .
 
 SOURCES
-    # platforms/micromod.cpp
-    platforms/stm32f103c8.cpp
-
+    ../drivers/src/h_bridge.cpp
+    src/bldc_servo.cpp
+    ../drivers/src/serial_commands.cpp
+    
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import

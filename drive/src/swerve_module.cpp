@@ -1,6 +1,8 @@
 #include "../include/swerve_module.hpp"
 #include <drivetrain_math.hpp>
 #include "resource_list.hpp"
+#include <swerve_module.hpp>
+#include <resource_list.hpp>
 #include <cmath>
 #include <cstdlib>
 #include <libhal-util/serial.hpp>

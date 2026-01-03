@@ -38,8 +38,9 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
-#include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
+#include <resource_list.hpp>
+
 
 namespace sjsu::drivers::resources {
 using namespace hal::literals;
@@ -86,7 +87,7 @@ hal::v5::strong_ptr<hal::serial> console()
 {
   return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
     driver_allocator(), hal::port<1>, hal::buffer<128>);
-} 
+}
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
