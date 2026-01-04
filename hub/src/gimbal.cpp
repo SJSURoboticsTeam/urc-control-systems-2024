@@ -123,7 +123,7 @@ void gimbal::update_y_servo(float p_delta_time)
   // Checking if the current error will make the angle position set for the
   // servo out of bounds (the servo will fail)
   bool at_upper = (curr_y_servo_angle >= m_max_angle - 0.001f);
-  bool at_lower = (curr_y_servo_angle >= m_min_angle + 0.001f);
+  bool at_lower = (curr_y_servo_angle <= m_min_angle + 0.001f);
 
   bool pushing_upper = at_upper && (curr_error > 0);
   bool pushing_lower = at_lower && (curr_error < 0);
@@ -144,7 +144,7 @@ void gimbal::update_y_servo(float p_delta_time)
   control_var =
     std::clamp(control_var,
                m_min_angle + gimbal_control_settings::deg_tolerance,
-               m_max_angle + gimbal_control_settings::deg_tolerance);
+               m_max_angle - gimbal_control_settings::deg_tolerance);
 
   float new_angle_pos = (m_min_angle + m_max_angle) / 2 + control_var;
 

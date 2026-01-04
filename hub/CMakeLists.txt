@@ -19,12 +19,14 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
 DEMOS
   application
+  
 
 INCLUDES
   include
   .
 
-#SOURCES
+SOURCES
+  ./src/gimbal.cpp
 
     PACKAGES
     libhal-actuator
