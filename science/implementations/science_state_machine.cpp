@@ -1,4 +1,7 @@
 #include "../include/science_state_machine.hpp"
+#include <libhal-util/steady_clock.hpp>
+
+using namespace hal::literals;
 using namespace std::chrono_literals;
 namespace sjsu::science {
 science_state_machine::science_state_machine(
@@ -23,17 +26,18 @@ science_state_machine::science_state_machine(
 
 int science_state_machine::get_num_vials()
 {
-    return 0;
+  return 0;
 }
 
-void science_state_machine::turn_on_pump([[maybe_unused]] auto pump, [[maybe_unused]] hal::time_duration duration)
-{
+void science_state_machine::mix_solution(){
+
 }
 
-void science_state_machine::run_state_machine([[maybe_unused]] science_states state)
+void science_state_machine::run_state_machine(science_states state)
 {
   switch(state){
     case science_state_machine::science_states::HOME_CAROUSEL:
+      m_carousel->home();
       break;
     case science_state_machine::science_states::CUP_OUTSIDE:
       m_door.position(180);
@@ -57,8 +61,11 @@ void science_state_machine::run_state_machine([[maybe_unused]] science_states st
       hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::ADD_DI_WATER:
+      m_carousel->step_move();
+      m_pump_manager->pump(pump_manager::pumps::DEIONIZED_WATER, 1000ms);
       break;
     case science_state_machine::science_states::MIX_DI_WATER:
+      m_carousel->step_move();
       break;
     case science_state_machine::science_states::ADD_MIX_BENEDICT_REAGENT:
       break;

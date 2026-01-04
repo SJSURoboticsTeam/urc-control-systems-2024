@@ -47,7 +47,7 @@ public:
                         hal::v5::strong_ptr<hal::steady_clock> p_clock,
                         hal::v5::strong_ptr<hal::serial> p_terminal);
     int get_num_vials();
-    void turn_on_pump(auto pump, hal::time_duration duration);
+    void mix_solution();
     void run_state_machine(science_states state);
 };
 }  // namespace sjsu::science
