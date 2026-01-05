@@ -23,6 +23,7 @@ libhal_build_demos(
   INCLUDES
   ../drivers/include/
   include
+  .
 
 SOURCES
     # platforms/micromod.cpp

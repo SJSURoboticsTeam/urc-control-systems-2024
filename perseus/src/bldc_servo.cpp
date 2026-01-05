@@ -8,7 +8,7 @@
 
 #include <bldc_servo.hpp>
 
-#include "../hardware_map.hpp"
+#include "../resource_list.hpp"
 
 using namespace std::chrono_literals;
 
@@ -53,7 +53,7 @@ float bldc_perseus::get_current_position()
   return m_current.position;
 }
 
-void bldc_perseus::set_target_velocity(hal::i16 target_velocity)
+void bldc_perseus::set_target_velocity(float target_velocity)
 {
   m_target.velocity = target_velocity;
 }
@@ -69,13 +69,19 @@ float bldc_perseus::get_current_velocity_percentage()
   // TODO!
   return m_current.power;
 }
-void bldc_perseus::set_current_velocity(hal::i16 current_velocity)
+void bldc_perseus::set_current_velocity(float current_velocity)
 {
   m_current.velocity = current_velocity;
 }
 float bldc_perseus::get_target_velocity()
 {
   return m_target.velocity;
+}
+
+void bldc_perseus::stop()
+{
+  m_current.power = 0.0f;
+  m_h_bridge->power(0.0f);
 }
 
 bldc_perseus::PID_settings bldc_perseus::get_pid_settings()
@@ -102,6 +108,17 @@ void bldc_perseus::update_velocity()
   // TODO : implement velocity PID control
 }
 
+void bldc_perseus::reset_time()
+{
+  m_PID_prev_velocity_values = { .integral = 0,
+                                 .last_error = 0,
+                                 .prev_dt_time = 0.0 };
+  m_PID_prev_position_values = { .integral = 0,
+                                 .last_error = 0,
+                                 .prev_dt_time = 0.0 };
+  m_last_clock_check = m_clock->uptime();
+}
+
 void bldc_perseus::set_pid_clamped_power(float power)
 {
   m_clamped_speed = power; 
@@ -116,24 +133,23 @@ hal::time_duration bldc_perseus::get_clock_time(hal::steady_clock& p_clock)
 void bldc_perseus::update_position() 
 {
   m_current.position = m_encoder->read().angle;
-  auto error = m_target.position - m_current.position;
+  float error = m_target.position - m_current.position;
   auto clock = resources::clock();
-  auto console = resources::console();
-  auto curr_time = hal_time_duration_to_sec(get_clock_time(*clock));
+  sec curr_time = hal_time_duration_to_sec(get_clock_time(*clock));
   sec dt = curr_time - m_PID_prev_position_values.prev_dt_time;
   m_PID_prev_position_values.integral += error * dt; 
-  auto derivative = (error - m_PID_prev_position_values.last_error) / dt; // this turns out to be negative because hopefully your current error is less than your last error
-  auto pTerm = m_current_position_settings.kp * error; 
-  auto iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
-  auto dTerm = m_current_position_settings.kd * derivative; 
+  float derivative = (error - m_PID_prev_position_values.last_error) / dt; // this turns out to be negative because hopefully your current error is less than your last error
+  float pTerm = m_current_position_settings.kp * error; 
+  float iTerm  = m_current_position_settings.ki * m_PID_prev_position_values.integral; 
+  float dTerm = m_current_position_settings.kd * derivative; 
   m_PID_prev_position_values.last_error = error; 
   m_PID_prev_position_values.prev_dt_time = curr_time;
 
-  auto proj_pos = pTerm + iTerm + dTerm;
+  float proj_pos = pTerm + iTerm + dTerm;
   float ff_clamp =0.2;
-  auto ff = bldc_perseus::position_feedforward() * ff_clamp; // print this? maybe consider as another csv print
+  float ff = bldc_perseus::position_feedforward() * ff_clamp; // print this? maybe consider as another csv print
   
-  auto proj_power = std::clamp(proj_pos, -1 * m_clamped_speed, m_clamped_speed);
+  float proj_power = std::clamp(proj_pos, -1 * m_clamped_speed, m_clamped_speed);
 
   m_current.power = proj_power; 
   print_csv_format(pTerm, iTerm, dTerm, proj_power, ff);

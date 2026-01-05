@@ -1,7 +1,8 @@
-#include "../hardware_map.hpp"
 #include <h_bridge.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <resource_list.hpp>
+
 
 using namespace std::chrono_literals;
 namespace sjsu::drivers {

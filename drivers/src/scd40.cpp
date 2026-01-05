@@ -1,6 +1,6 @@
 // #pragma once
 
-#include "../include/scd40.hpp"
+#include <scd40.hpp>
 
 using namespace std::chrono_literals;
 namespace sjsu::drivers {
