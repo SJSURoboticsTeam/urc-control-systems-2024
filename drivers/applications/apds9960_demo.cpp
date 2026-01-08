@@ -19,17 +19,6 @@ void application()
   hal::print<64>(*terminal, "i2c Created \n");
   using namespace std::literals;
 
-  // [[maybe_unused]] constexpr hal::byte first_i2c_address = 0x08;
-  // [[maybe_unused]] constexpr hal::byte last_i2c_address = 0x78;
-  // hal::print(*terminal, "I2C devices found: ");
-  // for (hal::byte address = first_i2c_address; address < last_i2c_address;
-  //      address++) {
-  //   // this can only fail if the device is not present
-  //   if (hal::probe(*i2c2, address)) {
-  //     hal::print<12>(*terminal, "0x%02X ", address);
-  //   }
-  // }
-
   apds9960 adps9960_sensor = apds9960(i2c2, counter, terminal);
 
   hal::delay(*counter, 1000ms);

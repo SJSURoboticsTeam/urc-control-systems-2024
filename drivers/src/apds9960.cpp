@@ -14,34 +14,26 @@ apds9960::apds9960(hal::v5::strong_ptr<hal::i2c> p_i2c,
 
 void apds9960::default_enable()
 {
-  // hal::byte config1_data = 0x60;  // 01100000
-  // std::array<hal::byte, 2> write_buff = { register_set::config1, config1_data
-  // }; hal::write(*m_i2c, m_address, write_buff, hal::never_timeout());
-
-  // hal::delay(*m_clock, 10ms);
-
-  // hal::byte config2_data = 0x01;  // 00000001
-  // write_buff = { register_set::config2, config2_data };
-  // hal::write(*m_i2c, m_address, write_buff, hal::never_timeout());
-
-  // hal::delay(*m_clock, 10ms);
-
   hal::byte aen_enable = 0x03;  // 00000011
   std::array<hal::byte, 2> write_buff = { register_set::enable, aen_enable };
   hal::write(*m_i2c, m_address, write_buff, hal::never_timeout());
+
   hal::delay(*m_clock, 10ms);
 
-  // hal::delay(*m_clock, 10ms);
+  hal::byte control_reg = 0x02;  // 00000010 (16x)
+  write_buff = { register_set::control, control_reg };
+  control_reg = write_buff[0];
 
-  // hal::byte control_reg = 0x02;  // 00000010 (16x)
-  // write_buff = { register_set::control, control_reg };
-  // control_reg = write_buff[0];
+  hal::delay(*m_clock, 10ms);
+
+  hal::byte atime_reg = 0xDB;  // (103 ms)
+  write_buff = { register_set::atime, atime_reg };
+  hal::write(*m_i2c, m_address, write_buff, hal::never_timeout());
 }
 
 apds9960::color apds9960::readColor()
 {
   color data_color;
-  hal::print<64>(*m_terminal, "Reading from Color Sensor...\n");
 
   std::array<hal::byte, 1> data_buff_low;
   std::array<hal::byte, 1> data_buff_high;
@@ -49,6 +41,7 @@ apds9960::color apds9960::readColor()
   std::array<hal::byte, 1> write_to_address = { register_set::cdatal };
   hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_low);
   hal::delay(*m_clock, 10ms);
+
   // write_to_address = { register_set::cdatah };
   hal::read(*m_i2c, m_address, data_buff_high);
 
@@ -82,27 +75,27 @@ apds9960::color apds9960::readColor()
 
   hal::print<64>(*m_terminal, "Green Low Byte: %u\n", data_buff_low[0]);
   hal::print<64>(*m_terminal, "Green High Byte: %u\n", data_buff_high[0]);
-
+ 
   data_color.green_data = data_buff_high[0] << 8 | data_buff_low[0];
-
+ 
   hal::delay(*m_clock, 10ms);
-
+ 
   write_to_address = { register_set::bdatal };
   hal::write_then_read(*m_i2c, m_address, write_to_address, data_buff_low);
   hal::delay(*m_clock, 10ms);
-
+ 
   // write_to_address = { register_set::bdatah };
   hal::read(*m_i2c, m_address, data_buff_high);
-
+ 
   hal::print<64>(*m_terminal, "Blue Low Byte: %u\n", data_buff_low[0]);
   hal::print<64>(*m_terminal, "Blue High Byte: %u\n", data_buff_high[0]);
-
+ 
   data_color.blue_data = data_buff_high[0] << 8 | data_buff_low[0];
-
+ 
   hal::delay(*m_clock, 10ms);
-
+ 
   return data_color;
-
+ 
   // std::array<hal::byte, 2> data_buff;
 
   // std::array<hal::byte, 1> write_to_address = { register_set::cdatal };
@@ -131,4 +124,4 @@ apds9960::color apds9960::readColor()
 
   // return data_color;
 }
-}  // namespace sjsu::drivers
+}

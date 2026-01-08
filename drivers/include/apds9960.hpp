@@ -30,6 +30,7 @@ public:
   enum register_set
   {
     enable = 0x80,
+    atime = 0x81,
     control = 0x8F,
     config1 = 0x8D,
     config2 = 0x90,
