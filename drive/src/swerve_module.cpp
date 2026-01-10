@@ -1,15 +1,15 @@
 #include "../include/swerve_module.hpp"
-#include <drivetrain_math.hpp>
-#include "resource_list.hpp"
-#include <swerve_module.hpp>
 #include <resource_list.hpp>
 #include <cmath>
 #include <cstdlib>
+#include <drivetrain_math.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
+#include <resource_list.hpp>
+#include <swerve_module.hpp>
 
 using namespace std::chrono_literals;
 using namespace hal::literals;
@@ -110,22 +110,22 @@ swerve_module_state swerve_module::get_target_state() const
 
 void swerve_module::update_tolerance_debouncer()
 {
+  // 1. the target angle is always within the absolute min/max for the angle
+  // 2. if the actual angle is not within tolerance of the target, then we
+  // state angle is out of tolerance
+  // 3. if actual angle is within tolerance of the target, and we know target
+  // is always within absolute min/max, then we know actual angle is within
+  // tolerance of the absolute min/max
+  // 4. therefore, we do not actually need to check absolute min/max bounds
   bool angle_out_of_tolerance =
-    // if the angle is not out of tolerance of the target, then we do not need
-    // to check if it is in min/max bounds since the target angle must be
-    // within bounds and the actual angle is within tolerance of the target
-    //
-    // in other words, we only need to check if the angle is in min/max bounds
-    // if it is out of tolerance; which means we do not need to check if it is
-    // within min/max bounds at all because it is already out of tolerance
-    fabs(m_actual_state_cache.steer_angle - m_target_state.steer_angle) >
+    fabs(m_actual_state_cache.steer_angle - m_target_state.steer_angle) >=
     settings.position_tolerance;
 
+  // similar reasoning as the angle out of tolerance, we do not need to check
+  // max speed
   bool velocity_out_of_tolerance =
-    // similar reasoning as the angle out of tolerance, don't need to check max
-    // as the target tolerance checking already encodes this logic
     fabs(m_actual_state_cache.propulsion_velocity -
-         m_target_state.propulsion_velocity) > settings.velocity_tolerance;
+         m_target_state.propulsion_velocity) >= settings.velocity_tolerance;
 
   // true if out of tolerance
   bool current_state = angle_out_of_tolerance || velocity_out_of_tolerance;
