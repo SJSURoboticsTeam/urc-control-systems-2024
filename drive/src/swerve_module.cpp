@@ -26,7 +26,6 @@ swerve_module::swerve_module(
   , m_propulsion_motor(p_propulsion_motor)
   , m_limit_switch(p_limit_switch)
   , m_clock(p_clock)
-  , m_tolerance_last_changed()
 {
   // TODO: verify settings were initalized
 }
