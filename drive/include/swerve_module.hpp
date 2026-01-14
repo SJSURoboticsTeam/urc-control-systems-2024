@@ -23,6 +23,8 @@ namespace sjsu::drive {
 
 using namespace std::chrono_literals;
 
+using namespace std::chrono_literals;
+
 struct swerve_module_settings
 {
   vector2d position = vector2d(NAN, NAN);
@@ -143,8 +145,14 @@ private:
   hal::v5::strong_ptr<hal::steady_clock> m_clock;
   swerve_module_state m_target_state;
   swerve_module_state m_actual_state_cache;
+  // the position reading when facing forward using the interface for the steer
+  // motor (NAN indicates it has not been homed before)
+  hal::degrees m_steer_offset = NAN;
   hal::time_duration m_tolerance_last_changed = 0ns;
   // true = out of tolerance
   bool m_stable_tolerance_state = false;
+
+private:
 };
 }  // namespace sjsu::drive
+
