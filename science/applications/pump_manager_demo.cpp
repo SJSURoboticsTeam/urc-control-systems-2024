@@ -6,31 +6,35 @@
 #include <libhal/units.hpp>
 
 #include "../include/pump_manager.hpp"
-#include "application.hpp"
+#include <resource_list.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
 namespace sjsu::science {
 
-void application(hardware_map_t& p_framework)
+void application()
 {
   // configure drivers
-  auto& clock = *p_framework.steady_clock;
-  auto& terminal = *p_framework.terminal;
+  auto clock = resources::clock();
+  auto terminal = resources::console();
+  auto deionized_water_pump = resources::deionized_water_pump();
+  auto benedict_reagent_pump = resources::benedict_reagent_pump();
+  auto biuret_reagent_pump = resources::biuret_reagent_pump();
+  auto kalling_reagent_pump = resources::kalling_reagent_pump();
+
   //TODO: replace nullptrs once hardwaremap has been updated
   auto m_pump_manager = pump_manager(
     clock,
-    *p_framework.deionized_water_pump,
-    *p_framework.sample_pump,
-    *p_framework.molisch_reagent_pump,
-    *p_framework.sulfuric_acid_pump,
-    *p_framework.biuret_reagent
+    deionized_water_pump,
+    benedict_reagent_pump,
+    biuret_reagent_pump,
+    kalling_reagent_pump
     );
 
     while(true){
-        hal::print<64>(terminal, "hello i am working");
-        m_pump_manager.pump(pump_manager::pumps::DEIONIZED_WATER, 1000ms);
+        hal::print<64>(*terminal, "hello i am working");
+        m_pump_manager.pump(pump_manager::pumps::DEIONIZED_WATER, 5000ms);
     }
 }
 }  // namespace sjsu::drivers
