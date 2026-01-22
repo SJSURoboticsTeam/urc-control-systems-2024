@@ -150,28 +150,28 @@ hal::v5::strong_ptr<hal::input_pin> input_pin_2()
     driver_allocator(), gpio_b().acquire_input_pin(3));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_0()
+hal::v5::strong_ptr<hal::output_pin> deionized_water_pump()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
-    driver_allocator(), gpio_a().acquire_output_pin(0));
+  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
+    driver_allocator(), gpio_b().acquire_output_pin(12));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_1()
+hal::v5::strong_ptr<hal::output_pin> benedict_reagent_pump()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
-    driver_allocator(), gpio_a().acquire_output_pin(15));
+  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
+    driver_allocator(), gpio_b().acquire_output_pin(4));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_2()
+hal::v5::strong_ptr<hal::output_pin> biuret_reagent_pump()
 {
   return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
     driver_allocator(), gpio_b().acquire_output_pin(3));
 }
 
-hal::v5::strong_ptr<hal::output_pin> output_pin_3()
+hal::v5::strong_ptr<hal::output_pin> kalling_reagent_pump()
 {
-  return hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
-    driver_allocator(), gpio_b().acquire_output_pin(4));
+  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
+    driver_allocator(), gpio_a().acquire_output_pin(15));
 }
 
 hal::v5::strong_ptr<hal::output_pin> output_pin_4()
