@@ -23,8 +23,4 @@ class demos(ConanFile):
 
     def requirements(self):
         self.requires("libhal-util/5.8.1")
-<<<<<<< HEAD
-        self.requires("libhal-arm-mcu/1.21.2")
-=======
-        self.requires("libhal-arm-mcu/1.19.1")
->>>>>>> 2e19123 (Clean Up (#78))
+        self.requires("libhal-arm-mcu/1.19.6")

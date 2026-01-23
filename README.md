@@ -14,6 +14,8 @@ Replace `PATH` with the corelating path to subsystem or driver(s). The folder co
 
 If the conan.lock prevents you from building due to inconsequential package differences based on your system use the `--lockfile-partial` flag to bypass the lock
 
+If the conan.lock prevents you from building due to inconsequential package differences based on your system use the `--lockfile-partial` flag to bypass the lock
+
 If you are already in in the folder run (for quick copy paste):
 
 ```
