@@ -19,8 +19,8 @@ void application()
   drivetrain dt(resources::swerve_modules(),
                 hal_time_duration_to_sec(refresh_rate));
 
-  dt.hard_home_begin();
-  while (!dt.hard_home_poll()) {
+  dt.async_home_begin();
+  while (!dt.async_home_poll()) {
     hal::delay(*clock, 250ms);
   }
 

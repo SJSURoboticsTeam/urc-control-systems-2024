@@ -19,7 +19,7 @@ void application()
     hal::print(*console, "starting homing!\n");
     for (int i = 0; i < module_count; i++) {
       try {
-        (*swerve_modules)[i]->hard_home_begin();
+        (*swerve_modules)[i]->async_home_begin();
       } catch (hal::exception e) {
         hal::print<64>(*console, "Wheel home throwing error %d\n", i);
         throw e;
@@ -29,14 +29,14 @@ void application()
       bool homed = true;
       for (int i = 0; i < module_count; i++) {
         try {
-          switch (swerve_modules->at(i)->hard_home_poll()) {
-            case hard_home_status::in_progress:
+          switch (swerve_modules->at(i)->async_home_poll()) {
+            case async_home_status::in_progress:
               homed = false;
               break;
-            case hard_home_status::completed:
+            case async_home_status::completed:
               hal::print<64>(*console, "Wheel homed %d\n", i);
               break;
-            case hard_home_status::inactive:
+            case async_home_status::inactive:
               break;
           }
           // swerve_modules->at(i)->set_target_state(swerve_module_state(0, 0));

@@ -33,7 +33,7 @@ struct swerve_module_settings
   bool drive_forward_clockwise = true;
 };
 
-enum hard_home_status {
+enum async_home_status {
   inactive,
   in_progress,
   completed,
@@ -110,10 +110,10 @@ public:
    */
   bool tolerance_timed_out() const;
   /**
-   * @brief begin homing asynchronously, *you must call hard_home_poll* in a
+   * @brief begin homing asynchronously, *you must call async_home_poll* in a
    * loop with a delay of <= 250ms otherwise the limit switches may break!
    */
-  void hard_home_begin();
+  void async_home_begin();
   /**
    * @brief poll limit switches, if active it will stop homing.
    *
@@ -121,7 +121,7 @@ public:
    * detects the limit switch is hit and stops the motors; after completed is
    * fired, poll will return inactive for this module.
    */
-  hard_home_status hard_home_poll();
+  async_home_status async_home_poll();
 
 private:
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_steer_motor;

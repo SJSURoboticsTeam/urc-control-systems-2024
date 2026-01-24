@@ -57,16 +57,16 @@ public:
    */
   bool aligned();
   /**
-   * @brief begin homing asynchronously, *you must call hard_home_poll* in a
+   * @brief begin homing asynchronously, *you must call async_home_poll* in a
    * loop with a delay of <= 250ms otherwise the limit switches may break!
    */
-  void hard_home_begin();
+  void async_home_begin();
   /**
    * @brief poll limit switches, if active it will stop homing.
    *
    * @return true if hard homing is complete.
    */
-  bool hard_home_poll();
+  bool async_home_poll();
 
 private:
   hal::v5::strong_ptr<

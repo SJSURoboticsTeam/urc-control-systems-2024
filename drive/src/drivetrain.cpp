@@ -172,17 +172,17 @@ bool drivetrain::aligned()
   }
   return true;
 }
-void drivetrain::hard_home_begin()
+void drivetrain::async_home_begin()
 {
   for (auto& m : *m_modules) {
-    m->hard_home_begin();
+    m->async_home_begin();
   }
 }
-bool drivetrain::hard_home_poll()
+bool drivetrain::async_home_poll()
 {
   bool complete = true;
   for (auto& m : *m_modules) {
-    if (m->hard_home_poll() == hard_home_status::in_progress) {
+    if (m->async_home_poll() == async_home_status::in_progress) {
       complete = false;
     }
   }

@@ -146,7 +146,7 @@ bool swerve_module::tolerance_timed_out() const
   return m_stable_tolerance_state;
 }
 
-void swerve_module::hard_home_begin()
+void swerve_module::async_home_begin()
 {
   auto console = resources::console();
   if (m_hard_homing_state) {
@@ -170,13 +170,13 @@ void swerve_module::hard_home_begin()
   m_hard_homing_state = true;
 }
 
-hard_home_status swerve_module::hard_home_poll()
+async_home_status swerve_module::async_home_poll()
 {
   if (!m_hard_homing_state) {
-    return hard_home_status::inactive;
+    return async_home_status::inactive;
   }
   if (!m_limit_switch->level()) {
-    return hard_home_status::in_progress;
+    return async_home_status::in_progress;
   }
 
   auto console = resources::console();
@@ -194,7 +194,7 @@ hard_home_status swerve_module::hard_home_poll()
   //   refresh_actual_state_cache().steer_angle);
 
   m_hard_homing_state = false;
-  return hard_home_status::completed;
+  return async_home_status::completed;
 }
 
 }  // namespace sjsu::drive
