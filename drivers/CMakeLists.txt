@@ -29,6 +29,7 @@ DEMOS
   tla2528_input_pin_demo
   tla2528_analog_input_demo
   serial_commands_demo
+  nhd0420d3z_demo
 
 INCLUDES
   include
