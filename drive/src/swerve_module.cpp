@@ -149,7 +149,7 @@ bool swerve_module::tolerance_timed_out() const
 void swerve_module::async_home_begin()
 {
   auto console = resources::console();
-  if (m_hard_homing_state) {
+  if (m_async_homing_state) {
     hal::print(*console, "already homing module!\n");
     return;
   }
@@ -167,12 +167,12 @@ void swerve_module::async_home_begin()
     m_steer_motor->velocity_control(1);
   }
 
-  m_hard_homing_state = true;
+  m_async_homing_state = true;
 }
 
 async_home_status swerve_module::async_home_poll()
 {
-  if (!m_hard_homing_state) {
+  if (!m_async_homing_state) {
     return async_home_status::inactive;
   }
   if (!m_limit_switch->level()) {
@@ -193,7 +193,7 @@ async_home_status swerve_module::async_home_poll()
   //   *console, "fin position: %f\n",
   //   refresh_actual_state_cache().steer_angle);
 
-  m_hard_homing_state = false;
+  m_async_homing_state = false;
   return async_home_status::completed;
 }
 

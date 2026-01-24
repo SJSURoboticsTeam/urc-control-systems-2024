@@ -137,7 +137,7 @@ private:
   // true = out of tolerance
   bool m_stable_tolerance_state = false;
   // true if currently hard homing
-  bool m_hard_homing_state = false;
+  bool m_async_homing_state = false;
 
 private:
 };
