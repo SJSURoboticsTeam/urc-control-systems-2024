@@ -188,5 +188,11 @@ bool drivetrain::async_home_poll()
   }
   return complete;
 }
+void drivetrain::async_home_stop()
+{
+  for (auto& m : *m_modules) {
+    m->async_home_stop();
+  }
+}
 
 }  // namespace sjsu::drive

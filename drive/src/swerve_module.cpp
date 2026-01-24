@@ -197,4 +197,10 @@ async_home_status swerve_module::async_home_poll()
   return async_home_status::completed;
 }
 
+void swerve_module::async_home_stop()
+{
+  m_steer_motor->velocity_control(0);
+  m_async_homing_state = false;
+}
+
 }  // namespace sjsu::drive

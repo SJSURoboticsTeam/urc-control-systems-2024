@@ -67,6 +67,11 @@ public:
    * @return true if hard homing is complete.
    */
   bool async_home_poll();
+  /**
+   * @brief stops homing immediately on all motors, regardless if they are
+   * currently homing or not.
+   */
+  void async_home_stop();
 
 private:
   hal::v5::strong_ptr<

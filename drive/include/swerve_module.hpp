@@ -122,6 +122,11 @@ public:
    * fired, poll will return inactive for this module.
    */
   async_home_status async_home_poll();
+  /**
+   * @brief stops homing immediately by setting motor velocity to 0 and homing
+   * state to false regardless if homing state is active or not.
+   */
+  void async_home_stop();
 
 private:
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_steer_motor;
