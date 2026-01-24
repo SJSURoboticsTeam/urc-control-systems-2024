@@ -57,10 +57,16 @@ public:
    */
   bool aligned();
   /**
-   * @brief with run homing in a fixed loop (will not update other motors or get
-   * interupted)
+   * @brief begin homing asynchronously, *you must call hard_home_poll* in a
+   * loop with a delay of <= 250ms otherwise the limit switches may break!
    */
-  void hard_home();
+  void hard_home_begin();
+  /**
+   * @brief poll limit switches, if active it will stop homing.
+   *
+   * @return true if hard homing is complete.
+   */
+  bool hard_home_poll();
 
 private:
   hal::v5::strong_ptr<

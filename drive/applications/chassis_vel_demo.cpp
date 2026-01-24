@@ -18,7 +18,11 @@ void application()
   constexpr int delay_cycles = transition_time / refresh_rate;
   drivetrain dt(resources::swerve_modules(),
                 hal_time_duration_to_sec(refresh_rate));
-  dt.hard_home();
+
+  dt.hard_home_begin();
+  while (!dt.hard_home_poll()) {
+    hal::delay(*clock, 250ms);
+  }
 
   dt.set_target_state(chassis_velocities(vector2d(0, 0), 1), true);
   hal::print<128>(*console,

@@ -33,7 +33,10 @@ void application()
   constexpr sec cycle_time_sec = hal_time_duration_to_sec(cycle_time);
   auto clock = resources::clock();
   drivetrain dt(resources::swerve_modules(), cycle_time_sec);
-  dt.hard_home();
+  dt.hard_home_begin();
+  while (!dt.hard_home_poll()) {
+    hal::delay(*clock, 250ms);
+  }
 
   hal::time_duration loop_duration = 0ns;
   for (unsigned int i = 0; i < sizeof(states) / sizeof(states[0]); i++) {

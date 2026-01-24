@@ -28,7 +28,7 @@ bool drivetrain::set_target_state(chassis_velocities p_target_state,
   auto console = resources::console();
   for (vector2d v : vectors) {
     hal::print<128>(*console,"vec:%f,%f\n",v.x,v.y);
-  }  
+  }
 
   for (int i = 0; can_reach && i < module_count; i++) {
     m_final_target_module_states[i] =
@@ -119,7 +119,7 @@ void drivetrain::periodic()
       next_target_states = m_final_target_module_states;
     }
   }
-  
+
   // interpolate into modules next target_states
   next_target_states = interpolate_states(
     m_refresh_rate, *m_modules, next_target_states);
@@ -172,11 +172,21 @@ bool drivetrain::aligned()
   }
   return true;
 }
-void drivetrain::hard_home()
+void drivetrain::hard_home_begin()
 {
   for (auto& m : *m_modules) {
-    m->hard_home();
+    m->hard_home_begin();
   }
+}
+bool drivetrain::hard_home_poll()
+{
+  bool complete = true;
+  for (auto& m : *m_modules) {
+    if (m->hard_home_poll() == hard_home_status::in_progress) {
+      complete = false;
+    }
+  }
+  return complete;
 }
 
 }  // namespace sjsu::drive
