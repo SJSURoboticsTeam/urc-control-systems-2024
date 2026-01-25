@@ -46,6 +46,7 @@ SOURCES
     src/h_bridge.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
+    src/nhd0420d3z.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
