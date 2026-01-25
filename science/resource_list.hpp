@@ -32,6 +32,7 @@
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
 #include <libhal-actuator/rc_servo.hpp>
+#include <libhal-expander/pca9685.hpp>
 namespace sjsu::science {
 
 namespace resources {
@@ -72,7 +73,17 @@ hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo();
+hal::v5::strong_ptr<hal::actuator::rc_servo> arm_servo();
+hal::v5::strong_ptr<hal::actuator::rc_servo> trap_door_servo();
+hal::v5::strong_ptr<hal::actuator::rc_servo> door_servo();
+hal::v5::strong_ptr<hal::actuator::rc_servo> mixer_servo();
+hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch();
+hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch();
+// what pwms to use
 hal::v5::strong_ptr<hal::pwm> pwm0();
+hal::v5::strong_ptr<hal::pwm> pwm1();
+hal::v5::strong_ptr<hal::expander::pca9685> pca();
+
 
 inline void reset()
 {

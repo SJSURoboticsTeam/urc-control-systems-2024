@@ -2,10 +2,12 @@
 using namespace std::chrono_literals;
 namespace sjsu::science {
 science_state_machine::science_state_machine(
-  hal::actuator::rc_servo p_arm_servo,
-  hal::actuator::rc_servo p_trap_door,
-  hal::actuator::rc_servo p_mixer,
-  hal::actuator::rc_servo p_door,
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_arm_servo,
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_trap_door,
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_mixer,
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_door, 
+  hal::v5::strong_ptr<hal::input_pin> p_top_door_limit_switch,
+  hal::v5::strong_ptr<hal::input_pin> p_bottom_door_limit_switch,
   hal::v5::strong_ptr<carousel> p_carousel,
   hal::v5::strong_ptr<pump_manager> p_pump_manager,
   hal::v5::strong_ptr<hal::steady_clock> p_clock,
@@ -14,6 +16,8 @@ science_state_machine::science_state_machine(
   , m_trap_door(p_trap_door)
   , m_mixer(p_mixer)
   , m_door(p_door)
+  , m_top_door_limit_switch(p_top_door_limit_switch)
+  , m_bottom_door_limit_switch(p_bottom_door_limit_switch)
   , m_carousel(p_carousel)
   , m_pump_manager(p_pump_manager)
   , m_clock(p_clock)
@@ -30,30 +34,31 @@ void science_state_machine::turn_on_pump([[maybe_unused]] auto pump, [[maybe_unu
 {
 }
 
+
 void science_state_machine::run_state_machine([[maybe_unused]] science_states state)
 {
   switch(state){
     case science_state_machine::science_states::HOME_CAROUSEL:
       break;
     case science_state_machine::science_states::CUP_OUTSIDE:
-      m_door.position(180);
+      m_arm_servo->position(0);
       hal::delay(*m_clock, 1000ms);
-      m_arm_servo.position(180);
-      hal::delay(*m_clock, 1000ms);
+      m_door->position(180);
+      hal::delay(*m_clock, 1000ms);   
       break;
     case science_state_machine::science_states::CUP_INSIDE:
-      m_arm_servo.position(0);
+      m_arm_servo->position(0);
       hal::delay(*m_clock, 1000ms);
-      m_door.position(0);
+      m_door->position(180);
       hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::DUMP_SAMPLE: 
       // trapdoor servo deg: 0 close, 120 open)
-      m_trap_door.position(0);
+      m_trap_door->position(0);
       hal::delay(*m_clock, 1000ms);
-      m_trap_door.position(120); // keep open for 3s
+      m_trap_door->position(120); // keep open for 3s
       hal::delay(*m_clock, 3000ms);
-      m_trap_door.position(0);
+      m_trap_door->position(0);
       hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::ADD_DI_WATER:

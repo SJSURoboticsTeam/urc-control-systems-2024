@@ -162,6 +162,10 @@ public:
 
   hal::time_duration get_clock_time();
 
+  void set_power(float power) {
+    m_h_bridge->power(power);
+  }
+
 private:
   hal::v5::strong_ptr<sjsu::drivers::h_bridge> m_h_bridge;
   hal::v5::strong_ptr<hal::rotation_sensor> m_encoder;
