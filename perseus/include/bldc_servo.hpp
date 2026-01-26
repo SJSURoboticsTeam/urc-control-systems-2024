@@ -23,9 +23,9 @@ public:
   */
   struct status 
   {
-    float position;
+    hal::degrees position;
     float power;
-    hal::i16 velocity;
+    float velocity;
   };
 
   /**
@@ -49,57 +49,69 @@ public:
     float prev_dt_time; 
   }; 
   /**
+    * @brief Struct for the values that are individual to each servo.
+  */
+  struct servo_values 
+  {
+    // for feedforward 
+    float feedforward_clamp; // power needed to keep position at max gravity
+    float length; 
+    float angle_offset; 
+    float weight_beam; 
+    float weight_end; 
+  };
+  /**
     * @brief Set the target position of the servo.
     * @param target_position The target position to set, it is a hal::u16 value. This is relative to the home position. 
   */
-  void set_target_position(float target_position);
+  void set_target_position(hal::degrees);
   /**
     * @brief Get the target position of the servo.
     * @return Gets the position relative to the home position.
   */
-  float get_target_position();
+  hal::degrees get_target_position();
   /**
    * @brief Get the current position of the servo.
    * @return Gets the position relative to the home position.
   */
-  float get_current_position();
+  hal::degrees get_reading_position();
 
   /**
     * @brief Set the current position of the servo.
     * It will not immediately go to the target position, but will try to reach it using velocity control.
-    * @param current_position The current position to set, it is a hal::u16 value. This is relative to the home position.
+    * @param reading_position The current position to set, it is a hal::degrees value. This is relative to the home position.
   */
-  void set_current_position(hal::u16 current_position);
+  void set_reading_position(hal::degrees reading_position);
 
   /**
     * @brief Set the target velocity of the servo.
     * The servo will try to reach this velocity using acceleration limits.
-    * The velocity is sent from mission control as a hal::u16 value between -100 and 100, representing -100% to 100% of maximum speed.
-    * @param target_velocity The target velocity to set, it is a hal::u16 value.
+    * The velocity is sent from mission control as a float value between -100 and 100, representing -100% to 100% of maximum speed.
+    * @param target_velocity The target velocity to set, it is a float value.
   */
   void set_target_velocity(hal::i16 target_velocity);
 
   /**
    * @brief Set the current velocity of the servo.
    *  This should only be used to set the velocity to 0.
-   * @param current_velocity The current velocity to set, it is a hal::i16 value.
+   * @param reading_velocity The current velocity to set, it is a float value.
    */
-  void set_current_velocity(hal::i16 current_velocity);
+  void set_reading_velocity(float reading_velocity);
+
+  /**
+   * @brief TURNS OFF (Power = 0)
+   */
+  void stop();
 
   /**
     * @brief Get the current velocity of the servo.
-    * @return The current velocity of the servo as a hal::u16 ticks per second.
+    * @return The current velocity of the servo as a float value representing degrees per second.
   */
-  float get_current_velocity_in_tps();
+  float get_reading_velocity();
 
   /**
-    * @brief Get the current velocity of the servo as a percentage of maximum speed.
-    * @return The current velocity of the servo as a hal::u16 value between -100 and 100.
-  */
-  float get_current_velocity_percentage();
-  /**
     * @brief Get the target velocity of the servo.
-    * @return The target velocity of the servo as a hal::u16 value between -100 and 100.
+    * @return The target velocity of the servo as a float value representing degrees per second.
   */
   float get_target_velocity();
 
@@ -122,30 +134,51 @@ public:
   void home_encoder();
 
   /**
-    * @brief Update velocity to the target velocity using PID control
+    * @brief Update velocity to the target velocity using PID control and feedforward. 
   */
   void update_velocity(); 
   /**
-    * @brief Update position to the target position using PID control
+    * @brief Update position to the target position using PID control and feedforward. 
   */
   void update_position(); 
   /**
    * @brief Feedforward values to account for gravity/weight 
-   * 
    * @return Current feedforward value 
   */
   float position_feedforward();
-  /**
-    * @brief get velocity from encoder values 
-    * prints to terminal
-  */
-  void get_current_velocity();
+
 
   /**
     * @brief Set the maximum power the PID controller is allowed to use.
-    * @param power The maximum power as a float between 0.0 and 1.0, representing 0% to 100% of maximum power.
+    * @param power The clamped power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
   */
   void set_pid_clamped_power(float power);
+
+  /**
+    * @brief Get the maximum power the PID controller is allowed to use.
+    * @return The clamped power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
+  */
+  float get_pid_clamped_power();
+
+  /**
+    * @brief Sets the power (ignores clamped power) 
+    * Use with caution. Check max power beforehand.
+    * @param power The power to set the motor to, as a float between -1.0 and 1.0
+    * where -1 is the maximum in one direction and 1 is the maximum in the other direction.
+  */
+  void set_power(float power);
+
+  /**
+    * @brief Get the power the servo is using.
+    * @return The power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
+  */
+  float get_power();
+
+  /**
+   * @brief Resets the internal time tracking for the servo, this will be done
+   * when PID switches between Position and Velocity control.
+   */
+  void reset_time();
 
   /**
     * @brief Get the current PID settings of the servo.
@@ -166,35 +199,25 @@ public:
   
   hal::time_duration get_clock_time(hal::steady_clock& p_clock);
 
-  /**
-   * @brief 
-   * 
-   * @param pTerm 
-   * @param iTerm 
-   * @param dTerm 
-   * @param proj_power 
-   * @param ff 
-   */
-  void print_csv_format(float pTerm, float iTerm, float dTerm, float proj_power, float ff);
 
 private:
-  status m_current;
-  status m_target;
-  PID_settings m_current_position_settings;
-  PID_settings m_current_velocity_settings;
   hal::v5::strong_ptr<sjsu::drivers::h_bridge>
     m_h_bridge;
   hal::v5::strong_ptr<hal::rotation_sensor>
-    m_encoder;     
-  float m_clamped_speed;
-  float m_clamped_accel;
-  float m_prev_encoder_value;
+    m_encoder;
+  hal::v5::strong_ptr<hal::steady_clock> 
+    m_clock;
   hal::u64 m_last_clock_check; 
+  status m_reading;
+  status m_target;
+  PID_settings m_reading_position_settings;
+  PID_settings m_reading_velocity_settings;
   PID_prev_values m_PID_prev_velocity_values; 
   PID_prev_values m_PID_prev_position_values; 
+  servo_values m_servo_values; 
+  float m_clamped_power;
+  float m_prev_encoder_value;
   float home_encoder_value;
-  // feed forward values (weight, length, etc) struct for each servo 
-  // bool saying if pid-ed to position yet, this will be what breaks the loop 
 };
 
 }  // namespace sjsu::perseus

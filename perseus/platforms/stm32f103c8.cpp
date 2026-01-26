@@ -25,7 +25,7 @@
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
 
-#include "../hardware_map.hpp"
+#include <resource_list.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal/output_pin.hpp>
@@ -147,17 +147,26 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
-
-hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
+hal::v5::strong_ptr<hal::rotation_sensor> encoder(hal::u32 gear_ratio) 
 {
   return timer2().acquire_quadrature_encoder(
     driver_allocator(),
     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
-    5281 * 28 / 2);
+      gear_ratio / 2);
   // shoulder 28
   // elbow 2
 }
+// hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
+// {
+//   return timer2().acquire_quadrature_encoder(
+//     driver_allocator(),
+//     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
+//       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
+//     5281 * 28 / 2);
+//   // shoulder 28
+//   // elbow 2
+// }
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
   auto a_low = resources::pwm0_a8();
