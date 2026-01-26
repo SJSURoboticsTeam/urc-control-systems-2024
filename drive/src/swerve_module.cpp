@@ -1,12 +1,15 @@
 #include "../include/swerve_module.hpp"
-#include "resource_list.hpp"
+#include <resource_list.hpp>
 #include <cmath>
 #include <cstdlib>
+#include <drivetrain_math.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
+#include <resource_list.hpp>
+#include <swerve_module.hpp>
 
 using namespace std::chrono_literals;
 using namespace hal::literals;
@@ -43,7 +46,10 @@ bool swerve_module::stopped() const
 void swerve_module::set_target_state(swerve_module_state const& p_target_state)
 {
   auto console = resources::console();
-  hal::print<128>(*console,"set_target_state:%f,%f\n",p_target_state.steer_angle, p_target_state.propulsion_velocity);
+  hal::print<128>(*console,
+                  "set_target_state:%f,%f\n",
+                  p_target_state.steer_angle,
+                  p_target_state.propulsion_velocity);
   if (m_steer_offset == NAN) {
     throw hal::resource_unavailable_try_again(this);
   }
@@ -103,13 +109,42 @@ swerve_module_state swerve_module::get_target_state() const
 
 void swerve_module::update_tolerance_debouncer()
 {
-  // TODO: implement properly
+  // 1. the target angle is always within the absolute min/max for the angle
+  // 2. if the actual angle is not within tolerance of the target, then we
+  // state angle is out of tolerance
+  // 3. if actual angle is within tolerance of the target, and we know target
+  // is always within absolute min/max, then we know actual angle is within
+  // tolerance of the absolute min/max
+  // 4. therefore, we do not actually need to check absolute min/max bounds
+  bool angle_out_of_tolerance =
+    fabs(m_actual_state_cache.steer_angle - m_target_state.steer_angle) >=
+    settings.position_tolerance;
+
+  // similar reasoning as the angle out of tolerance, we do not need to check
+  // max speed
+  bool velocity_out_of_tolerance =
+    fabs(m_actual_state_cache.propulsion_velocity -
+         m_target_state.propulsion_velocity) >= settings.velocity_tolerance;
+
+  // true if out of tolerance
+  bool current_state = angle_out_of_tolerance || velocity_out_of_tolerance;
+  auto current_time = get_clock_time(*m_clock);
+
+  // if deviated from stable
+  if (m_stable_tolerance_state != current_state) {
+    m_tolerance_last_changed = current_time;
+  }
+
+  sec dt = hal_time_duration_to_sec(current_time - m_tolerance_last_changed);
+  // if stayed stable for timeout time
+  if (dt > settings.tolerance_timeout) {
+    m_stable_tolerance_state = current_state;
+  }
 }
 
 bool swerve_module::tolerance_timed_out() const
 {
-  // TODO: implement properly
-  return false;
+  return m_stable_tolerance_state;
 }
 
 void swerve_module::hard_home()

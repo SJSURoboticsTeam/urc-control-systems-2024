@@ -17,24 +17,24 @@ cmake_minimum_required(VERSION 3.20)
 project(demos LANGUAGES CXX)
 
 libhal_build_demos(
-    DEMOS
-    color_sensor_demo
-    led_strip_demo
-    h_bridge_demo
-    pressure_sensor_demo
-    scd40_demo
+
+DEMOS
+  color_sensor_demo
+  led_strip_demo
+  h_bridge_demo
+  pressure_sensor_demo
+  scd40_demo
   soil_sensor_demo
   tla2528_output_pin_demo
   tla2528_input_pin_demo
   tla2528_analog_input_demo
   serial_commands_demo
 
-  INCLUDES
+INCLUDES
   include
+  .
 
 SOURCES
-    # platforms/micromod.cpp
-    platforms/stm32f103c8.cpp
     src/serial_commands.cpp
     src/color_sensor_opt4048.cpp
     src/mq4.cpp

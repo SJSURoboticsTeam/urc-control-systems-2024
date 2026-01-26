@@ -7,6 +7,8 @@ conan build PATH -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
 
 Replace `PATH` with the corelating path to subsystem or driver(s). The folder contain a `conan.py` file. 
 
+If the conan.lock prevents you from building due to inconsequential package differences based on your system use the `--lockfile-partial` flag to bypass the lock
+
 If you are already in in the folder run (for quick copy paste):
 
 ```

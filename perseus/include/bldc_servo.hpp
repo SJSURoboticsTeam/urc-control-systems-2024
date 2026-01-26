@@ -1,11 +1,13 @@
 #pragma once
+#include <h_bridge.hpp>
+#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
+#include <libhal-util/steady_clock.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/units.hpp>
-#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
-#include <libhal-util/steady_clock.hpp>
 
-#include "../../drivers/include/h_bridge.hpp"
+
+using sec = float;
 
 namespace sjsu::perseus {
 
@@ -13,8 +15,6 @@ class bldc_perseus
 {
 
 public:
-  using sec = float;
-
   bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridge,
                hal::v5::strong_ptr<hal::rotation_sensor> p_encoder);
 

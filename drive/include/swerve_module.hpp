@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector2d.hpp"
+#include <vector2d.hpp>
 #include <cmath>
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
@@ -12,6 +12,8 @@
 #include <swerve_structs.hpp>
 
 namespace sjsu::drive {
+
+using namespace std::chrono_literals;
 
 struct swerve_module_settings
 {
@@ -117,6 +119,9 @@ private:
   // the position reading when facing forward using the interface for the steer
   // motor (NAN indicates it has not been homed before)
   hal::degrees m_steer_offset = NAN;
+  hal::time_duration m_tolerance_last_changed = 0ns;
+  // true = out of tolerance
+  bool m_stable_tolerance_state = false;
 
 private:
 };

@@ -1,4 +1,4 @@
-#include "../include/sk9822.hpp"
+#include <sk9822.hpp>
 #include <array>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/output_pin.hpp>

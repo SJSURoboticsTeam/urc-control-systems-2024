@@ -5,8 +5,8 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/units.hpp>
 
-#include "../hardware_map.hpp"
-#include "../include/pressure_sensor_bme680.hpp"
+#include <pressure_sensor_bme680.hpp>
+#include <resource_list.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

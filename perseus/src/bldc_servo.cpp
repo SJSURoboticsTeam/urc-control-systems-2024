@@ -149,7 +149,7 @@ void bldc_perseus::reset_time()
 
 void bldc_perseus::set_pid_clamped_power(float power)
 {
-  m_clamped_speed = power; 
+  m_clamped_power = power; 
 }
 float bldc_perseus::get_pid_clamped_power() {
   return m_clamped_power; 
