@@ -71,11 +71,8 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
 hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
-  if (not console_ptr) {
-    console_ptr  = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
+  return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
     driver_allocator(), hal::port<1>, hal::buffer<128>);
-  }
-  return console_ptr; 
 }
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
@@ -147,26 +144,15 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
-hal::v5::strong_ptr<hal::rotation_sensor> encoder(hal::u32 gear_ratio) 
+hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
 {
   return timer2().acquire_quadrature_encoder(
     driver_allocator(),
     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
-      gear_ratio / 2);
-  // shoulder 28
-  // elbow 2
+      720); 
+      //this is to just get the plain number of ticks, divided by two bc it reports both A and B channel
 }
-// hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
-// {
-//   return timer2().acquire_quadrature_encoder(
-//     driver_allocator(),
-//     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
-//       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
-//     5281 * 28 / 2);
-//   // shoulder 28
-//   // elbow 2
-// }
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
   auto a_low = resources::pwm0_a8();
@@ -179,48 +165,7 @@ hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
   return hal::v5::make_strong_ptr<decltype(h_bridge)>(
     resources::driver_allocator(), std::move(h_bridge));
 }
-hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
 
-void initialize_can()
-{
-  constexpr hal::u32 baudrate = 1'000'000;
-  if (not can_manager) {
-    auto clock_ref = clock();
-    can_manager =
-      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
-        driver_allocator(),
-        32,
-        driver_allocator(),
-        baudrate,
-        *clock_ref,
-        std::chrono::milliseconds(1),
-        hal::stm32f1::can_pins::pb9_pb8);
-  }
-}
-
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
-{
-  initialize_can();
-  return hal::acquire_can_transceiver(driver_allocator(), can_manager);
-}
-
-hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
-{
-  initialize_can();
-  return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
-}
-
-hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
-{
-  initialize_can();
-  return hal::acquire_can_interrupt(driver_allocator(), can_manager);
-}
-
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
-{
-  initialize_can();
-  return hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
-}
 
 // add one for quadrature encoder
 

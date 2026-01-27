@@ -19,9 +19,9 @@ public:
                hal::v5::strong_ptr<hal::rotation_sensor> p_encoder);
 
   /**
-    * @brief Struct keeps position and velocity status of the servo.
-  */
-  struct status 
+   * @brief Struct keeps position and velocity status of the servo.
+   */
+  struct status
   {
     hal::degrees position;
     float power;
@@ -29,9 +29,8 @@ public:
   };
 
   /**
-    * @brief Struct keeps PID settings for the servo.
-    * The PID parameters will be sent over 2 bytes each. Byte 1 would be the decimal part, and Byte 0 the integer part.
-  */
+   * @brief Struct keeps PID settings for the servo.
+   */
   struct PID_settings
   {
     float kp = 0.1;
@@ -40,7 +39,7 @@ public:
   };
   /**
     * @brief Struct keeps previous PID settings for the servo.
-    * Obtained from update_velocity/position(_noff) functions 
+    * Obtained from update_velocity/position functions 
   */
   struct PID_prev_values 
   {
@@ -53,6 +52,8 @@ public:
   */
   struct servo_values 
   {
+    // for reading value 
+    float gear_ratio; 
     // for feedforward 
     float feedforward_clamp; // power needed to keep position at max gravity
     float length; 
@@ -62,9 +63,10 @@ public:
   };
   /**
     * @brief Set the target position of the servo.
-    * @param target_position The target position to set, it is a hal::u16 value. This is relative to the home position. 
+    * @param target_position The target position to set, it is float value in
+    * degrees.
   */
-  void set_target_position(hal::degrees);
+  void set_target_position(hal::degrees target_position);
   /**
     * @brief Get the target position of the servo.
     * @return Gets the position relative to the home position.
@@ -86,10 +88,10 @@ public:
   /**
     * @brief Set the target velocity of the servo.
     * The servo will try to reach this velocity using acceleration limits.
-    * The velocity is sent from mission control as a float value between -100 and 100, representing -100% to 100% of maximum speed.
+    * This may change the clamped speed. 
     * @param target_velocity The target velocity to set, it is a float value.
   */
-  void set_target_velocity(hal::i16 target_velocity);
+  void set_target_velocity(float target_velocity);
 
   /**
    * @brief Set the current velocity of the servo.
@@ -102,6 +104,9 @@ public:
    * @brief TURNS OFF (Power = 0)
    */
   void stop();
+
+
+  hal::degrees read_angle(); 
 
   /**
     * @brief Get the current velocity of the servo.
@@ -196,7 +201,7 @@ public:
   {
     return static_cast<float>(p_time.count()) * 1e-9f;
   }
-  
+
   hal::time_duration get_clock_time(hal::steady_clock& p_clock);
 
 

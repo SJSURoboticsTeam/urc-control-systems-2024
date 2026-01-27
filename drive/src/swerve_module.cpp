@@ -1,4 +1,4 @@
-#include "../include/swerve_module.hpp"
+#include <swerve_module.hpp>
 #include <resource_list.hpp>
 #include <cmath>
 #include <cstdlib>
