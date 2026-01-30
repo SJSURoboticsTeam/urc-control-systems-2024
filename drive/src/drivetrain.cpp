@@ -1,10 +1,10 @@
-#include <resource_list.hpp>
-#include <vector2d.hpp>
 #include <array>
 #include <drivetrain.hpp>
 #include <drivetrain_math.hpp>
 #include <libhal-util/serial.hpp>
+#include <resource_list.hpp>
 #include <swerve_module.hpp>
+#include <vector2d.hpp>
 
 namespace sjsu::drive {
 
@@ -27,7 +27,7 @@ bool drivetrain::set_target_state(chassis_velocities p_target_state,
   bool can_reach = true;
   auto console = resources::console();
   for (vector2d v : vectors) {
-    hal::print<128>(*console,"vec:%f,%f\n",v.x,v.y);
+    hal::print<128>(*console, "vec:%f,%f\n", v.x, v.y);
   }
 
   for (int i = 0; can_reach && i < module_count; i++) {
@@ -57,7 +57,8 @@ bool drivetrain::set_target_state(chassis_velocities p_target_state,
   }
   return can_reach;
 }
-chassis_velocities drivetrain::get_target_state() {
+chassis_velocities drivetrain::get_target_state()
+{
   return m_target_state;
 }
 
@@ -78,6 +79,9 @@ void drivetrain::periodic()
   if (drive_stopped) {
     m_stopping = false;
   }
+
+  // poll homing
+  async_home_poll();
 
   std::array<swerve_module_state, module_count> next_target_states;
   // if stopping slow down
@@ -121,8 +125,8 @@ void drivetrain::periodic()
   }
 
   // interpolate into modules next target_states
-  next_target_states = interpolate_states(
-    m_refresh_rate, *m_modules, next_target_states);
+  next_target_states =
+    interpolate_states(m_refresh_rate, *m_modules, next_target_states);
   for (int i = 0; i < module_count; i++) {
     swerve_module& module = *(m_modules->at(i));
     module.set_target_state(next_target_states[i]);
@@ -178,15 +182,11 @@ void drivetrain::async_home_begin()
     m->async_home_begin();
   }
 }
-bool drivetrain::async_home_poll()
+void drivetrain::async_home_poll()
 {
-  bool complete = true;
   for (auto& m : *m_modules) {
-    if (m->async_home_poll() == async_home_status::in_progress) {
-      complete = false;
-    }
+    m->async_home_poll();
   }
-  return complete;
 }
 void drivetrain::async_home_stop()
 {

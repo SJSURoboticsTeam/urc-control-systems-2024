@@ -62,12 +62,6 @@ public:
    */
   void async_home_begin();
   /**
-   * @brief poll limit switches, if active it will stop homing.
-   *
-   * @return true if hard homing is complete.
-   */
-  bool async_home_poll();
-  /**
    * @brief stops homing immediately on all motors, regardless if they are
    * currently homing or not.
    */
@@ -83,6 +77,7 @@ private:
   chassis_velocities m_target_state;
   bool m_resolve_module_conflicts = false;
   bool m_stopping = false;
+  void async_home_poll();
 };
 
 }  // namespace sjsu::drive
