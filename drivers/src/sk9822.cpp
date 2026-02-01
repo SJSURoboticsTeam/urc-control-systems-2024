@@ -69,7 +69,7 @@ void sk9822::update(light_strip_view lights)
 
 void sk9822::send_byte(hal::byte data)
 {
-  for (int i = 7; i >0; i--) {
+  for (int i = 7; i >= 0; i--) {
     if (data & (1 << i)) {
       (*data_pin).level(true);
     } else {

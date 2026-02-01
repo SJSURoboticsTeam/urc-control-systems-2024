@@ -27,6 +27,7 @@ INCLUDES
 
 SOURCES
   ./src/gimbal.cpp
+  ./src/mission_control_manager.cpp
 
     PACKAGES
     libhal-actuator

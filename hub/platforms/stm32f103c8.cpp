@@ -157,48 +157,36 @@ auto& timer2()
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
-
-// pwm0 - 32 -> ch8
-// pwm1 - 47 -> ch1
-// hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
-// {
-//   auto timer_pwm_channel =
-//     timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
-//   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-//     driver_allocator(), std::move(timer_pwm_channel));
-// }
-
-// hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
-// {
-//   auto timer_pwm_channel =
-//     timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
-//   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-//     driver_allocator(), std::move(timer_pwm_channel));
-// }
+hal::v5::optional_ptr<hal::pwm> mast_servo_pwm_channel_0_ptr;
+hal::v5::optional_ptr<hal::pwm> mast_servo_pwm_channel_1_ptr;
 
 hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_0()
 {
-  static auto timer_old_pwm =
-    timer1().acquire_pwm(hal::stm32f1::timer1_pin::pa8);
-  return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
-    driver_allocator(), std::move(timer_old_pwm));
+  if(not mast_servo_pwm_channel_0_ptr){
+    auto pwm = timer1().acquire_pwm(hal::stm32f1::timer1_pin::pa8);
+    mast_servo_pwm_channel_0_ptr = hal::v5::make_strong_ptr<decltype(pwm)> (driver_allocator(), std::move(pwm));
+  }
+  return mast_servo_pwm_channel_0_ptr;
 }
 
 hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_1()
 {
-  static auto timer_old_pwm =
-    timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
-  return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
-    driver_allocator(), std::move(timer_old_pwm));
+  if(not mast_servo_pwm_channel_1_ptr){
+    auto pwm = timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
+    mast_servo_pwm_channel_1_ptr = hal::v5::make_strong_ptr<decltype(pwm)> (driver_allocator(), std::move(pwm));
+  }
+  return mast_servo_pwm_channel_1_ptr;
 }
 
 // PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
+hal::v5::optional_ptr<hal::pwm> under_chassis_servo_pwm_channel_2_ptr;
+hal::v5::strong_ptr<hal::pwm> under_chassis_servo_pwm_channel_2()
 {
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if(not under_chassis_servo_pwm_channel_2_ptr){
+    auto pwm = timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa2);
+    under_chassis_servo_pwm_channel_2_ptr = hal::v5::make_strong_ptr<decltype(pwm)> (driver_allocator(), std::move(pwm));
+  }
+  return under_chassis_servo_pwm_channel_2_ptr;
 }
 
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
@@ -256,42 +244,8 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
   return hal::acquire_can_interrupt(driver_allocator(), can_manager);
 }
 // Watchdog implementation using global function pattern from original
-class stm32f103c8_watchdog : public custom::watchdog
-{
-public:
-  void start() override
-  {
-    m_stm_watchdog.start();
-  }
 
-  void reset() override
-  {
-    m_stm_watchdog.reset();
-  }
 
-  void set_countdown_time(hal::time_duration p_wait_time) override
-  {
-    m_stm_watchdog.set_countdown_time(p_wait_time);
-  }
-
-  bool check_flag() override
-  {
-    return m_stm_watchdog.check_flag();
-  }
-
-  void clear_flag() override
-  {
-    m_stm_watchdog.clear_flag();
-  }
-
-private:
-  hal::stm32f1::independent_watchdog m_stm_watchdog{};
-};
-
-hal::v5::strong_ptr<custom::watchdog> watchdog()
-{
-  return hal::v5::make_strong_ptr<stm32f103c8_watchdog>(driver_allocator());
-}
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {
