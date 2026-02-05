@@ -175,7 +175,9 @@ public:
 
   /**
     * @brief Get the power the servo is using.
-    * @return The power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
+    * @return The power as a float between -1.0 and 1.0, representing maximum power in the negative and positive directions. 
+    * The spin is dependant on the wiring, but assuming the positive is wired to Channel A and negative to Channel B,
+    * facing the motor, a positive value will spin clockwise and negative will spin counterclockwise. 
   */
   float get_power();
 

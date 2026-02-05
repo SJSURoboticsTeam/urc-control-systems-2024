@@ -140,7 +140,7 @@ void bldc_perseus::update_pid_velocity(PID_settings settings)
 void bldc_perseus::home_encoder()
 {
   // TODO!
-  home_encoder_value = bldc_perseus::read_angle();
+  home_encoder_value = read_angle();
   m_reading.position = 0;
 }
 
@@ -199,8 +199,13 @@ void bldc_perseus::update_position()
   // apply 
   float projected_power = pid_sum + feedforward; 
   // use actual position here once can be communicated/calculated via can 
-  if (m_reading.position < 0) projected_power = std::clamp(projected_power, -1 * m_clamped_power, -0.1f * m_clamped_power); 
-  else projected_power = std::clamp(projected_power, -1 * m_clamped_power, m_clamped_power);
+  if (m_reading.position < 0) 
+  { 
+    projected_power = std::clamp(projected_power, -1 * m_clamped_power, -0.1f * m_clamped_power); 
+  }
+  else { 
+    projected_power = std::clamp(projected_power, -1 * m_clamped_power, m_clamped_power);
+  }
   m_reading.power = projected_power; 
   m_h_bridge->power(m_reading.power);
 }
