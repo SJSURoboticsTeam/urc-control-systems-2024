@@ -51,6 +51,7 @@ hal::v5::strong_ptr<swerve_module> back_right_swerve_module();
 hal::v5::strong_ptr<
   std::array<hal::v5::strong_ptr<swerve_module>, module_count>>
 swerve_modules();
+void stop();
 
 inline void reset()
 {

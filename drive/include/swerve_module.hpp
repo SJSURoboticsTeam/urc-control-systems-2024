@@ -20,7 +20,7 @@ struct swerve_module_settings
   vector2d position = vector2d(NAN, NAN);
   meters_per_sec max_speed = 10;
   meters_per_sec_per_sec acceleration = 4.0;
-  deg_per_sec turn_speed = 360.0;
+  deg_per_sec turn_speed = 36000.0;
   hal::degrees min_angle = -135.0;
   hal::degrees max_angle = 135.0;
   hal::degrees limit_switch_position = NAN;
@@ -71,6 +71,7 @@ public:
    * @return if the values are with in tolerances based on settings
    */
   bool can_reach_state(swerve_module_state const& p_state) const;
+  bool valid_interpolation(swerve_module_state const& p_state) const;
 
   /**
    * @brief gives the cached module state based on most recent readings
@@ -104,12 +105,24 @@ public:
    */
   bool tolerance_timed_out() const;
   /**
-   * @brief with run homing in a fixed loop (will not update other motors or get
+   * @brief run homing in a fixed loop (will not update other motors or get
    * interupted)
    */
   void hard_home();
-
+  /**
+   * @brief gets steer encoder offset
+   * @return returns encoder reading in degrees when facing forward
+   */
+  float get_steer_offset();
+  
 private:
+  hal::degrees get_steer_motor_position();
+  void set_steer_motor_position(hal::degrees p_position);
+  void set_steer_motor_velocity(float p_velocity);
+  
+  float get_prop_motor_velocity();
+  void set_prop_motor_velocity(float p_velocity);
+
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_steer_motor;
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_propulsion_motor;
   hal::v5::strong_ptr<hal::input_pin> m_limit_switch;

@@ -18,7 +18,7 @@ void application()
     resources::back_left_steer(),
     resources::back_right_steer()
   };
-  for (int i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < sizeof(steer)/sizeof(steer[0]); i++) {
     steer[i]->feedback_request(
       hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
     float angle = steer[i]->feedback().angle();
@@ -33,9 +33,9 @@ void application()
     resources::back_right_prop()
   };
   hal::delay(*clock, 3s);
-  float rpm = 20;
   hal::print(*console, "forward\n");
-  for (int i = 0; i < 4; i++) {
+  float rpm = 20;
+  for (uint8_t i = 0; i < sizeof(prop)/sizeof(prop[0]); i++) {
     if (i % 2) {
       prop[i]->velocity_control(rpm);
     } else {
@@ -44,7 +44,7 @@ void application()
   }
   hal::delay(*clock, 8s);
   hal::print(*console, "backward\n");
-  for (int i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < sizeof(prop)/sizeof(prop[0]); i++) {
     if (i % 2) {
       prop[i]->velocity_control(-rpm);
     } else {
@@ -53,7 +53,7 @@ void application()
   }
   hal::delay(*clock, 8s);
   hal::print(*console, "Fin\n");
-  for (int i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < sizeof(prop)/sizeof(prop[0]); i++) {
     prop[i]->velocity_control(0);
   }
 }
