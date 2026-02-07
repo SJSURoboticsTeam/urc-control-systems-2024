@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector2d.hpp>
 #include <cmath>
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
@@ -10,6 +9,7 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <swerve_structs.hpp>
+#include <vector2d.hpp>
 
 namespace sjsu::drive {
 
@@ -33,7 +33,8 @@ struct swerve_module_settings
   bool drive_forward_clockwise = true;
 };
 
-enum async_home_status {
+enum async_home_status
+{
   inactive,
   in_progress,
   completed,

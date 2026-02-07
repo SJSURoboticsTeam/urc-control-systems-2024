@@ -19,7 +19,7 @@ void application()
     drivetrain dt(resources::swerve_modules(),
                   hal_time_duration_to_sec(refresh_rate));
 
-    dt.async_home_begin();
+    dt.hard_home();
 
     dt.set_target_state(chassis_velocities(vector2d(0, 0), 1), true);
     hal::print<128>(*console,

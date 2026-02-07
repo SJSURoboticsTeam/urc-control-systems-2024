@@ -180,6 +180,23 @@ bool drivetrain::aligned()
   }
   return true;
 }
+void drivetrain::hard_home(hal::v5::strong_ptr<hal::steady_clock> clock)
+{
+  for (auto& m : *m_modules) {
+    m->async_home_begin();
+  }
+  bool done = true;
+  while (true) {
+    if (m->async_home_poll() == async_home_status::in_progress) {
+      done = false;
+    }
+    if (done) {
+      break;
+    }
+    // seems safe
+    hal::delay(*clock, 250ms);
+  }
+}
 void drivetrain::async_home_begin()
 {
   for (auto& m : *m_modules) {

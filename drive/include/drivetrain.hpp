@@ -57,6 +57,10 @@ public:
    */
   bool aligned();
   /**
+   * @brief synchronously home, blocks thread until homing is finished.
+   */
+  void hard_home();
+  /**
    * @brief begin homing asynchronously, polling for "homing stop" is done
    * automatically within periodic() so you should not call async_home_begin()
    * without calling periodic() in a loop!
