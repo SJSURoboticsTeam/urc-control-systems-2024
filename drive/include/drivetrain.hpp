@@ -59,7 +59,7 @@ public:
   /**
    * @brief synchronously home, blocks thread until homing is finished.
    */
-  void hard_home();
+  void hard_home(hal::v5::strong_ptr<hal::steady_clock> p_clock);
   /**
    * @brief begin homing asynchronously, polling for "homing stop" is done
    * automatically within periodic() so you should not call async_home_begin()

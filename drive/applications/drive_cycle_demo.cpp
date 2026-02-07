@@ -34,7 +34,7 @@ void application()
   auto clock = resources::clock();
   drivetrain dt(resources::swerve_modules(), cycle_time_sec);
 
-  dt.hard_home();
+  dt.hard_home(clock);
 
   hal::time_duration loop_duration = 0ns;
   for (unsigned int i = 0; i < sizeof(states) / sizeof(states[0]); i++) {
