@@ -17,15 +17,14 @@ cmake_minimum_required(VERSION 3.20)
 project(demos LANGUAGES CXX)
 
 libhal_build_demos(
-  DEMOS
+DEMOS
   application
 
-  INCLUDES
+INCLUDES
   include
+  .
 
-SOURCES
-    # platforms/micromod.cpp
-    platforms/stm32f103c8.cpp
+#SOURCES
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"

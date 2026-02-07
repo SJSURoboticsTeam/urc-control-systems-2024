@@ -13,7 +13,10 @@
 // limitations under the License.
 #pragma once
 
+#include <h_bridge.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/can.hpp>
+#include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 #include <libhal/functional.hpp>
 #include <libhal/input_pin.hpp>
@@ -21,11 +24,14 @@
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
+#include <libhal/rotation_sensor.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
 
-namespace sjsu::drivers {
+#include <resource_list.hpp>
+
+namespace sjsu::perseus {
 namespace custom {
 /**
  * @brief A stand in interface until libhal supports an official watchdog
@@ -66,19 +72,14 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // to instantiate H-bridge
-hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> output_pin_1();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-
-// current sensing
-hal::v5::strong_ptr<hal::adc> adc_0();
-
-// quadrature encoder
+hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+// can instantiation
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 
 inline void reset()
 {
@@ -94,4 +95,4 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
-}  // namespace sjsu::drivers
+}  // namespace sjsu::perseus

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector2d.hpp"
+#include <vector2d.hpp>
 #include <cmath>
 #include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
@@ -13,20 +13,24 @@
 
 namespace sjsu::drive {
 
+using namespace std::chrono_literals;
+
 struct swerve_module_settings
 {
-  vector2d position = vector2d(NAN,NAN);
-  meters_per_sec max_speed = NAN;
-  meters_per_sec_per_sec acceleration = NAN;
-  deg_per_sec turn_speed = NAN;
-  hal::degrees min_angle = NAN;
-  hal::degrees max_angle = NAN;
+  vector2d position = vector2d(NAN, NAN);
+  meters_per_sec max_speed = 10;
+  meters_per_sec_per_sec acceleration = 4.0;
+  deg_per_sec turn_speed = 360.0;
+  hal::degrees min_angle = -135.0;
+  hal::degrees max_angle = 135.0;
   hal::degrees limit_switch_position = NAN;
-  hal::degrees position_tolerance = NAN;
-  meters_per_sec velocity_tolerance = NAN;
-  sec tolerance_timeout = NAN;
+  hal::degrees position_tolerance = 5.0;
+  meters_per_sec velocity_tolerance = 0.5;
+  float mps_to_rpm = 60;
+  sec tolerance_timeout = 0.5;
   // If motor turns clockwise inorder to home
   bool home_clockwise = true;
+  bool drive_forward_clockwise = true;
 };
 
 class swerve_module
@@ -115,6 +119,9 @@ private:
   // the position reading when facing forward using the interface for the steer
   // motor (NAN indicates it has not been homed before)
   hal::degrees m_steer_offset = NAN;
+  hal::time_duration m_tolerance_last_changed = 0ns;
+  // true = out of tolerance
+  bool m_stable_tolerance_state = false;
 
 private:
 };
