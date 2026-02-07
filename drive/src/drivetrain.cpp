@@ -81,7 +81,11 @@ void drivetrain::periodic()
   }
 
   // poll homing
-  async_home_poll();
+  bool homing = async_home_poll();
+  // do not interpolate to next target states while homing
+  if (homing) {
+    return;
+  }
 
   std::array<swerve_module_state, module_count> next_target_states;
   // if stopping slow down
@@ -182,11 +186,15 @@ void drivetrain::async_home_begin()
     m->async_home_begin();
   }
 }
-void drivetrain::async_home_poll()
+bool drivetrain::async_home_poll()
 {
+  bool in_progress = false;
   for (auto& m : *m_modules) {
-    m->async_home_poll();
+    if (m->async_home_poll() == async_home_status::in_progress) {
+      in_progress = true;
+    }
   }
+  return in_progress;
 }
 void drivetrain::async_home_stop()
 {

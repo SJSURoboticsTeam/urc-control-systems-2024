@@ -57,8 +57,9 @@ public:
    */
   bool aligned();
   /**
-   * @brief begin homing asynchronously, *you must call async_home_poll* in a
-   * loop with a delay of <= 250ms otherwise the limit switches may break!
+   * @brief begin homing asynchronously, polling for "homing stop" is done
+   * automatically within periodic() so you should not call async_home_begin()
+   * without calling periodic() in a loop!
    */
   void async_home_begin();
   /**
@@ -77,7 +78,10 @@ private:
   chassis_velocities m_target_state;
   bool m_resolve_module_conflicts = false;
   bool m_stopping = false;
-  void async_home_poll();
+  /**
+   * @return true if at least one swerve module is currently homing.
+   */
+  bool async_home_poll();
 };
 
 }  // namespace sjsu::drive
