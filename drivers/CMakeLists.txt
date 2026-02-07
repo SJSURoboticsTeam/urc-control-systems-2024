@@ -19,32 +19,32 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
 
 DEMOS
-  color_sensor_demo
+  #color_sensor_demo
   led_strip_demo
-  h_bridge_demo
-  pressure_sensor_demo
-  scd40_demo
-  soil_sensor_demo
-  tla2528_output_pin_demo
-  tla2528_input_pin_demo
-  tla2528_analog_input_demo
-  serial_commands_demo
+  #h_bridge_demo
+  #pressure_sensor_demo
+  #scd40_demo
+  #soil_sensor_demo
+  #tla2528_output_pin_demo
+  #tla2528_input_pin_demo
+  #tla2528_analog_input_demo
+  #serial_commands_demo
 
 INCLUDES
   include
   .
 
 SOURCES
-    src/serial_commands.cpp
-    src/color_sensor_opt4048.cpp
-    src/mq4.cpp
-    src/pressure_sensor_bme680.cpp
-    src/scd40.cpp
-    src/soil_sensor_sht21.cpp
+    #src/serial_commands.cpp
+    #src/color_sensor_opt4048.cpp
+    #src/mq4.cpp
+    #src/pressure_sensor_bme680.cpp
+    #src/scd40.cpp
+    #src/soil_sensor_sht21.cpp
     src/sk9822.cpp
-    src/h_bridge.cpp
-    src/tla2528.cpp
-    src/tla2528_adapters.cpp
+    #src/h_bridge.cpp
+    #src/tla2528.cpp
+    #src/tla2528_adapters.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
