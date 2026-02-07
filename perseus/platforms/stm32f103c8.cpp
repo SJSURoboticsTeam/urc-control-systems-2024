@@ -147,16 +147,14 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
-
-hal::v5::strong_ptr<hal::rotation_sensor> encoder()
+hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
 {
   return timer2().acquire_quadrature_encoder(
     driver_allocator(),
     { static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
       static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
-    5281 * 28 / 2);
-  // shoulder 28
-  // elbow 2
+      720); 
+      //this is to just get the plain number of ticks, divided by two bc it reports both A and B channel
 }
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {

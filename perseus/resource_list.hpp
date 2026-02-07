@@ -75,9 +75,10 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // to instantiate H-bridge
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge();
+hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+// can instantiation
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
-hal::v5::strong_ptr<hal::rotation_sensor> encoder();
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 
 inline void reset()
