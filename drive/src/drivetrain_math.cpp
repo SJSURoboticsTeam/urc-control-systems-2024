@@ -87,6 +87,9 @@ static bool cholesky(const float A_[3][3], const float c[3], float x[3])
   return true;
 }
 
+//https://www.youtube.com/watch?v=PjeOmOz9jSY 
+//shows how we get 
+
 chassis_velocities calc_estimated_chassis_velocities(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
     p_modules){
@@ -102,15 +105,6 @@ chassis_velocities calc_estimated_chassis_velocities(
 
       const auto& module = *p_modules[i];
 
-      x[i] = module.settings.position.x;
-      y[i] = module.settings.position.y;
-
-      const auto state = module.get_actual_state_cache();
-      const float speed = state.propulsion_velocity;
-      const float angle = state.steer_angle;
-
-      vix[i] = speed * cosf(angle);
-      viy[i] = speed * sinf(angle);   
     }
 
     float a [3][3] = {{0,0,0},{0,0,0},{0,0,0}};
@@ -313,5 +307,75 @@ float modulus_range(float p_value, float p_lower, float p_upper)
     offset -= diff * rounds_above;
   }
   return offset + p_lower;
+}
+
+
+//helper to find difference given two angels
+//returns radians
+float angleDiff(float a, float b){
+
+  float d = std::fmod(a - b + M_PI, 2.0 * M_PI);
+  if (d < 0) d += 2.0 * M_PI;
+  
+  return d - M_PI;
+
+}
+
+// angle tolerance
+constexpr angle_tolerance_radians = 10.0f * M_PI/180.0f;
+// sideways tolerance
+constexpr sideways_tolerance = 0.3f;
+
+
+// checks angle should point to chasis motion
+// compares predicted wheel direction do actual module angle
+// checks sideways slip (velocites dont match angles)
+
+bool moduleConsistentWithChasis(const vector2d& v_wheel, const swerve_module_state& state){
+
+  float theta = state.steer_angle;
+  float expected_theta = std::atan2(v_wheel.y, v_wheel.x);
+  float differenceRadians = angleDiff(theta, expected_theta);
+
+  //check if difference greater than tolerance
+  if (abs(differenceRadians) > angle_tolerance_radians){
+    return false;
+  }
+
+  float xtheta = std::cos(theta);
+  float ytheta = std::sin(theta);
+
+  float dotProduct = (v_wheel.x * -ytheta) + (v_wheel.y * xtheta);
+
+  if (std::fabs(dot) > sideways_tolerance){
+    return false;
+  }
+
+  return true;
+}
+
+
+bool isSafe(std::array<swerve_module_state, module_count>& modules){
+
+  chassis_velocities estimates = calc_estimated_chassis_velocities(modules);
+
+  for (i = 0; i < module_count; i++){
+    const auto& module = *modules[i];
+    const auto state = module.get_actual_state_cache();
+    const auto& position = module.position.settings.postion;
+
+    //convert to radians/sec
+    float omega_radians = estimates.rotational_vel * (M_PI/180.0f);
+
+    est_vx = estimates.translation.x - omega_radians * position.y;
+    est_vy = estimates.translation.y + omega_radians * position.x;
+
+    vector2d v_wheel{est_vx, est_vy};
+
+    if (!moduleConsistentWithChasis(v_wheel, state)){
+      return false;
+    }
+  }
+  return true;
 }
 }  // namespace sjsu::drive

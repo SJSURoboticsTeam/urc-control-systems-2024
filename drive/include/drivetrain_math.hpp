@@ -141,4 +141,6 @@ std::array<swerve_module_state, module_count> interpolate_states(
  * @param p_upper the upper limit of the bounds to place the value in
  */
 float modulus_range(float p_value, float p_lower, float p_upper);
+
+bool isSafe(const std::array<swerve_module_state, module_count>& modules)
 }  // namespace sjsu::drive
