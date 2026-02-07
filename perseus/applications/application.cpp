@@ -1,7 +1,6 @@
-// copied from drivers/applications/h_bridge_demo.cpp
+//copied from drivers/applications/h_bridge_demo.cpp
 
-#include <libhal-util/can.hpp>
-#include <libhal-util/serial.hpp>
+#include <h_bridge.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/can.hpp>
 #include <libhal/error.hpp>
@@ -9,7 +8,6 @@
 
 #include <bldc_servo.hpp>
 #include <resource_list.hpp>
-#include <type_traits>
 
 
 using namespace std::chrono_literals;
