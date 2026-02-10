@@ -1,4 +1,3 @@
-#include <swerve_module.hpp>
 #include <drivetrain.hpp>
 #include <drivetrain_math.hpp>
 #include <libhal-exceptions/control.hpp>
@@ -7,6 +6,7 @@
 #include <libhal/error.hpp>
 #include <libhal/units.hpp>
 #include <resource_list.hpp>
+#include <swerve_module.hpp>
 
 namespace sjsu::drive {
 
@@ -33,7 +33,8 @@ void application()
   constexpr sec cycle_time_sec = hal_time_duration_to_sec(cycle_time);
   auto clock = resources::clock();
   drivetrain dt(resources::swerve_modules(), cycle_time_sec);
-  dt.hard_home();
+
+  dt.hard_home(clock);
 
   hal::time_duration loop_duration = 0ns;
   for (unsigned int i = 0; i < sizeof(states) / sizeof(states[0]); i++) {

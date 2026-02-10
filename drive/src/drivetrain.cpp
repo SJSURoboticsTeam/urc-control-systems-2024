@@ -1,10 +1,10 @@
-#include <resource_list.hpp>
-#include <vector2d.hpp>
 #include <array>
 #include <drivetrain.hpp>
 #include <drivetrain_math.hpp>
 #include <libhal-util/serial.hpp>
+#include <resource_list.hpp>
 #include <swerve_module.hpp>
+#include <vector2d.hpp>
 
 namespace sjsu::drive {
 
@@ -27,8 +27,8 @@ bool drivetrain::set_target_state(chassis_velocities p_target_state,
   bool can_reach = true;
   auto console = resources::console();
   for (vector2d v : vectors) {
-    hal::print<128>(*console,"vec:%f,%f\n",v.x,v.y);
-  }  
+    hal::print<128>(*console, "vec:%f,%f\n", v.x, v.y);
+  }
 
   for (int i = 0; can_reach && i < module_count; i++) {
     m_final_target_module_states[i] =
@@ -57,7 +57,8 @@ bool drivetrain::set_target_state(chassis_velocities p_target_state,
   }
   return can_reach;
 }
-chassis_velocities drivetrain::get_target_state() {
+chassis_velocities drivetrain::get_target_state()
+{
   return m_target_state;
 }
 
@@ -77,6 +78,13 @@ void drivetrain::periodic()
   bool drive_stopped = stopped();
   if (drive_stopped) {
     m_stopping = false;
+  }
+
+  // poll homing
+  bool homing = async_home_poll();
+  // do not interpolate to next target states while homing
+  if (homing) {
+    return;
   }
 
   std::array<swerve_module_state, module_count> next_target_states;
@@ -119,10 +127,10 @@ void drivetrain::periodic()
       next_target_states = m_final_target_module_states;
     }
   }
-  
+
   // interpolate into modules next target_states
-  next_target_states = interpolate_states(
-    m_refresh_rate, *m_modules, next_target_states);
+  next_target_states =
+    interpolate_states(m_refresh_rate, *m_modules, next_target_states);
   for (int i = 0; i < module_count; i++) {
     swerve_module& module = *(m_modules->at(i));
     module.set_target_state(next_target_states[i]);
@@ -172,10 +180,45 @@ bool drivetrain::aligned()
   }
   return true;
 }
-void drivetrain::hard_home()
+void drivetrain::hard_home(hal::v5::strong_ptr<hal::steady_clock> p_clock)
 {
   for (auto& m : *m_modules) {
-    m->hard_home();
+    m->async_home_begin();
+  }
+  bool done = true;
+  while (true) {
+    for (auto& m : *m_modules) {
+      if (m->async_home_poll() == async_home_status::in_progress) {
+        done = false;
+      }
+    }
+    if (done) {
+      break;
+    }
+    // seems safe
+    hal::delay(*p_clock, 250ms);
+  }
+}
+void drivetrain::async_home_begin()
+{
+  for (auto& m : *m_modules) {
+    m->async_home_begin();
+  }
+}
+bool drivetrain::async_home_poll()
+{
+  bool in_progress = false;
+  for (auto& m : *m_modules) {
+    if (m->async_home_poll() == async_home_status::in_progress) {
+      in_progress = true;
+    }
+  }
+  return in_progress;
+}
+void drivetrain::async_home_stop()
+{
+  for (auto& m : *m_modules) {
+    m->async_home_stop();
   }
 }
 

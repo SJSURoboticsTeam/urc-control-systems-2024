@@ -57,10 +57,20 @@ public:
    */
   bool aligned();
   /**
-   * @brief with run homing in a fixed loop (will not update other motors or get
-   * interupted)
+   * @brief synchronously home, blocks thread until homing is finished.
    */
-  void hard_home();
+  void hard_home(hal::v5::strong_ptr<hal::steady_clock> p_clock);
+  /**
+   * @brief begin homing asynchronously, polling for "homing stop" is done
+   * automatically within periodic() so you should not call async_home_begin()
+   * without calling periodic() in a loop!
+   */
+  void async_home_begin();
+  /**
+   * @brief stops homing immediately on all motors, regardless if they are
+   * currently homing or not.
+   */
+  void async_home_stop();
 
 private:
   hal::v5::strong_ptr<
@@ -72,6 +82,10 @@ private:
   chassis_velocities m_target_state;
   bool m_resolve_module_conflicts = false;
   bool m_stopping = false;
+  /**
+   * @return true if at least one swerve module is currently homing.
+   */
+  bool async_home_poll();
 };
 
 }  // namespace sjsu::drive

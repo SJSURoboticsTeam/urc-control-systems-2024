@@ -1,5 +1,4 @@
 #include "../include/swerve_module.hpp"
-#include <resource_list.hpp>
 #include <cmath>
 #include <cstdlib>
 #include <drivetrain_math.hpp>
@@ -147,13 +146,19 @@ bool swerve_module::tolerance_timed_out() const
   return m_stable_tolerance_state;
 }
 
-void swerve_module::hard_home()
+void swerve_module::async_home_begin()
 {
   auto console = resources::console();
+  if (m_async_homing_state) {
+    hal::print(*console, "already homing module!\n");
+    return;
+  }
+
   hal::print(*console, "starting hard home changed\n");
   m_steer_motor->feedback_request(
     hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
   m_steer_motor->velocity_control(0);  // dummy message
+                                       //
   hal::print<128>(*console, "Start level: %d\n", m_limit_switch->level());
   [[__maybe_unused__]] float start_angle = m_steer_motor->feedback().angle();
   if (settings.home_clockwise) {
@@ -161,9 +166,20 @@ void swerve_module::hard_home()
   } else {
     m_steer_motor->velocity_control(1);
   }
-  // while (m_limit_switch->level()) {
-  //   hal::delay(*m_clock, 250ms);  // 250ms seams safe refresh time
-  // }
+
+  m_async_homing_state = true;
+}
+
+async_home_status swerve_module::async_home_poll()
+{
+  if (!m_async_homing_state) {
+    return async_home_status::inactive;
+  }
+  if (!m_limit_switch->level()) {
+    return async_home_status::in_progress;
+  }
+
+  auto console = resources::console();
   m_steer_motor->velocity_control(0);  // stops
   hal::print<128>(*console, "Final level: %d\n", m_limit_switch->level());
 
@@ -176,6 +192,15 @@ void swerve_module::hard_home()
   // hal::print<128>(
   //   *console, "fin position: %f\n",
   //   refresh_actual_state_cache().steer_angle);
+
+  m_async_homing_state = false;
+  return async_home_status::completed;
+}
+
+void swerve_module::async_home_stop()
+{
+  m_steer_motor->velocity_control(0);
+  m_async_homing_state = false;
 }
 
 }  // namespace sjsu::drive
