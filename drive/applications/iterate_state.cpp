@@ -8,6 +8,7 @@
 #include <libhal/error.hpp>
 #include <libhal/units.hpp>
 #include <resource_list.hpp>
+#include <span>
 #include <swerve_module.hpp>
 
 namespace sjsu::drive {
@@ -17,18 +18,20 @@ struct state_and_duration
   chassis_velocities velocities;
   hal::time_duration duration;
 };
-// If will loop through state queue or 
+// If will loop through state queue or
 constexpr bool loop = false;
-// Target state queue for target velocities and how long to keep that as the target state
-constexpr state_and_duration target_state_queue[] = {
+// Target state queue for target velocities and how long to keep that as the
+// target state
+constexpr state_and_duration target_state_array[] = {
   { chassis_velocities(vector2d(0, 0), 0), 2s },
   { chassis_velocities(vector2d(0.40, 0), 0), 8s },
   { chassis_velocities(vector2d(0, 0), 0), 4s },
   { chassis_velocities(vector2d(0, 0), 0.5), 17500ms },
   { chassis_velocities(vector2d(0, 0), 0), 4s }
 };
-
-// Demo waits a second then iterates through target state queue above (looping queue if loop is true)
+constexpr std::span target_state_queue(target_state_array);
+// Demo waits a second then iterates through target state queue above (looping
+// queue if loop is true)
 void application()
 {
   constexpr hal::time_duration cycle_time = 50ms;
@@ -37,11 +40,11 @@ void application()
   hal::delay(*clock, 1s);
   [[maybe_unused]] auto console = resources::console();
   drivetrain dt(resources::swerve_modules(), cycle_time_sec);
-  hal::print(*console,"homing\n");
+  hal::print(*console, "homing\n");
   dt.hard_home();
 
   hal::time_duration loop_duration = 0ns;
-  for (unsigned int i = 0; i < sizeof(target_state_queue) / sizeof(target_state_queue[0]); i++) {
+  for (unsigned int i = 0; i < target_state_queue.size(); i++) {
     loop_duration += target_state_queue[i].duration;
   }
   hal::print<64>(

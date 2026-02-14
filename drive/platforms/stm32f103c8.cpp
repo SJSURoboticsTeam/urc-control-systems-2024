@@ -562,18 +562,17 @@ void resources::stop()
 {
   auto can_transceiver_ref = can_transceiver();
   auto clock_ref = clock();
-  auto con_ref = console();
   hal::can_message message = { .id = 0,
                                .length = 8,
                                .payload = { 0x81, 0, 0, 0, 0, 0, 0, 0 } };
-  constexpr uint16_t motor_ids[] = {
+  constexpr uint16_t motor_ids_array[] = {
     front_left_steer_can_id, front_left_prop_can_id, front_right_steer_can_id,
     front_right_prop_can_id, back_left_steer_can_id, back_left_prop_can_id,
     back_right_steer_can_id, back_right_prop_can_id
   };
+  std::span motor_ids(motor_ids_array);
   while (true) {
-    for (unsigned int i = 0; i < sizeof(motor_ids) / sizeof(motor_ids[0]);
-         i++) {
+    for (unsigned int i = 0; i < motor_ids.size(); i++) {
       message.id = motor_ids[i];
       can_transceiver_ref->send(message);
       hal::delay(*clock_ref, 5ms);
