@@ -17,7 +17,7 @@ void application()
     auto swerve_modules = resources::swerve_modules();
     hal::print(*console, "modules defined\n");
     hal::print(*console, "starting homing!\n");
-    for (int i = 0; i < module_count; i++) {
+    for (uint8_t i = 0; i < module_count; i++) {
       try {
         swerve_modules->at(i)->hard_home();
         hal::print<64>(*console, "Homed wheel: %d\n", i);

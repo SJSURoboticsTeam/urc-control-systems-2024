@@ -12,7 +12,7 @@ DEMOS
     prop_motor_test
     chassis_vel_demo
     iterate_state
-    poll_connecitons
+    poll_motor_connections
     serial_command_demo
     limit_switch_test
 INCLUDES

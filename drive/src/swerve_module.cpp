@@ -37,19 +37,6 @@ void swerve_module::stop()
 
 bool swerve_module::stopped() const
 {
-  /*
-  auto console = resources::console();
-  hal::print(*console, "checking stop\n");
-  hal::print<64>(
-    *console, "target_vel:%f\n", m_target_state.propulsion_velocity);
-  hal::print<64>(*console,
-                 "target_vel == 0.0f:%d\n",
-                 m_target_state.propulsion_velocity == 0.0f);
-  hal::print<64>(*console,
-                 "ster:%d\n",
-                 std::abs(m_actual_state_cache.propulsion_velocity) <=
-                   settings.velocity_tolerance);
-  */
   return m_target_state.propulsion_velocity == 0.0f &&
          std::abs(m_actual_state_cache.propulsion_velocity) <=
            settings.velocity_tolerance;
@@ -65,6 +52,7 @@ void swerve_module::set_target_state(swerve_module_state const& p_target_state)
   if (m_steer_offset == NAN) {
     throw hal::resource_unavailable_try_again(this);
   }
+  // NAN is to indicate a non-specific angle (angle doesn't matter)
   if (p_target_state.steer_angle == NAN &&
       p_target_state.propulsion_velocity == 0) {
     stop();
@@ -193,27 +181,21 @@ void swerve_module::hard_home()
 {
   auto console = resources::console();
   hal::print(*console, "starting hard home changed\n");
-  set_steer_motor_velocity(0);  // dummy message
   hal::print<128>(*console, "Start level: %d\n", m_limit_switch->level());
-  [[__maybe_unused__]] float start_angle = get_steer_motor_position();
   if (settings.home_clockwise) {
     set_steer_motor_velocity(-1);
   } else {
     set_steer_motor_velocity(1);
   }
-  // while (m_limit_switch->level()) {
-  //   hal::delay(*m_clock, 250ms);  // 250ms seams safe refresh time
-  // }
+  while (m_limit_switch->level()) {
+    hal::delay(*m_clock, 250ms);  // 250ms seams safe refresh time
+  }
   set_steer_motor_velocity(0);  // stops
   hal::print<128>(*console, "Final level: %d\n", m_limit_switch->level());
 
   float stop_angle = get_steer_motor_position();
 
-  // hal::print<128>(*console, "Stopped angle: %f\n", stop_angle);
   m_steer_offset = stop_angle - settings.limit_switch_position;
-  // hal::print<128>(
-  //   *console, "fin position: %f\n",
-  //   refresh_actual_state_cache().steer_angle);
 }
 
 hal::degrees swerve_module::get_steer_offset()

@@ -197,7 +197,7 @@ hal::v5::optional_ptr<hal::input_pin> front_right_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> front_right_limit_switch()
 {
   if (not front_right_limit_switch_ptr) {
-    auto front_right_limit_switch = gpio_b().acquire_input_pin(15);  // 5
+    auto front_right_limit_switch = gpio_b().acquire_input_pin(15);  // 7
     front_right_limit_switch_ptr =
       hal::v5::make_strong_ptr<decltype(front_right_limit_switch)>(
         driver_allocator(), std::move(front_right_limit_switch));
@@ -221,7 +221,7 @@ hal::v5::optional_ptr<hal::input_pin> back_right_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch()
 {
   if (not back_right_limit_switch_ptr) {
-    auto back_right_limit_switch = gpio_b().acquire_input_pin(13);  // 7
+    auto back_right_limit_switch = gpio_b().acquire_input_pin(13);  // 5
     back_right_limit_switch_ptr =
       hal::v5::make_strong_ptr<decltype(back_right_limit_switch)>(
         driver_allocator(), std::move(back_right_limit_switch));
@@ -289,7 +289,6 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
 {
   if (not front_right_steer_ptr) {
     try {
-      // front_right_steer_ptr = make_rmd(0x150);
       front_right_steer_ptr = make_rmd(front_right_steer_can_id);
       front_right_steer_ptr->velocity_control(0);
     } catch (hal::exception e) {

@@ -29,6 +29,12 @@ void application()
       try {
         steer[i]->feedback_request(
           hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
+      } catch (hal::operation_not_supported e) {
+        hal::print<64>(
+          *console, "steer[%d], operation_not_supported: %d\n", i, e.error_code());
+      } catch (hal::timed_out e) {
+        hal::print<64>(
+          *console, "steer[%d], timed_out: %d\n", i, e.error_code());
       } catch (hal::exception e) {
         hal::print<64>(
           *console, "steer[%d], error code: %d\n", i, e.error_code());

@@ -23,8 +23,8 @@ void application()
 
   std::array cmd_defs = {
     drivers::serial_commands::def{
-      "set-vel",
-      [&](auto params) {
+      .m_prefix = "set-vel",
+      .m_callback = [&](auto params) {
         if (params.size() != 3) {
           throw hal::argument_out_of_domain(nullptr);
         }
@@ -36,8 +36,8 @@ void application()
       },
     },
     drivers::serial_commands::def{
-      "hard-home",
-      [&](auto params) {
+      .m_prefix = "hard-home",
+      .m_callback = [&](auto params) {
         if (params.size() != 0) {
           throw hal::argument_out_of_domain(nullptr);
         }
@@ -47,8 +47,8 @@ void application()
       },
     },
     drivers::serial_commands::def{
-      "print-actual-states",
-      [&](auto params) {
+      .m_prefix = "print-actual-states",
+      .m_callback = [&](auto params) {
         if (params.size() != 0) {
           throw hal::argument_out_of_domain(nullptr);
         }
@@ -65,8 +65,8 @@ void application()
       },
     },
     drivers::serial_commands::def{
-      "print-taget-states",
-      [&](auto params) {
+      .m_prefix = "print-target-states",
+      .m_callback = [&](auto params) {
         if (params.size() != 0) {
           throw hal::argument_out_of_domain(nullptr);
         }
