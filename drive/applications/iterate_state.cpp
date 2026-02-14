@@ -18,7 +18,7 @@ struct state_and_duration
   chassis_velocities velocities;
   hal::time_duration duration;
 };
-// If will loop through state queue or
+// If will loop through state queue or only iterate once
 constexpr bool loop = false;
 // Target state queue for target velocities and how long to keep that as the
 // target state
