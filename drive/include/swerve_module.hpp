@@ -1,27 +1,17 @@
 #pragma once
 
-<<<<<<< HEAD
-=======
 #include <vector2d.hpp>
->>>>>>> 2e19123 (Clean Up (#78))
 #include <cmath>
+#include <libhal-actuator/smart_servo/rmd/mc_x_v2.hpp>
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
-#include <libhal/motor.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/serial.hpp>
 #include <libhal/servo.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
-#include <limits>
-#include <propulsion_controller.hpp>
-#include <steer_controller.hpp>
 #include <swerve_structs.hpp>
-#include <vector2d.hpp>
-
 
 namespace sjsu::drive {
-
-using namespace std::chrono_literals;
 
 using namespace std::chrono_literals;
 
@@ -30,7 +20,7 @@ struct swerve_module_settings
   vector2d position = vector2d(NAN, NAN);
   meters_per_sec max_speed = 10;
   meters_per_sec_per_sec acceleration = 4.0;
-  deg_per_sec turn_speed = 360.0;
+  deg_per_sec turn_speed = 36000.0;
   hal::degrees min_angle = -135.0;
   hal::degrees max_angle = 135.0;
   hal::degrees limit_switch_position = NAN;
@@ -49,14 +39,14 @@ public:
   swerve_module_settings settings;
 
   /**
-   * @param p_steer_controller steer controller for the module
-   * @param p_propulsion_controller propulsion controller for the module
-   * @param p_clock steady clock
-   * @param p_settings module config info
+   * @param p_steer_motor the motor used to control
+   * @param p_propulsion_motor the motor
+   * @param p_setting module config info
    */
   swerve_module(
-    hal::v5::strong_ptr<steer_controller> p_steer_controller,
-    hal::v5::strong_ptr<propulsion_controller> p_propulsion_controller,
+    hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
+    hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
+    hal::v5::strong_ptr<hal::input_pin> p_limit_switch,
     hal::v5::strong_ptr<hal::steady_clock> p_clock,
     swerve_module_settings p_settings);
   /**
@@ -81,6 +71,7 @@ public:
    * @return if the values are with in tolerances based on settings
    */
   bool can_reach_state(swerve_module_state const& p_state) const;
+  bool valid_interpolation(swerve_module_state const& p_state) const;
 
   /**
    * @brief gives the cached module state based on most recent readings
@@ -119,29 +110,22 @@ public:
    */
   void hard_home();
   /**
-   * @brief begin homing without blocking (you must call `home_periodic`
-   * periodically to advance homing)
-   */
-  void home();
-  /**
-   * @brief advance homing progress
-   *
-   * @return false if the homing has finished
-   */
-  bool home_periodic();
-  /**
-   * @brief is the swerve module currently homing
-   */
-  bool is_homing();
-  /**
    * @brief gets steer encoder offset
    * @return returns encoder reading in degrees when facing forward
    */
   float get_steer_offset();
-
+  
 private:
-  hal::v5::strong_ptr<steer_controller> m_steer_controller;
-  hal::v5::strong_ptr<propulsion_controller> m_propulsion_controller;
+  hal::degrees get_steer_motor_position();
+  void set_steer_motor_position(hal::degrees p_position);
+  void set_steer_motor_velocity(float p_velocity);
+  
+  float get_prop_motor_velocity();
+  void set_prop_motor_velocity(float p_velocity);
+
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_steer_motor;
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> m_propulsion_motor;
+  hal::v5::strong_ptr<hal::input_pin> m_limit_switch;
   hal::v5::strong_ptr<hal::steady_clock> m_clock;
   swerve_module_state m_target_state;
   swerve_module_state m_actual_state_cache;
@@ -155,4 +139,3 @@ private:
 private:
 };
 }  // namespace sjsu::drive
-

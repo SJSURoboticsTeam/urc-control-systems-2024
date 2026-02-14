@@ -57,12 +57,19 @@ public:
    * @return if the swerve module angles match the final target state angles (or
    * within tolerance of that)
    */
-  bool aligned();
+  bool aligned() const;
   /**
    * @brief with run homing in a fixed loop (will not update other motors or get
    * interupted)
    */
   void hard_home();
+  /**
+   * @brief gets a module's steer encoder offset
+   * @param p_module_index index of swerve module
+   * @return returns encoder reading in degrees when facing forward
+   * @throws hal::argument_out_of_domain if index in invalid
+   */
+  hal::degrees get_steer_offset(unsigned int p_module_index) const;
 
 private:
   hal::v5::strong_ptr<

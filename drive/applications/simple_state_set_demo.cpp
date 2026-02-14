@@ -1,10 +1,11 @@
-#include <swerve_module.hpp>
 #include <drivetrain_math.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <resource_list.hpp>
+#include <swerve_module.hpp>
+
 
 namespace sjsu::drive {
 void application()
@@ -23,11 +24,11 @@ void application()
         hal::print<64>(*console, "Homed wheel: %d\n", i);
       } catch (hal::exception e) {
         hal::print<64>(*console, "Wheel throwing error %d\n", i);
-        throw e;
+        throw;
       }
     }
     for (int i = 0; i < module_count; i++) {
-      (*swerve_modules)[i]->set_target_state(swerve_module_state(0,0));
+      (*swerve_modules)[i]->set_target_state(swerve_module_state(0, 0));
     }
     hal::delay(*clock, 10s);
     while (true) {
