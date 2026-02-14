@@ -72,7 +72,11 @@ hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo();
+hal::v5::strong_ptr<hal::actuator::rc_servo> door_servo();
+hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch();
+hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch();
 hal::v5::strong_ptr<hal::pwm> pwm0();
+hal::v5::strong_ptr<hal::pwm> pwm1();
 
 inline void reset()
 {

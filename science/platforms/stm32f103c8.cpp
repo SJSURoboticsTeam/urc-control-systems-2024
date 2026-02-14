@@ -227,6 +227,12 @@ hal::v5::strong_ptr<hal::pwm> pwm0(){
     driver_allocator(), std::move(timer_old_pwm));
 }
 
+hal::v5::strong_ptr<hal::pwm> pwm1(){
+  static auto timer_old_pwm = timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
+  return hal::v5::make_strong_ptr<decltype(timer_old_pwm)>(
+    driver_allocator(), std::move(timer_old_pwm));
+}
+
 hal::v5::optional_ptr<hal::actuator::rc_servo> carousel_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo()
 {
@@ -244,6 +250,49 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo()
   }
   return carousel_servo_ptr;
 }
+
+hal::v5::optional_ptr<hal::actuator::rc_servo> door_servo_ptr;
+hal::v5::strong_ptr<hal::actuator::rc_servo> door_servo()
+{
+  if (not door_servo_ptr) {
+    static auto door_servo_pwm = pwm1(); // WHAT PWM TO USE
+    constexpr hal::actuator::rc_servo::settings door_servo_settings{
+      .frequency = 50,
+      .min_angle = 0,
+      .max_angle = 180,
+      .min_microseconds = 750,
+      .max_microseconds = 2250,
+    };
+    door_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo>(
+      driver_allocator(), *door_servo_pwm, door_servo_settings);
+  }
+  return door_servo_ptr;
+}
+
+hal::v5::optional_ptr<hal::input_pin> top_door_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch()
+{
+  if (not top_door_limit_switch_ptr) {
+    auto top_door_limit_switch = gpio_b().acquire_input_pin(12);  // 4  // GPIO AND PIN TBD WHEN SCIENCE BOARD SCHEMATIC GIVEN
+    top_door_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(top_door_limit_switch)>(
+        driver_allocator(), std::move(top_door_limit_switch));
+  }
+  return top_door_limit_switch_ptr;
+}
+
+hal::v5::optional_ptr<hal::input_pin> bottom_door_limit_switch_ptr;
+hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch()
+{
+  if (not bottom_door_limit_switch_ptr) {
+    auto bottom_door_limit_switch = gpio_b().acquire_input_pin(13);  // 5  // GPIO AND PIN TBD WHEN SCIENCE BOARD SCHEMATIC GIVEN
+    bottom_door_limit_switch_ptr =
+      hal::v5::make_strong_ptr<decltype(bottom_door_limit_switch)>(
+        driver_allocator(), std::move(bottom_door_limit_switch));
+  }
+  return bottom_door_limit_switch_ptr;
+}
+
 
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
