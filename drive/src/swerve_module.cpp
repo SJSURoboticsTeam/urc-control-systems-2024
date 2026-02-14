@@ -1,5 +1,3 @@
-#include "../include/swerve_module.hpp"
-#include <resource_list.hpp>
 #include <cmath>
 #include <cstdlib>
 #include <drivetrain_math.hpp>
@@ -15,6 +13,7 @@ using namespace std::chrono_literals;
 using namespace hal::literals;
 
 namespace sjsu::drive {
+
 swerve_module::swerve_module(
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_steer_motor,
   hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> p_propulsion_motor,
@@ -32,14 +31,14 @@ swerve_module::swerve_module(
 
 void swerve_module::stop()
 {
-  m_steer_motor->velocity_control(0);
-  m_propulsion_motor->velocity_control(0);
+  set_steer_motor_velocity(0);
+  set_prop_motor_velocity(0);
 }
 
 bool swerve_module::stopped() const
 {
-  return m_target_state.propulsion_velocity == 0 &&
-         std::abs(m_actual_state_cache.steer_angle) <=
+  return m_target_state.propulsion_velocity == 0.0f &&
+         std::abs(m_actual_state_cache.propulsion_velocity) <=
            settings.velocity_tolerance;
 }
 
@@ -53,34 +52,62 @@ void swerve_module::set_target_state(swerve_module_state const& p_target_state)
   if (m_steer_offset == NAN) {
     throw hal::resource_unavailable_try_again(this);
   }
-  if (!can_reach_state(m_target_state)) {
-    throw hal::argument_out_of_domain(this);
+  // NAN is to indicate a non-specific angle (angle doesn't matter)
+  if (p_target_state.steer_angle == NAN &&
+      p_target_state.propulsion_velocity == 0) {
+    stop();
   }
-  m_target_state = p_target_state;
-  // auto console = resources::console();
-  // m_steer_motor->feedback_request(
-  //   hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
-  // hal::print<128>(
-  //   *console, "Cur angle: %f\n", m_steer_motor->feedback().angle());
-  // hal::print<128>(*console,
-  //                 "Target angle: %f\n",
-  //                 m_target_state.steer_angle + m_steer_offset);
-  // m_steer_motor->position_control(m_steer_motor->feedback().angle(),
-  //                                 1);
-  m_steer_motor->position_control(m_target_state.steer_angle + m_steer_offset,
-                                  30);
+  if (!valid_interpolation(m_target_state)) {
+    hal::print(*console, "invalid interp\n");
+    throw hal::argument_out_of_domain(this);
+  } else {
+    m_target_state = p_target_state;
+    // cap valid interpolations
+    m_target_state.steer_angle = std::clamp(
+      m_target_state.steer_angle, settings.min_angle, settings.max_angle);
+    m_target_state.propulsion_velocity =
+      std::clamp(m_target_state.propulsion_velocity,
+                 -settings.max_speed,
+                 settings.max_speed);
+  }
+  hal::print<128>(*console, "Cur angle: %f\n", get_steer_motor_position());
+  hal::print<128>(*console,
+                  "Target angle: %f\n",
+                  m_target_state.steer_angle + m_steer_offset);
+  hal::print(*console, "commanding steer,");
+  set_steer_motor_position(m_target_state.steer_angle + m_steer_offset);
+  hal::print(*console, "command acked,");
   hal::rpm velocity = m_target_state.propulsion_velocity * settings.mps_to_rpm;
   if (settings.drive_forward_clockwise) {
     velocity *= -1;
   }
-  m_propulsion_motor->velocity_control(velocity);
+  hal::print(*console, "commanding prop,");
+  set_prop_motor_velocity(velocity);
+  hal::print(*console, "commanding steer,\n");
 }
 
 bool swerve_module::can_reach_state(swerve_module_state const& p_state) const
 {
   return ((p_state.propulsion_velocity <= std::abs(settings.max_speed)) &&
-          (p_state.steer_angle >= settings.min_angle) &&
-          (p_state.steer_angle <= settings.max_angle));
+          (p_state.steer_angle == NAN ||
+           (p_state.steer_angle >= settings.min_angle &&
+            p_state.steer_angle <= settings.max_angle)));
+}
+bool swerve_module::valid_interpolation(
+  swerve_module_state const& p_state) const
+{
+  return ((p_state.steer_angle == NAN ||
+           p_state.propulsion_velocity <= std::abs(settings.max_speed) ||
+           (p_state.propulsion_velocity >= 0 &&
+            p_state.propulsion_velocity <=
+              m_actual_state_cache.propulsion_velocity) ||
+           (p_state.propulsion_velocity <= 0 &&
+            p_state.propulsion_velocity >=
+              m_actual_state_cache.propulsion_velocity)) &&
+          (p_state.steer_angle >= settings.min_angle ||
+           p_state.steer_angle >= m_actual_state_cache.steer_angle) &&
+          (p_state.steer_angle <= settings.max_angle ||
+           p_state.steer_angle <= m_actual_state_cache.steer_angle));
 }
 
 swerve_module_state swerve_module::get_actual_state_cache() const
@@ -90,15 +117,18 @@ swerve_module_state swerve_module::get_actual_state_cache() const
 
 swerve_module_state swerve_module::refresh_actual_state_cache()
 {
-  m_steer_motor->feedback_request(
-    hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
+  // auto console = resources::console();
+  // hal::print(*console, "actual_state:");
   m_actual_state_cache.steer_angle =
-    m_steer_motor->feedback().angle() - m_steer_offset;
+    get_steer_motor_position() - m_steer_offset;
+  // hal::print<64>(*console, "%f,", m_actual_state_cache.steer_angle);
+
   m_actual_state_cache.propulsion_velocity =
-    m_propulsion_motor->feedback().speed() / settings.mps_to_rpm;
+    get_prop_motor_velocity() / settings.mps_to_rpm;
   if (settings.drive_forward_clockwise) {
     m_actual_state_cache.propulsion_velocity *= -1;
   }
+  // hal::print<64>(*console, "%f\n", m_actual_state_cache.propulsion_velocity);
   return m_actual_state_cache;
 }
 
@@ -151,31 +181,121 @@ void swerve_module::hard_home()
 {
   auto console = resources::console();
   hal::print(*console, "starting hard home changed\n");
-  m_steer_motor->feedback_request(
-    hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
-  m_steer_motor->velocity_control(0);  // dummy message
   hal::print<128>(*console, "Start level: %d\n", m_limit_switch->level());
-  [[__maybe_unused__]] float start_angle = m_steer_motor->feedback().angle();
   if (settings.home_clockwise) {
-    m_steer_motor->velocity_control(-1);
+    set_steer_motor_velocity(-1);
   } else {
-    m_steer_motor->velocity_control(1);
+    set_steer_motor_velocity(1);
   }
-  // while (m_limit_switch->level()) {
-  //   hal::delay(*m_clock, 250ms);  // 250ms seams safe refresh time
-  // }
-  m_steer_motor->velocity_control(0);  // stops
+  while (m_limit_switch->level()) {
+    hal::delay(*m_clock, 250ms);  // 250ms seams safe refresh time
+  }
+  set_steer_motor_velocity(0);  // stops
   hal::print<128>(*console, "Final level: %d\n", m_limit_switch->level());
 
-  m_steer_motor->feedback_request(
-    hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
-  float stop_angle = m_steer_motor->feedback().angle();
+  float stop_angle = get_steer_motor_position();
 
-  // hal::print<128>(*console, "Stopped angle: %f\n", stop_angle);
   m_steer_offset = stop_angle - settings.limit_switch_position;
-  // hal::print<128>(
-  //   *console, "fin position: %f\n",
-  //   refresh_actual_state_cache().steer_angle);
+}
+
+hal::degrees swerve_module::get_steer_offset()
+{
+  return m_steer_offset;
+}
+
+[[maybe_unused]]constexpr int can_attempts = 2;
+hal::degrees swerve_module::get_steer_motor_position()
+{
+  auto console = resources::console();
+  int attempts = can_attempts;
+  while (true) {
+    try {
+      hal::print(*console, "tg_steer");
+      m_steer_motor->feedback_request(
+        hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
+      auto angle = m_steer_motor->feedback().angle();
+      return angle;
+    } catch (hal::exception e) {
+      attempts--;
+      if (attempts <= 0) {
+        hal::print(*console,"final attempt failed throwing");
+        throw;
+      }
+    }
+  }
+}
+void swerve_module::set_steer_motor_position(hal::degrees p_position)
+{
+  auto console = resources::console();
+  int attempts = can_attempts;
+  while (true) {
+    hal::print(*console, "ts_steer");
+    try {
+      m_steer_motor->position_control(p_position, 30);
+      return;
+    } catch (hal::exception e) {
+      attempts--;
+      if (attempts <= 0) {
+        hal::print(*console,"final attempt failed throwing");
+        throw;
+      }
+    }
+  }
+}
+void swerve_module::set_steer_motor_velocity(float p_velocity)
+{
+  auto console = resources::console();
+  int attempts = can_attempts;
+  while (true) {
+    hal::print(*console, "tg_steer_vel");
+    try {
+      m_steer_motor->velocity_control(p_velocity);
+      return;
+    } catch (hal::exception e) {
+      attempts--;
+      if (attempts <= 0) {
+        hal::print(*console,"final attempt failed throwing");
+        throw;
+      }
+    }
+  }
+}
+
+float swerve_module::get_prop_motor_velocity()
+{
+  int attempts = can_attempts;
+  auto console = resources::console();
+  while (true) {
+    hal::print(*console, "tg_prop");
+    try {
+      return m_propulsion_motor->feedback().speed();
+    } catch (hal::exception e) {
+      attempts--;
+      if (attempts <= 0) {
+        hal::print(*console,"final attempt failed throwing");
+        throw;
+      }
+      throw;
+    }
+  }
+}
+void swerve_module::set_prop_motor_velocity(float p_velocity)
+{
+  auto console = resources::console();
+  int attempts = can_attempts;
+  while (true) {
+    hal::print(*console, "ts_prop");
+    try {
+      m_propulsion_motor->velocity_control(p_velocity);
+      return;
+    } catch (hal::exception e) {
+      attempts--;
+      if (attempts <= 0) {
+        hal::print(*console,"final attempt failed throwing");
+        throw;
+      }
+    }
+  }
 }
 
 }  // namespace sjsu::drive

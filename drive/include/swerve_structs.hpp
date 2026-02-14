@@ -31,6 +31,10 @@ struct chassis_velocities
 {
   vector2d translation;
   deg_per_sec rotational_vel = 0.0f;
+  constexpr bool operator==(chassis_velocities const& b) const
+  {
+    return translation == b.translation && rotational_vel == b.rotational_vel;
+  }
 };
 
 }  // namespace sjsu::drive

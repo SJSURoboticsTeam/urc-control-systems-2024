@@ -21,21 +21,25 @@ struct vector2d
   {
   }
 
-  constexpr vector2d operator+(vector2d const& b)
+  constexpr vector2d operator+(vector2d const& b) const
   {
     return vector2d(x + b.x, y + b.y);
   }
-  constexpr vector2d operator-(vector2d const& b)
+  constexpr vector2d operator-(vector2d const& b) const
   {
     return vector2d(x - b.x, y - b.y);
   }
-  constexpr vector2d operator*(float s)
+  constexpr vector2d operator*(float s) const
   {
     return vector2d(x * s, y * s);
   }
-  constexpr vector2d operator/(float s)
+  constexpr vector2d operator/(float s) const
   {
     return vector2d(x / s, y / s);
+  }
+  constexpr bool operator==(vector2d v) const
+  {
+    return x == v.x && y == v.y;
   }
   /**
    * @brief Compute the dot product
