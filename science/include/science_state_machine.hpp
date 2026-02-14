@@ -30,6 +30,7 @@ private:
   hal::v5::strong_ptr<hal::actuator::rc_servo> m_trap_door;
   hal::v5::strong_ptr<hal::actuator::rc_servo> m_mixer;
   hal::v5::strong_ptr<hal::actuator::rc_servo> m_door;
+    hal::v5::strong_ptr<hal::actuator::rc_servo> m_cache;
   hal::v5::strong_ptr<hal::input_pin> m_top_door_limit_switch;
   hal::v5::strong_ptr<hal::input_pin> m_bottom_door_limit_switch;
   hal::v5::strong_ptr<carousel> m_carousel;
@@ -46,6 +47,7 @@ public:
                         hal::v5::strong_ptr<hal::actuator::rc_servo> p_trap_door,
                         hal::v5::strong_ptr<hal::actuator::rc_servo> p_mixer,
                         hal::v5::strong_ptr<hal::actuator::rc_servo> p_door,
+                        hal::v5::strong_ptr<hal::actuator::rc_servo> p_cache,
                         hal::v5::strong_ptr<hal::input_pin> p_top_door_limit_switch,
                         hal::v5::strong_ptr<hal::input_pin> p_bottom_door_limit_switch,
                         hal::v5::strong_ptr<carousel> p_carousel,

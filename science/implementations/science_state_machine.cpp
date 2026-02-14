@@ -6,6 +6,7 @@ science_state_machine::science_state_machine(
   hal::v5::strong_ptr<hal::actuator::rc_servo> p_trap_door,
   hal::v5::strong_ptr<hal::actuator::rc_servo> p_mixer,
   hal::v5::strong_ptr<hal::actuator::rc_servo> p_door, 
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_cache, 
   hal::v5::strong_ptr<hal::input_pin> p_top_door_limit_switch,
   hal::v5::strong_ptr<hal::input_pin> p_bottom_door_limit_switch,
   hal::v5::strong_ptr<carousel> p_carousel,
@@ -16,6 +17,7 @@ science_state_machine::science_state_machine(
   , m_trap_door(p_trap_door)
   , m_mixer(p_mixer)
   , m_door(p_door)
+  , m_cache(p_cache)
   , m_top_door_limit_switch(p_top_door_limit_switch)
   , m_bottom_door_limit_switch(p_bottom_door_limit_switch)
   , m_carousel(p_carousel)
