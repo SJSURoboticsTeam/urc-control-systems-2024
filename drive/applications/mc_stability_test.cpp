@@ -8,8 +8,11 @@
 #include <resource_list.hpp>
 
 namespace sjsu::drive {
+
 void application()
 {
+  // This demo is a mixed set of can message items to check can stability
+  // Everything is intended to be easily commented out & modified for different tests
   auto clock = resources::clock();
   auto console = resources::console();
   hal::print(*console, "app starting\n");
