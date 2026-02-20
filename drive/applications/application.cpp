@@ -21,7 +21,7 @@ void application()
   drivetrain dt(resources::swerve_modules(), cycle_time_sec);
   mission_control_manager mcm(resources::can_transceiver());
 
-  dt.hard_home();//TODO: move homing into main loop 
+  dt.hard_home();  // TODO: move homing into main loop
   while (true) {
     hal::u64 frame_end = hal::future_deadline(*clock, cycle_time);
 
@@ -53,7 +53,7 @@ void application()
     } else if (home_req) {
       hal::print(*console, "\nhoming\n");
       mcm.reply_homing_request();
-      // dt.hard_home();//TODO: replace with interuptable homing later
+      // dt.hard_home();// TODO: replace with interuptable homing later
     }
     hal::print(*console, "\ndata req\n");
     mcm.fulfill_data_requests(dt);

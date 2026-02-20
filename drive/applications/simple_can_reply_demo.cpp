@@ -10,7 +10,6 @@
 #include <resource_list.hpp>
 #include <swerve_module.hpp>
 
-
 namespace sjsu::drive {
 
 void application()
@@ -20,25 +19,13 @@ void application()
   auto console = resources::console();
   auto can_transceiver = resources::can_transceiver();
   mission_control_manager mcm(can_transceiver);
-  [[maybe_unused]]auto finder =  hal::can_message_finder(*can_transceiver,0x00);
-  
+
   hal::print(*console, "appstart\n");
   while (true) {
-    // hal::print(*console, "scanning\n");
     hal::u64 frame_end = hal::future_deadline(*clock, cycle_time);
-    
-    if (finder.find()) {
-      hal::print(*console, "\nfound==================================================================\n");
-    } else {
-      // hal::print(*console,"w");
-    }
-    // can_transceiver->send({.id=0xD,.length=0});
 
-
-
-
-    [[maybe_unused]]bool home_req = mcm.read_homing_request();
-    [[maybe_unused]]std::optional<chassis_velocities_request> cvr =
+    bool home_req = mcm.read_homing_request();
+    std::optional<chassis_velocities_request> cvr =
       mcm.read_set_velocity_request();
     if (cvr) {
       mcm.reply_set_velocity_request(cvr.value());

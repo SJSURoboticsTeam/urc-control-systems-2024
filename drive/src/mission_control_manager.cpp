@@ -145,15 +145,12 @@ std::array<hal::byte, 4> mission_control_manager::int32_to_byte_array(
 std::optional<chassis_velocities_request>
 mission_control_manager::read_set_velocity_request()
 {
-  auto console = resources::console();
+  // find most recent message
   std::optional<hal::can_message> velocity_request_message;
   while (true) {
     std::optional<hal::can_message> check_velocity_request_message =
       m_set_chassis_velocities_message_finder.find();
     if (check_velocity_request_message) {
-      // hal::print(
-      //   *console,
-      //   "\nmessage passed===============================================");
       if (check_velocity_request_message->length == 7) {
         velocity_request_message = check_velocity_request_message;
       }
@@ -164,6 +161,8 @@ mission_control_manager::read_set_velocity_request()
   if (not velocity_request_message) {
     return std::nullopt;
   }
+
+  // parse message
   chassis_velocities velocities;
   auto& payload = velocity_request_message->payload;
   velocities.translation.x = fixed_point_16_to_float(
@@ -175,11 +174,6 @@ mission_control_manager::read_set_velocity_request()
   chassis_velocities_request cvr = { .chassis_vels = velocities,
                                      .module_conflicts =
                                        (bool)(payload[6] & 0x01) };
-  hal::print<64>(*console,
-                 "\n%x,%x,%x",
-                 byte_array_to_int16({ payload[0], payload[1] }),
-                 byte_array_to_int16({ payload[2], payload[3] }),
-                 byte_array_to_int16({ payload[4], payload[5] }));
   return cvr;
 }
 
@@ -205,7 +199,6 @@ void mission_control_manager::reply_set_velocity_request(
   m_can_transceiver->send(reply);
 }
 
-// return true if homing requested;
 bool mission_control_manager::read_homing_request()
 {
   bool requested = false;
@@ -213,9 +206,6 @@ bool mission_control_manager::read_homing_request()
     std::optional<hal::can_message> message =
       m_homing_request_message_finder.find();
     if (message) {
-      auto console = resources::console();
-      // hal::print(*console,"\nmessage
-      // passed===============================================");
       if (message->length == 0) {
         requested = true;
       }
@@ -235,7 +225,7 @@ void mission_control_manager::reply_homing_request()
 void mission_control_manager::fulfill_data_requests(
   drivetrain const& p_drivetrain)
 {
-  // handle offset requests
+  // find offsets requested
   hal::byte offsets_requested = 0;
   std::optional<hal::can_message> offset_request_message;
   do {
@@ -244,6 +234,8 @@ void mission_control_manager::fulfill_data_requests(
       offsets_requested |= 1 << offset_request_message->payload[0];
     }
   } while (offset_request_message);
+
+  // send replies
   hal::byte i = 0;
   while (offsets_requested >> i) {
     if ((offsets_requested >> i) & 1) {
@@ -265,6 +257,7 @@ void mission_control_manager::fulfill_data_requests(
     }
     i++;
   }
+
   // return state_estimate
   while (true) {
     auto get_request = m_get_chassis_velocities_message_finder.find();
