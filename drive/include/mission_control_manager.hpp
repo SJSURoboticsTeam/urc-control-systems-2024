@@ -34,18 +34,19 @@ public:
   mission_control_manager(
     hal::v5::strong_ptr<hal::can_transceiver> p_can_transceiver);
   /**
-   * @brief converts a float into a fixed point value
+   * @brief converts a fixed point value into a float
    * @param p_fixed_point_num value being converted
-   * @param p_expo fixed point exponent, i.e value of fixed point=1 corelates to
-   * 2^p_expo
+   * @param p_expo fixed point exponent, i.e value of fixed point value of 1
+   * corelates to 2^p_expo in floating point
+   * @returns fixed point values converted to float
    */
   float fixed_point_16_to_float(int16_t p_fixed_point_num, int p_expo);
   /**
    * @brief converts a float into a fixed point value
    * @param p_float_num value being converted
    * @param p_expo fixed point exponent, i.e value of fixed point=1 corelates to
-   * 2^p_expo
-   * @returns floating point value converted
+   * 2^p_expo in floating point
+   * @returns floating point value converted to fixed point
    */
   int16_t float_to_fixed_point_16(float p_float_num, int p_expo);
   /**
@@ -62,35 +63,6 @@ public:
   std::array<hal::byte, 2> int16_to_byte_array(int16_t p_num);
 
   /**
-   * @brief converts a float into a fixed point value
-   * @param p_fixed_point_num value being converted
-   * @param p_expo fixed point exponent, i.e value of fixed point=1 corelates to
-   * 2^p_expo
-   * @returns fixedpoint value converted
-   */
-  float fixed_point_32_to_float(int32_t p_fixed_point_num, int p_expo);
-  /**
-   * @brief converts a float into a fixed point value
-   * @param p_float_num value being converted
-   * @param p_expo fixed point exponent, i.e value of fixed point=1 corelates to
-   * 2^p_expo
-   * @returns floating point value converted
-   */
-  int32_t float_to_fixed_point_32(float p_float_num, int p_expo);
-  /**
-   * @brief gets int32_t from a 2 byte array
-   * @param p_array byte array of values put in big endian
-   * @returns int value in given array
-   */
-  int32_t byte_array_to_int32(std::array<hal::byte, 4> p_array);
-  /**
-   * @brief puts int32_t into a 2 byte array
-   * @param p_num int value
-   * @returns byte array of the input in big endian
-   */
-  std::array<hal::byte, 4> int32_to_byte_array(int32_t p_num);
-
-  /**
    * @brief returns most recent target velocity request from mission control
    *
    * @returns most recent target velocity request
@@ -101,11 +73,11 @@ public:
 
   /**
    * @brief if homing was requested
-   * @returns return true if homing requested
+   * @returns true if homing requested
    */
   bool read_homing_request();
   /**
-   * @brief sends a reply to last homing requests
+   * @brief sends a reply to homing requests
    */
   void reply_homing_request();
   /**
