@@ -96,51 +96,6 @@ std::array<hal::byte, 2> mission_control_manager::int16_to_byte_array(
   return byte_array;
 }
 
-float mission_control_manager::fixed_point_32_to_float(
-  int32_t p_fixed_point_num,
-  int p_expo)
-{
-  unsigned int shifted_expo = 1 << abs(p_expo);
-  float floating_num = p_fixed_point_num;
-  if (p_expo < 0) {
-    return floating_num / shifted_expo;
-  } else {
-    return floating_num * shifted_expo;
-  }
-}
-int32_t mission_control_manager::float_to_fixed_point_32(
-  float p_floating_point_num,
-  int p_expo)
-{
-  unsigned int shifted_expo = 1 << abs(p_expo);
-  if (p_expo > 0) {
-    p_floating_point_num /= shifted_expo;
-  } else {
-    p_floating_point_num *= shifted_expo;
-  }
-  // TODO: consider implementing rounding
-  return static_cast<int32_t>(p_floating_point_num);
-}
-
-int32_t mission_control_manager::byte_array_to_int32(
-  std::array<hal::byte, 4> p_array)
-{
-  return (static_cast<int32_t>(p_array[0]) << 24) |
-         (static_cast<int32_t>(p_array[1]) << 16) |
-         (static_cast<int32_t>(p_array[2]) << 8) |
-         (static_cast<int32_t>(p_array[3]) << 0);
-}
-std::array<hal::byte, 4> mission_control_manager::int32_to_byte_array(
-  int32_t p_num)
-{
-  uint32_t unum = std::bit_cast<uint32_t>(p_num);
-  std::array<hal::byte, 4> byte_array = { static_cast<uint8_t>(unum >> 24),
-                                          static_cast<uint8_t>(unum >> 16),
-                                          static_cast<uint8_t>(unum >> 8),
-                                          static_cast<uint8_t>(unum) };
-  return byte_array;
-}
-
 // returns most recent velocity request
 std::optional<chassis_velocities_request>
 mission_control_manager::read_set_velocity_request()
