@@ -109,7 +109,6 @@ float bldc_perseus::get_target_velocity()
 }
 float bldc_perseus::get_reading_velocity()
 {
-  // TODO! 
 
   const size_t now_time = m_clock->uptime();
   const size_t dt_time = now_time - m_last_clock_check;
