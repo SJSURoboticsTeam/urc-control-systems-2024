@@ -7,7 +7,6 @@ libhal_build_demos(
     DEMOS
     application
     carousel_demo
-    door_demo
 
     INCLUDES
     .

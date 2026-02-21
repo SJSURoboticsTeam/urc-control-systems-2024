@@ -57,6 +57,5 @@ public:
     int get_num_vials();
     void turn_on_pump(auto pump, hal::time_duration duration);
     void run_state_machine(science_states state);
-    void create_can_messages();
 };
 }  // namespace sjsu::science
