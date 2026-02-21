@@ -29,36 +29,37 @@ enum commands : hal::byte
 }
 
 namespace sjsu::drivers {
-hal::byte nhd0420d3z::coordinates_to_position(hal::byte line, hal::byte column)
+hal::byte nhd0420d3z::coordinates_to_position(hal::byte p_line,
+                                              hal::byte p_column)
 {
-  hal::byte pos = line;
-  pos += (column / 2) * display_lines;
-  if (column % 2) {
+  hal::byte pos = p_line;
+  pos += (p_column / 2) * display_lines;
+  if (p_column % 2) {
     pos += 0x40;
   }
   return pos;
 }
-void nhd0420d3z::send_data(hal::byte data)
+void nhd0420d3z::send_data(hal::byte p_data)
 {
-  std::array<hal::byte, 1> command = { data };
+  std::array<hal::byte, 1> command = { p_data };
   hal::write(m_i2c_bus, m_i2c_address, command);
 }
 void nhd0420d3z::send_prefix()
 {
   send_data(commands::prefix);
 }
-void nhd0420d3z::write_char(char c)
+void nhd0420d3z::write_char(char p_c)
 {
   send_prefix();
-  send_data(c);
+  send_data(p_c);
 }
-void nhd0420d3z::set_cursor_position(hal::byte line, hal::byte column)
+void nhd0420d3z::set_cursor_position(hal::byte p_line, hal::byte p_column)
 {
   send_prefix();
   send_data(set_cursor);
-  send_data(coordinates_to_position(line, column));
-  m_cursor_line = line;
-  m_cursor_column = column;
+  send_data(coordinates_to_position(p_line, p_column));
+  m_cursor_line = p_line;
+  m_cursor_column = p_column;
 }
 
 void nhd0420d3z::move_cursor_right()
@@ -88,12 +89,12 @@ nhd0420d3z::nhd0420d3z(hal::i2c& p_i2c, hal::byte p_i2c_address)
   , m_i2c_address(p_i2c_address)
 {
 }
-void nhd0420d3z::display_message(std::string_view str)
+void nhd0420d3z::display_message(std::string_view p_str)
 {
   clear_screen();
   set_cursor_position(0, 0);
-  auto strIt = str.begin();
-  while (m_cursor_line < display_lines && strIt != str.end()) {
+  auto strIt = p_str.begin();
+  while (m_cursor_line < display_lines && strIt != p_str.end()) {
     if (*strIt == '\n') {
       set_cursor_position(0, m_cursor_column + 1);
     } else {
@@ -102,10 +103,10 @@ void nhd0420d3z::display_message(std::string_view str)
     strIt++;
   }
 }
-void nhd0420d3z::power(bool on)
+void nhd0420d3z::power(bool p_on)
 {
   send_prefix();
-  if (on) {
+  if (p_on) {
     send_data(commands::display_on);
   } else {
     send_data(commands::display_off);
