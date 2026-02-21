@@ -6,8 +6,10 @@
 
 #include <resource_list.hpp>
 
-const int sample_rate = 40;
-const std::array<float, sample_rate> filter_const = {
+constexpr int sample_rate = 40;
+/*Constants for digital filter obtained though signal.firwin2(20, [0, fs / 2], [1.0, 0], fs = fs) 
+20 is number of sample and fs is sample frequency: 1/100ms*/
+constexpr std::array<float, sample_rate> filter_const = {
   2.30217199e-05, 2.72703862e-05, 3.64891392e-05, 5.21727953e-05,
   7.62544386e-05, 1.11288539e-04, 1.60733417e-04, 2.29399083e-04,
   3.24180225e-04, 4.55301222e-04, 6.38525399e-04, 8.99285005e-04,
