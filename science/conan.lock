@@ -7,6 +7,7 @@
         "prebuilt-picolibc/14.2#197a708367ee7d3b9e9057bf9bd0eaa2%1747924705.981",
         "libhal-util/5.8.1#dca6ef7baf4f47bcc0eba9baf3c7dbf1%1761614359.953",
         "libhal-mock/4.0.0#e2a2cc593adc03806c6a8b80c5a89638%1715616381.717",
+        "libhal-expander/1.3.1#bd33b60a0c32a42ea76cc62c7a8c0b7a%1764274810.099",
         "libhal-arm-mcu/1.19.6#54553cd730a92e3c11da7924a5c149a6%1766154640.666",
         "libhal-actuator/1.2.3#c9604e30af20eb688d32b6a6440ad6ea%1761181221.054",
         "libhal/4.18.1#8d15efecea9aadb357c23770627b0341%1761511486.387",
