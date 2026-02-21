@@ -7,6 +7,7 @@ libhal_build_demos(
     DEMOS
     application
     carousel_demo
+    load_cell_demo
 
     INCLUDES
     .
