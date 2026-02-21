@@ -48,6 +48,8 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   return vectors;
 }
 
+//https://planetmath.org/choleskydecomposition
+//to solve Ax = b
 static bool cholesky(const float A_[3][3], const float c[3], float x[3])
 {
 
@@ -87,8 +89,10 @@ static bool cholesky(const float A_[3][3], const float c[3], float x[3])
   return true;
 }
 
-//https://www.youtube.com/watch?v=PjeOmOz9jSY 
-//shows how we get 
+//normal equations least squares puesdoinverse
+//https://www.youtube.com/watch?v=C7LEuhS4H94&t=8s
+//https://math.mit.edu/icg/resources/teaching/18.085-spring2015/LeastSquares.pdf
+//https://tobydriscoll.net/fnc-julia/leastsq/normaleqns.html
 
 chassis_velocities calc_estimated_chassis_velocities(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
