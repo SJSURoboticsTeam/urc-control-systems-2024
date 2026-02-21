@@ -11,11 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <memory_resource>
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
+#include <libhal-arm-mcu/stm32f1/can2.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -35,6 +36,8 @@
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/can.hpp>
+#include <libhal/error.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
@@ -154,31 +157,36 @@ auto& timer2()
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
+hal::v5::optional_ptr<hal::pwm> mast_servo_pwm_channel_0_ptr;
+hal::v5::optional_ptr<hal::pwm> mast_servo_pwm_channel_1_ptr;
 
-// pwm0 - 32 -> ch8
-// pwm1 - 47 -> ch1
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
+hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_0()
 {
-  auto timer_pwm_channel =
-    timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if(not mast_servo_pwm_channel_0_ptr){
+    auto pwm = timer1().acquire_pwm(hal::stm32f1::timer1_pin::pa8);
+    mast_servo_pwm_channel_0_ptr = hal::v5::make_strong_ptr<decltype(pwm)> (driver_allocator(), std::move(pwm));
+  }
+  return mast_servo_pwm_channel_0_ptr;
 }
 
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
+hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_1()
 {
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if(not mast_servo_pwm_channel_1_ptr){
+    auto pwm = timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa1);
+    mast_servo_pwm_channel_1_ptr = hal::v5::make_strong_ptr<decltype(pwm)> (driver_allocator(), std::move(pwm));
+  }
+  return mast_servo_pwm_channel_1_ptr;
 }
+
 // PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
+hal::v5::optional_ptr<hal::pwm> under_chassis_servo_pwm_channel_2_ptr;
+hal::v5::strong_ptr<hal::pwm> under_chassis_servo_pwm_channel_2()
 {
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if(not under_chassis_servo_pwm_channel_2_ptr){
+    auto pwm = timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa2);
+    under_chassis_servo_pwm_channel_2_ptr = hal::v5::make_strong_ptr<decltype(pwm)> (driver_allocator(), std::move(pwm));
+  }
+  return under_chassis_servo_pwm_channel_2_ptr;
 }
 
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
@@ -195,28 +203,48 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
     driver_allocator(), std::move(timer_pwm_frequency));
 }
 
+hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+
+void initialize_can()
+{
+  if (not can_manager) {
+    auto clock_ref = clock();
+    can_manager =
+      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
+        driver_allocator(),
+        32,
+        driver_allocator(),
+        100'000,
+        *clock_ref,
+        std::chrono::milliseconds(1),
+        hal::stm32f1::can_pins::pb9_pb8);
+  }
+}
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
-  throw hal::operation_not_supported(nullptr);
-  // CAN is commented out in original due to potential stalling issues
-  // TODO(#125): Initializing the can peripheral without it connected to a can
-  // transceiver causes it to stall on occasion.
+  initialize_can();
+  return hal::acquire_can_transceiver(driver_allocator(), can_manager);
 }
 
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  throw hal::operation_not_supported(nullptr);
+  initialize_can();
+  return hal::acquire_can_bus_manager(driver_allocator(), can_manager);
 }
 
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
 {
-  throw hal::operation_not_supported(nullptr);
+  initialize_can();
+  return hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
 }
 
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 {
-  throw hal::operation_not_supported(nullptr);
+  initialize_can();
+  return hal::acquire_can_interrupt(driver_allocator(), can_manager);
 }
+// Watchdog implementation using global function pattern from original
+
 
 [[noreturn]] void terminate_handler() noexcept
 {
