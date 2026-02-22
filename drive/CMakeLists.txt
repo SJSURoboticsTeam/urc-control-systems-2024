@@ -7,23 +7,25 @@ libhal_build_demos(
 
 DEMOS
     application
-    sequential_homing_demo
-    simple_state_set_demo
-    prop_motor_test
     chassis_vel_demo
     iterate_state
-    poll_motor_connections
-    serial_command_demo
     limit_switch_test
+    mc_stability_test
+    prop_motor_test
+    sequential_homing_demo
+    serial_command_demo
+    simple_can_reply_demo
+    simple_state_set_demo
 INCLUDES
-    include
     .
     ../drivers/include
+    include
 SOURCES
-    src/drivetrain_math.cpp
-    src/drivetrain.cpp
-    src/swerve_module.cpp
     ../drivers/src/serial_commands.cpp
+    src/drivetrain.cpp
+    src/drivetrain_math.cpp
+    src/mission_control_manager.cpp
+    src/swerve_module.cpp
 
 PACKAGES
 #    libhal-__device__
