@@ -50,7 +50,7 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
 
 //https://planetmath.org/choleskydecomposition
 //to solve Ax = b
-static bool cholesky(const float A_[3][3], const float c[3], float x[3])
+static bool cholesky(float const& A_[3][3], float const& c[3], float& x[3])
 {
 
   const float a00 = A_[0][0];
@@ -59,19 +59,19 @@ static bool cholesky(const float A_[3][3], const float c[3], float x[3])
 
   // A = L * L^T 
 
-  // 1st coloum
+  // 1st column
   float L00 = sqrtf(a00);
   if (!(L00 > 0.0f)) return false;
   float L10 = a10 / L00;
   float L20 = a20 / L00;
 
-  // 2nd coloum
+  // 2nd column
   float t11 = a11 - L10*L10;
   if (!(t11 > 0.0f)) return false;
   float L11 = sqrtf(t11);
   float L21 = (a21 - L20*L10) / L11;
 
-  // 3rd coloum
+  // 3rd column
   float t22 = a22 - L20*L20 - L21*L21;
   if (!(t22 > 0.0f)) return false;
   float L22 = sqrtf(t22);
@@ -98,36 +98,23 @@ chassis_velocities calc_estimated_chassis_velocities(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
     p_modules){
 
-    size_t n = module_count;
-
-    float x[n];
-    float y[n];
-    float vix[n];
-    float viy[n];
-
-    for (size_t i = 0; i < n; i++){
-
-      const auto& module = *p_modules[i];
-
-    }
-
     float a [3][3] = {{0,0,0},{0,0,0},{0,0,0}};
     float c [3] = {0,0,0};
     float x_solution [3] = {0,0,0};
 
     auto accumulate = [&](float r0, float r1, float position, float v){
 
-      //1st coloum
+      //1st column
       a[0][0] += r0 * r0; 
       a[1][0] += r0 * r1; 
       a[2][0] += r0 * position;
 
-      //2nd coloum
+      //2nd column
       a[0][1] += r1 * r0;
       a[1][1] += r1 * r1;
       a[2][1] += r1 * position;
 
-      //3rd coloum
+      //3rd column
       a[0][2] += position * r0;
       a[1][2] += position * r1;
       a[2][2] += position * position;
@@ -138,20 +125,36 @@ chassis_velocities calc_estimated_chassis_velocities(
       c[2] += position * v;
     };
 
-    for (size_t i = 0; i < n; i++){
-      accumulate(1.0f, 0.0f, -y[i], vix[i]);
-      accumulate(0.0f, 1.0f, x[i], viy[i]);
+    //deg & rad helpers
+    constexpr float deg_to_rad = static_cast<float>(M_PI) / 180.0f;
+    constexpr float rad_to_deg = 180.0f / static_cast<float>(M_PI);
+
+    for (auto const& mod_ptr : p_modules){
+      auto const& module = *mod_ptr;
+
+      const float xi = module.settings.position.x;
+      const float yi = module.settings.position.y;
+
+      const auto state = module.get_actual_state_cache();
+      const float speed = state.propulsion_velocity;
+      const float angle_degrees = state.steer_angle;
+      const float angle_rad = angle_degrees * deg_to_rad;
+      const float vix = speed * std::cos(angle_rad);
+      const float viy = speed * std::sin(angle_rad);
+
+      accumulate(1.0f, 0.0f, -yi, vix);
+      accumulate(0.0f, 1.0f, xi, viy);
     }
 
     chassis_velocities results{};
 
-    if (!cholesky(a,c,x_solution)){
-      return results;
+    if (!cholesky(a,c,x_solution)){ //error check
+      return false;
     }
 
     results.translation.x = x_solution[0];
     results.translation.y = x_solution[1];
-    results.rotational_vel = x_solution[2];
+    results.rotational_vel = x_solution[2] * rad_to_deg; // stores in degrees
 
     return results;
 
