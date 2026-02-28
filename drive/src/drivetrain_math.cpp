@@ -49,9 +49,117 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   return vectors;
 }
 
+static bool cholesky(const float A_[3][3], const float c[3], float x[3])
+{
+
+  const float a00 = A_[0][0];
+  const float a10 = A_[1][0], a11 = A_[1][1];
+  const float a20 = A_[2][0], a21 = A_[2][1], a22 = A_[2][2];
+
+  // A = L * L^T 
+
+  // 1st coloum
+  float L00 = sqrtf(a00);
+  if (!(L00 > 0.0f)) return false;
+  float L10 = a10 / L00;
+  float L20 = a20 / L00;
+
+  // 2nd coloum
+  float t11 = a11 - L10*L10;
+  if (!(t11 > 0.0f)) return false;
+  float L11 = sqrtf(t11);
+  float L21 = (a21 - L20*L10) / L11;
+
+  // 3rd coloum
+  float t22 = a22 - L20*L20 - L21*L21;
+  if (!(t22 > 0.0f)) return false;
+  float L22 = sqrtf(t22);
+
+  // forward solve
+  float y0 = c[0] / L00;
+  float y1 = (c[1] - L10*y0) / L11;
+  float y2 = (c[2] - L20*y0 - L21*y1) / L22;
+
+  // backward solve
+  x[2] = y2 / L22;
+  x[1] = (y1 - L21*x[2]) / L11;
+  x[0] = (y0 - L10*x[1] - L20*x[2]) / L00;
+
+  return true;
+}
+
 chassis_velocities calc_estimated_chassis_velocities(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
-    p_modules);
+    p_modules){
+
+    size_t n = module_count;
+
+    float x[n];
+    float y[n];
+    float vix[n];
+    float viy[n];
+
+    for (size_t i = 0; i < n; i++){
+
+      const auto& module = *p_modules[i];
+
+      x[i] = module.settings.position.x;
+      y[i] = module.settings.position.y;
+
+      const auto state = module.get_actual_state_cache();
+      const float speed = state.propulsion_velocity;
+      const float angle = state.steer_angle;
+
+      vix[i] = speed * cosf(angle);
+      viy[i] = speed * sinf(angle);   
+    }
+
+    float a [3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+    float c [3] = {0,0,0};
+    float x_solution [3] = {0,0,0};
+
+    auto accumulate = [&](float r0, float r1, float position, float v){
+
+      //1st coloum
+      a[0][0] += r0 * r0; 
+      a[1][0] += r0 * r1; 
+      a[2][0] += r0 * position;
+
+      //2nd coloum
+      a[0][1] += r1 * r0;
+      a[1][1] += r1 * r1;
+      a[2][1] += r1 * position;
+
+      //3rd coloum
+      a[0][2] += position * r0;
+      a[1][2] += position * r1;
+      a[2][2] += position * position;
+
+      //C-matrix
+      c[0] += r0 * v;
+      c[1] += r1 * v;
+      c[2] += position * v;
+    };
+
+    for (size_t i = 0; i < n; i++){
+      accumulate(1.0f, 0.0f, -y[i], vix[i]);
+      accumulate(0.0f, 1.0f, x[i], viy[i]);
+    }
+
+    chassis_velocities results{};
+
+    if (!cholesky(a,c,x_solution)){
+      return results;
+    }
+
+    results.translation.x = x_solution[0];
+    results.translation.y = x_solution[1];
+    results.rotational_vel = x_solution[2];
+
+    return results;
+
+    }
+
 
 swerve_module_state calculate_freest_state(swerve_module const& p_module,
                                            vector2d const& p_target_vector)
