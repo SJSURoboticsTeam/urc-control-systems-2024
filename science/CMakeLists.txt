@@ -21,10 +21,12 @@ libhal_build_demos(
     PACKAGES
     libhal-util
     libhal-actuator
+    libhal-expander
 
 
     LINK_LIBRARIES
     libhal::util
     libhal::actuator
+    libhal::expander
 
 ) 
