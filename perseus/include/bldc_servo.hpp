@@ -7,6 +7,7 @@
 #include <libhal/units.hpp>
 
 #include <resource_list.hpp>
+// #include <can_messaging.hpp>
 
 using sec = float;
 
@@ -44,23 +45,23 @@ public:
    */
   struct PID_prev_values
   {
-    float integral;
-    float last_error;
-    float prev_dt_time;
-  };
+    float integral; 
+    float last_error; 
+    float prev_timestamp; 
+  }; 
   /**
-   * @brief Struct for the values that are individual to each servo.
-   */
-  struct servo_values
+    * @brief Struct for the values that are individual to each servo.
+  */
+  struct servo_values 
   {
-    // for reading value
-    float gear_ratio;
-    // for feedforward
-    float feedforward_clamp;  // power needed to keep position at max gravity
-    float length;
-    float angle_offset;
-    float weight_beam;
-    float weight_end;
+    // for reading value 
+    float gear_ratio; 
+    // for feedforward 
+    float angle_offset; 
+    float fight_gravity; 
+    // for safety
+    float high_clamped_value; 
+    float low_clamped_value; 
   };
   /**
    * @brief Set the target position of the servo.
@@ -163,19 +164,23 @@ public:
    */
   float position_feedforward();
 
-  /**
-   * @brief Set the maximum power the PID controller is allowed to use.
-   * @param power The clamped power as a float between 0.0 and 1.0, representing
-   * 0% to 100% of maximum possible power.
-   */
-  void set_pid_clamped_power(float power);
 
-  /**
-   * @brief Get the maximum power the PID controller is allowed to use.
-   * @return The clamped power as a float between 0.0 and 1.0, representing 0%
-   * to 100% of maximum possible power.
-   */
-  float get_pid_clamped_power();
+  // /**
+  //   * @brief Set the maximum power the PID controller is allowed to use.
+  //   * @param power The clamped power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
+  // */
+  // void set_pid_clamped_power(float power);
+
+  // /**
+  //   * @brief Get the maximum power the PID controller is allowed to use.
+  //   * @return The clamped power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
+  // */
+  // float get_pid_clamped_power();
+
+  void set_pos_clamped_power(float power);
+  float get_pos_clamped_power();
+  void set_neg_clamped_power(float power);
+  float get_neg_clamped_power(); 
 
   /**
    * @brief Sets the power (ignores clamped power)
@@ -187,14 +192,22 @@ public:
   void set_power(float power);
 
   /**
-   * @brief Get the power the servo is using.
-   * @return The power as a float between -1.0 and 1.0, representing maximum
-   * power in the negative and positive directions. The spin is dependant on the
-   * wiring, but assuming the positive is wired to Channel A and negative to
-   * Channel B, facing the motor, a positive value will spin clockwise and
-   * negative will spin counterclockwise.
-   */
+    * @brief Get the power the servo is using.
+    * @return The power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
+  */
   float get_power();
+
+  /**
+    * @brief Set the servo's current action 
+    * @param action can_perseus::action value to be set 
+  */
+  void set_active_action(uint32_t action); 
+  
+  /**
+    * @brief Get the servo's current action 
+    * @return Returns the current action as a can_perseus::action 
+  */
+  uint32_t get_active_action(); 
 
   /**
    * @brief Resets the internal time tracking for the servo, this will be done
@@ -208,6 +221,8 @@ public:
    */
   bldc_perseus::PID_settings get_pid_settings();
 
+  void periodic_action(bool new_action);
+
   // Helper conversion functions (copied from drivetrain_math.hpp)
   constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
   {
@@ -220,23 +235,37 @@ public:
     return static_cast<float>(p_time.count()) * 1e-9f;
   }
 
+  void set_angle_offset(float angle_offset);
+  float get_angle_offset();
+
+  void set_prev_joint_position(float prev_joint_pos); 
+  float get_prev_joint_position(); 
+  void set_actual_position(); 
+  float get_actual_position(); 
+  void set_servo_values(servo_values p_servo_values); 
+
   hal::time_duration get_clock_time(hal::steady_clock& p_clock);
 
 private:
-  hal::v5::strong_ptr<sjsu::drivers::h_bridge> m_h_bridge;
-  hal::v5::strong_ptr<hal::rotation_sensor> m_encoder;
-  hal::v5::strong_ptr<hal::steady_clock> m_clock;
-  hal::u64 m_last_clock_check;
-  status m_reading;
+  hal::v5::strong_ptr<sjsu::drivers::h_bridge>
+    m_h_bridge;
+  hal::v5::strong_ptr<hal::rotation_sensor>
+    m_encoder;
+  hal::v5::strong_ptr<hal::steady_clock> 
+    m_clock;
+  hal::u64 m_last_clock_check; 
   status m_target;
   PID_settings m_reading_position_settings;
   PID_settings m_reading_velocity_settings;
-  PID_prev_values m_PID_prev_velocity_values;
-  PID_prev_values m_PID_prev_position_values;
-  servo_values m_servo_values;
-  float m_clamped_power;
+  PID_prev_values m_PID_prev_velocity_values; 
+  PID_prev_values m_PID_prev_position_values; 
+  servo_values m_servo_values; 
+  // float m_clamped_power;
   float m_prev_encoder_value;
-  float home_encoder_value;
+  float m_actual_position; 
+  float m_prev_joint_position; 
+  float m_active_power; 
+  uint32_t m_active_action; 
 };
 
 }  // namespace sjsu::perseus

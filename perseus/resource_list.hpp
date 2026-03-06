@@ -79,7 +79,13 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder();
 // can instantiation
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
+hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter(); 
+
+// hal::v5::strong_ptr<hal::output_pin> usart2_cts();
+// hal::v5::strong_ptr<hal::output_pin> tim2_ch2();
+
 
 inline void reset()
 {
