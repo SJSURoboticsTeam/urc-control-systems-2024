@@ -19,6 +19,15 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
   DEMOS
     application
+    # can_test
+    # can_test_wrist
+    can_test_elbow 
+    can_test_shoulder
+    can_test_track
+    can_test_wrist_l
+    can_test_wrist_r
+    can_test_endeff
+
   
   INCLUDES
     ../drivers/include/
@@ -29,6 +38,8 @@ SOURCES
     ../drivers/src/h_bridge.cpp
     src/bldc_servo.cpp
     ../drivers/src/serial_commands.cpp
+    src/can_messaging.cpp
+    applications/perseus_can_demo.cpp
     
 PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
