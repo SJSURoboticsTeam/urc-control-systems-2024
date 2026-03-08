@@ -203,7 +203,7 @@ hal::degrees swerve_module::get_steer_offset()
   return m_steer_offset;
 }
 
-[[maybe_unused]]constexpr int can_attempts = 2;
+constexpr int can_attempts = 2;
 hal::degrees swerve_module::get_steer_motor_position()
 {
   auto console = resources::console();
@@ -218,7 +218,7 @@ hal::degrees swerve_module::get_steer_motor_position()
     } catch (hal::exception e) {
       attempts--;
       if (attempts <= 0) {
-        hal::print(*console,"final attempt failed throwing");
+        hal::print(*console, "final attempt failed throwing");
         throw;
       }
     }
@@ -236,7 +236,7 @@ void swerve_module::set_steer_motor_position(hal::degrees p_position)
     } catch (hal::exception e) {
       attempts--;
       if (attempts <= 0) {
-        hal::print(*console,"final attempt failed throwing");
+        hal::print(*console, "final attempt failed throwing");
         throw;
       }
     }
@@ -254,7 +254,7 @@ void swerve_module::set_steer_motor_velocity(float p_velocity)
     } catch (hal::exception e) {
       attempts--;
       if (attempts <= 0) {
-        hal::print(*console,"final attempt failed throwing");
+        hal::print(*console, "final attempt failed throwing");
         throw;
       }
     }
@@ -272,7 +272,7 @@ float swerve_module::get_prop_motor_velocity()
     } catch (hal::exception e) {
       attempts--;
       if (attempts <= 0) {
-        hal::print(*console,"final attempt failed throwing");
+        hal::print(*console, "final attempt failed throwing");
         throw;
       }
       throw;
@@ -291,7 +291,7 @@ void swerve_module::set_prop_motor_velocity(float p_velocity)
     } catch (hal::exception e) {
       attempts--;
       if (attempts <= 0) {
-        hal::print(*console,"final attempt failed throwing");
+        hal::print(*console, "final attempt failed throwing");
         throw;
       }
     }
