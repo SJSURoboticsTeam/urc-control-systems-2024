@@ -1,4 +1,4 @@
-#include "../hardware_map.hpp"
+#include <resource_list.hpp>
 
 namespace sjsu::hub {
 

@@ -15,14 +15,18 @@
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
-#include "applications/application.hpp"
-
-#include "resource_list.hpp"
-
+#include <libhal/error.hpp>
+#include <resource_list.hpp>
 int main()
 {
-  initialize_platform();
-  sjsu::drive::application();
+  sjsu::drive::initialize_platform();
+  try {
+    sjsu::drive::application();
+  } catch (hal::exception e) {
+    auto console_ref = sjsu::drive::resources::console();
+    print<64>(*console_ref, "App Failed, error code: %d\n", e.error_code());
+    sjsu::drive::resources::stop();
+  }
   std::terminate();
 }
 

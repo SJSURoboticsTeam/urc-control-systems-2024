@@ -1,4 +1,4 @@
-#include "../include/color_sensor_opt4048.hpp"
+#include <color_sensor_opt4048.hpp>
 #include <libhal/units.hpp>
 #include <stdlib.h>
 

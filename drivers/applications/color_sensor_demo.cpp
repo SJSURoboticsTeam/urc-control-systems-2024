@@ -7,8 +7,8 @@
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
 
-#include "../hardware_map.hpp"
-#include "../include/color_sensor_opt4048.hpp"
+#include <color_sensor_opt4048.hpp>
+#include <resource_list.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

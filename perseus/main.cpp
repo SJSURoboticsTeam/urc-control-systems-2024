@@ -16,12 +16,12 @@
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 
-#include "hardware_map.hpp"
+#include <resource_list.hpp>
 
 int main()
 {
-  sjsu::drivers::initialize_platform();
-  sjsu::drivers::application();
+  sjsu::perseus::initialize_platform();
+  sjsu::perseus::application();
   std::terminate();
 }
 // libhal-arm-mcu specific APIs defined to reduce code size

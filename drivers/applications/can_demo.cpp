@@ -1,10 +1,11 @@
-#include "../hardware_map.hpp"
 #include <libhal-armcortex/dwt_counter.hpp>
 #include <libhal-armcortex/startup.hpp>
 #include <libhal-armcortex/system_control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/units.hpp>
+#include <resource_list.hpp>
+
 
 namespace sjsu::drivers {
 void application(application_framework& p_framework)

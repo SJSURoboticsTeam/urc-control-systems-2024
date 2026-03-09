@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "../include/pressure_sensor_bme680.hpp"
+#include <pressure_sensor_bme680.hpp>
 #include <libhal/units.hpp>
 
 using namespace hal::literals;

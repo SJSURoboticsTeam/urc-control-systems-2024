@@ -1,6 +1,7 @@
 #include <array>
 #include <cmath>
 #include <cstdlib>
+#include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <swerve_module.hpp>
 #include <sys/types.h>
@@ -38,15 +39,6 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   chassis_velocities const& p_chassis_velocities,
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
     p_modules);
-
-// will likely be unused for this rover
-/**
- * @brief calculates a score that represents how much conflict there is between
- * the modules
- */
-float module_validity_strain_score(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
-  std::array<vector2d, module_count> p_vectors);
 
 /**
  * @brief calculates an estimate of the chassis velocities based on the cached
@@ -150,4 +142,15 @@ std::array<swerve_module_state, module_count> interpolate_states(
  * @param p_upper the upper limit of the bounds to place the value in
  */
 float modulus_range(float p_value, float p_lower, float p_upper);
+
+constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
+{
+  return static_cast<hal::time_duration>(static_cast<long long>(p_time * 1e9f));
+}
+constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
+{
+  return static_cast<float>(p_time.count()) * 1e-9f;
+}
+hal::time_duration get_clock_time(hal::steady_clock& p_clock);
+
 }  // namespace sjsu::drive

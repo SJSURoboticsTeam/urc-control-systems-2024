@@ -1,4 +1,3 @@
-#include "../hardware_map.hpp"
 #include <array>
 #include <libhal-util/bit.hpp>
 #include <libhal-util/i2c.hpp>
@@ -6,8 +5,10 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/input_pin.hpp>
 #include <libhal/units.hpp>
+#include <resource_list.hpp>
 #include <tla2528.hpp>
 #include <tla2528_adapters.hpp>
+
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

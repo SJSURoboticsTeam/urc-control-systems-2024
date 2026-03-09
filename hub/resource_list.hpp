@@ -14,18 +14,26 @@
 #pragma once
 
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-util/steady_clock.hpp>
+#include <libhal/adc.hpp>
 #include <libhal/can.hpp>
+#include <libhal/dac.hpp>
 #include <libhal/functional.hpp>
+#include <libhal/i2c.hpp>
 #include <libhal/input_pin.hpp>
 #include <libhal/interrupt_pin.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/serial.hpp>
+#include <libhal/spi.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
+#include <libhal/zero_copy_serial.hpp>
 
-namespace sjsu::drivers {
+
+namespace sjsu::hub {
 namespace custom {
 /**
  * @brief A stand in interface until libhal supports an official watchdog
@@ -66,19 +74,15 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-
-hal::v5::strong_ptr<hal::output_pin> status_led();
-// to instantiate H-bridge
-hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> output_pin_1();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
-
-// current sensing
-hal::v5::strong_ptr<hal::adc> adc_0();
-
-// quadrature encoder
-hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
+hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
+hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
+hal::v5::strong_ptr<hal::i2c> i2c();
 
 inline void reset()
 {
@@ -94,4 +98,4 @@ inline void sleep(hal::time_duration p_duration)
 // Application function is implemented by one of the .cpp files.
 void initialize_platform();
 void application();
-}  // namespace sjsu::drivers
+}  // namespace sjsu::hub

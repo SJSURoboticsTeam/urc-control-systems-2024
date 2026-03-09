@@ -6,25 +6,26 @@ project(application LANGUAGES CXX)
 libhal_build_demos(
     DEMOS
     application
-    pump_manager_demo
-
-    PACKAGES
-    libhal-util
-    libhal-soft
-    libhal-pca
-    # libhal-esp8266
-
-    LINK_LIBRARIES
-    libhal::util
-    libhal::soft
-    libhal::pca
-    # libhal::esp8266
+    carousel_demo
+    load_cell_demo
 
     INCLUDES
     .
 
     SOURCES
     implementations/pump_manager.cpp
-    implementations/revolver.cpp
+    implementations/carousel.cpp
     implementations/science_state_machine.cpp
+
+    PACKAGES
+    libhal-util
+    libhal-actuator
+    libhal-expander
+
+
+    LINK_LIBRARIES
+    libhal::util
+    libhal::actuator
+    libhal::expander
+
 ) 
