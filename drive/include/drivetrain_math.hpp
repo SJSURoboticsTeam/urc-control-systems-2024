@@ -44,11 +44,12 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
  * module states
  *
  * @param p_modules modules used to form the estimate
- * @return chassis velocities estimate
+ * @param results a Chassis_velocities struct passed by reference to hold results
+ * @return true if calculations worked and are valid, flase if not able to calculate
  */
-chassis_velocities calc_estimated_chassis_velocities(
+bool calc_estimated_chassis_velocities(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
-    p_modules);
+    p_modules, chassis_velocities& results);
 
 /**
  * @brief calculates the swerve state with the most angular freedom either side
@@ -142,5 +143,5 @@ std::array<swerve_module_state, module_count> interpolate_states(
  */
 float modulus_range(float p_value, float p_lower, float p_upper);
 
-bool isSafe(const std::array<swerve_module_state, module_count>& modules)
+bool isSafe(const std::array<swerve_module_state, module_count>& modules);
 }  // namespace sjsu::drive

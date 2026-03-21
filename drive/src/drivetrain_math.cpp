@@ -1,9 +1,9 @@
-#include <drivetrain_math.hpp>
 #include "swerve_module.hpp"
 #include "vector2d.hpp"
 #include <array>
 #include <cmath>
 #include <cstdlib>
+#include <drivetrain_math.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
 
@@ -48,118 +48,118 @@ std::array<vector2d, module_count> chassis_velocities_to_module_vectors(
   return vectors;
 }
 
-//https://planetmath.org/choleskydecomposition
-//to solve Ax = b
-static bool cholesky(float const& A_[3][3], float const& c[3], float& x[3])
+// https://planetmath.org/choleskydecomposition
+// to solve Ax = b
+static bool cholesky(float const A_[3][3], float const c[3], float x[3])
 {
 
-  const float a00 = A_[0][0];
-  const float a10 = A_[1][0], a11 = A_[1][1];
-  const float a20 = A_[2][0], a21 = A_[2][1], a22 = A_[2][2];
+  float const a00 = A_[0][0];
+  float const a10 = A_[1][0], a11 = A_[1][1];
+  float const a20 = A_[2][0], a21 = A_[2][1], a22 = A_[2][2];
 
-  // A = L * L^T 
+  // A = L * L^T
 
   // 1st column
   float L00 = sqrtf(a00);
-  if (!(L00 > 0.0f)) return false;
+  if (!(L00 > 0.0f))
+    return false;
   float L10 = a10 / L00;
   float L20 = a20 / L00;
 
   // 2nd column
-  float t11 = a11 - L10*L10;
-  if (!(t11 > 0.0f)) return false;
+  float t11 = a11 - L10 * L10;
+  if (!(t11 > 0.0f))
+    return false;
   float L11 = sqrtf(t11);
-  float L21 = (a21 - L20*L10) / L11;
+  float L21 = (a21 - L20 * L10) / L11;
 
   // 3rd column
-  float t22 = a22 - L20*L20 - L21*L21;
-  if (!(t22 > 0.0f)) return false;
+  float t22 = a22 - L20 * L20 - L21 * L21;
+  if (!(t22 > 0.0f))
+    return false;
   float L22 = sqrtf(t22);
 
   // forward solve
   float y0 = c[0] / L00;
-  float y1 = (c[1] - L10*y0) / L11;
-  float y2 = (c[2] - L20*y0 - L21*y1) / L22;
+  float y1 = (c[1] - L10 * y0) / L11;
+  float y2 = (c[2] - L20 * y0 - L21 * y1) / L22;
 
   // backward solve
   x[2] = y2 / L22;
-  x[1] = (y1 - L21*x[2]) / L11;
-  x[0] = (y0 - L10*x[1] - L20*x[2]) / L00;
+  x[1] = (y1 - L21 * x[2]) / L11;
+  x[0] = (y0 - L10 * x[1] - L20 * x[2]) / L00;
 
   return true;
 }
 
-//normal equations least squares puesdoinverse
-//https://www.youtube.com/watch?v=C7LEuhS4H94&t=8s
-//https://math.mit.edu/icg/resources/teaching/18.085-spring2015/LeastSquares.pdf
-//https://tobydriscoll.net/fnc-julia/leastsq/normaleqns.html
+// normal equations least squares puesdoinverse
+// https://www.youtube.com/watch?v=C7LEuhS4H94&t=8s
+// https://math.mit.edu/icg/resources/teaching/18.085-spring2015/LeastSquares.pdf
+// https://tobydriscoll.net/fnc-julia/leastsq/normaleqns.html
+constexpr float M_PI = 3.14159265358979323846f;
 
-chassis_velocities calc_estimated_chassis_velocities(
-  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const&
-    p_modules){
+bool calc_estimated_chassis_velocities(
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
+  chassis_velocities& results)
+{
 
-    float a [3][3] = {{0,0,0},{0,0,0},{0,0,0}};
-    float c [3] = {0,0,0};
-    float x_solution [3] = {0,0,0};
+  float a[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+  float c[3] = { 0, 0, 0 };
+  float x_solution[3] = { 0, 0, 0 };
 
-    auto accumulate = [&](float r0, float r1, float position, float v){
+  auto accumulate = [&](float r0, float r1, float position, float v) {
+    // 1st column
+    a[0][0] += r0 * r0;
+    a[1][0] += r0 * r1;
+    a[2][0] += r0 * position;
 
-      //1st column
-      a[0][0] += r0 * r0; 
-      a[1][0] += r0 * r1; 
-      a[2][0] += r0 * position;
+    // 2nd column
+    a[0][1] += r1 * r0;
+    a[1][1] += r1 * r1;
+    a[2][1] += r1 * position;
 
-      //2nd column
-      a[0][1] += r1 * r0;
-      a[1][1] += r1 * r1;
-      a[2][1] += r1 * position;
+    // 3rd column
+    a[0][2] += position * r0;
+    a[1][2] += position * r1;
+    a[2][2] += position * position;
 
-      //3rd column
-      a[0][2] += position * r0;
-      a[1][2] += position * r1;
-      a[2][2] += position * position;
+    // C-matrix
+    c[0] += r0 * v;
+    c[1] += r1 * v;
+    c[2] += position * v;
+  };
 
-      //C-matrix
-      c[0] += r0 * v;
-      c[1] += r1 * v;
-      c[2] += position * v;
-    };
+  // deg & rad helpers
+  constexpr float deg_to_rad = static_cast<float>(M_PI) / 180.0f;
+  constexpr float rad_to_deg = 180.0f / static_cast<float>(M_PI);
 
-    //deg & rad helpers
-    constexpr float deg_to_rad = static_cast<float>(M_PI) / 180.0f;
-    constexpr float rad_to_deg = 180.0f / static_cast<float>(M_PI);
+  for (auto const& mod_ptr : p_modules) {
+    auto const& module = *mod_ptr;
 
-    for (auto const& mod_ptr : p_modules){
-      auto const& module = *mod_ptr;
+    float const xi = module.settings.position.x;
+    float const yi = module.settings.position.y;
 
-      const float xi = module.settings.position.x;
-      const float yi = module.settings.position.y;
+    auto const state = module.get_actual_state_cache();
+    float const speed = state.propulsion_velocity;
+    float const angle_degrees = state.steer_angle;
+    float const angle_rad = angle_degrees * deg_to_rad;
+    float const vix = speed * std::cos(angle_rad);
+    float const viy = speed * std::sin(angle_rad);
 
-      const auto state = module.get_actual_state_cache();
-      const float speed = state.propulsion_velocity;
-      const float angle_degrees = state.steer_angle;
-      const float angle_rad = angle_degrees * deg_to_rad;
-      const float vix = speed * std::cos(angle_rad);
-      const float viy = speed * std::sin(angle_rad);
+    accumulate(1.0f, 0.0f, -yi, vix);
+    accumulate(0.0f, 1.0f, xi, viy);
+  }
 
-      accumulate(1.0f, 0.0f, -yi, vix);
-      accumulate(0.0f, 1.0f, xi, viy);
-    }
+  if (!cholesky(a, c, x_solution)) {  // error check
+    return false;
+  }
 
-    chassis_velocities results{};
+  results.translation.x = x_solution[0];
+  results.translation.y = x_solution[1];
+  results.rotational_vel = x_solution[2] * rad_to_deg;  // stores in degrees
 
-    if (!cholesky(a,c,x_solution)){ //error check
-      return false;
-    }
-
-    results.translation.x = x_solution[0];
-    results.translation.y = x_solution[1];
-    results.rotational_vel = x_solution[2] * rad_to_deg; // stores in degrees
-
-    return results;
-
-    }
-
+  return true;
+}
 
 swerve_module_state calculate_freest_state(swerve_module const& p_module,
                                            vector2d const& p_target_vector)
@@ -316,36 +316,37 @@ float modulus_range(float p_value, float p_lower, float p_upper)
   return offset + p_lower;
 }
 
-
-//helper to find difference given two angels
-//returns radians
-float angleDiff(float a, float b){
+// helper to find difference given two angels
+// returns radians
+float angleDiff(float a, float b)
+{
 
   float d = std::fmod(a - b + M_PI, 2.0 * M_PI);
-  if (d < 0) d += 2.0 * M_PI;
-  
-  return d - M_PI;
+  if (d < 0)
+    d += 2.0 * M_PI;
 
+  return d - M_PI;
 }
 
 // angle tolerance
-constexpr angle_tolerance_radians = 10.0f * M_PI/180.0f;
+constexpr float angle_tolerance_radians = 10.0f * M_PI / 180.0f;
 // sideways tolerance
-constexpr sideways_tolerance = 0.3f;
-
+constexpr float sideways_tolerance = 0.3f;
 
 // checks angle should point to chasis motion
 // compares predicted wheel direction do actual module angle
 // checks sideways slip (velocites dont match angles)
 
-bool moduleConsistentWithChasis(const vector2d& v_wheel, const swerve_module_state& state){
+bool moduleConsistentWithChasis(vector2d const& v_wheel,
+                                swerve_module_state const& state)
+{
 
   float theta = state.steer_angle;
   float expected_theta = std::atan2(v_wheel.y, v_wheel.x);
   float differenceRadians = angleDiff(theta, expected_theta);
 
-  //check if difference greater than tolerance
-  if (abs(differenceRadians) > angle_tolerance_radians){
+  // check if difference greater than tolerance
+  if (abs(differenceRadians) > angle_tolerance_radians) {
     return false;
   }
 
@@ -354,35 +355,42 @@ bool moduleConsistentWithChasis(const vector2d& v_wheel, const swerve_module_sta
 
   float dotProduct = (v_wheel.x * -ytheta) + (v_wheel.y * xtheta);
 
-  if (std::fabs(dot) > sideways_tolerance){
+  if (std::fabs(dotProduct) > sideways_tolerance) {
     return false;
   }
 
   return true;
 }
 
+bool isSafe(
+  std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules)
+{
+  chassis_velocities estimates{};
 
-bool isSafe(std::array<swerve_module_state, module_count>& modules){
+  if (!calc_estimated_chassis_velocities(p_modules, estimates)) {
+    return false;
+  }
 
-  chassis_velocities estimates = calc_estimated_chassis_velocities(modules);
+  constexpr float deg_to_rad = M_PI / 180.0f;
 
-  for (i = 0; i < module_count; i++){
-    const auto& module = *modules[i];
-    const auto state = module.get_actual_state_cache();
-    const auto& position = module.position.settings.postion;
+  for (size_t i = 0; i < module_count; i++) {
+    auto const& module = *p_modules[i];
+    auto const state = module.get_actual_state_cache();
+    auto const& position = module.settings.position;
 
-    //convert to radians/sec
-    float omega_radians = estimates.rotational_vel * (M_PI/180.0f);
+    // convert deg/sec to rad/sec
+    float omega_radians = estimates.rotational_vel * deg_to_rad;
 
-    est_vx = estimates.translation.x - omega_radians * position.y;
-    est_vy = estimates.translation.y + omega_radians * position.x;
+    float est_vx = estimates.translation.x - omega_radians * position.y;
+    float est_vy = estimates.translation.y + omega_radians * position.x;
 
-    vector2d v_wheel{est_vx, est_vy};
+    vector2d v_wheel{ est_vx, est_vy };
 
-    if (!moduleConsistentWithChasis(v_wheel, state)){
+    if (!moduleConsistentWithChasis(v_wheel, state)) {
       return false;
     }
   }
+
   return true;
 }
 }  // namespace sjsu::drive
