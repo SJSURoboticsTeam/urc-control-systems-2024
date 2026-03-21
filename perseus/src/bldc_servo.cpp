@@ -110,8 +110,8 @@ float bldc_perseus::get_target_velocity()
 float bldc_perseus::get_reading_velocity()
 {
 
-  const size_t now_time = m_clock->uptime();
-  const size_t dt_time = now_time - m_last_clock_check;
+  const hal::u64 now_time = m_clock->uptime();
+  const hal::u64 dt_time = now_time - m_last_clock_check;
 
   const float  dt_sec = static_cast<float>(dt_time) / static_cast<float>(m_clock->frequency());
 
@@ -120,7 +120,7 @@ float bldc_perseus::get_reading_velocity()
   }
   
   const hal::degrees current_position = bldc_perseus::read_angle();
-  const float d_theta = (current_position - m_prev_encoder_value).to<float>();
+  const float d_theta = (current_position - m_prev_encoder_value);
   
   m_reading.velocity = d_theta / dt_sec;
 
