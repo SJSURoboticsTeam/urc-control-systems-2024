@@ -46,7 +46,7 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   };
   // elbow 
   m_servo_values = {
-    .gear_ratio = 10562.2, // 5281.1 * 2
+    .gear_ratio = 5281.1, // 5281.1 * 2 / 2
     .feedforward_clamp = 0.2, 
     .length = 0.4826, 
     .angle_offset = -20, 
@@ -55,7 +55,7 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   }; 
   // // shoulder 
   // m_servo_values = {
-  //   .gear_ratio = 147870.8, // 5281.1 * 28
+  //   .gear_ratio = 73935.4, // 5281.1 * 28 / 2
   //   .feedforward_clamp = 0, 
   //   .length = 0.5715, 
   //   .angle_offset = -20, 
@@ -64,16 +64,16 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
   // }; 
   // // wrist 
   // m_servo_values = {
-  //   .gear_ratio = 5281.1, // 5281.1 * 1
+  //   .gear_ratio = 2640.55, // 5281.1 * 1 / 2
   //   .feedforward_clamp = 0.2,
   //   .length = 0.762, 
   //   .angle_offset = 0, 
   //   .weight_beam = 500, 
   //   .weight_end = 100 
   // }; 
-// // track 
+  // // track 
   // m_servo_values = {
-  //   .gear_ratio = 751.8, // 751.8 * 1
+  //   .gear_ratio = 16915.5, // 751.8 * 1 / 2 * 360 / 8 (for mm) 
   //   .feedforward_clamp = 0,
   //   .length = 0, 
   //   .angle_offset = 0, 
@@ -113,10 +113,14 @@ float bldc_perseus::get_reading_velocity()
   return m_reading.velocity;
 }
 
-void bldc_perseus::set_power(float power) {
-  m_h_bridge->power(power);
+float bldc_perseus::get_power() {
+  return m_reading.power;
 }
 
+void bldc_perseus::set_power(float power) {
+  m_reading.power = power; 
+  m_h_bridge->power(m_reading.power);
+}
 
 void bldc_perseus::stop()
 {
@@ -145,12 +149,13 @@ void bldc_perseus::home_encoder()
 }
 
 hal::degrees bldc_perseus::read_angle() {
-  return m_encoder->read().angle * m_servo_values.gear_ratio; 
+  return m_encoder->read().angle / m_servo_values.gear_ratio; 
 }
 
-void bldc_perseus::update_velocity() 
+void bldc_perseus::update_velocity(int from_scratch) 
 {
   // TODO : implement velocity PID control
+  if (from_scratch) m_PID_prev_velocity_values.integral = 0; 
 }
 
 void bldc_perseus::reset_time()
@@ -179,13 +184,16 @@ hal::time_duration bldc_perseus::get_clock_time(hal::steady_clock& p_clock)
   return period * p_clock.uptime();
 }
 // position 
-void bldc_perseus::update_position() 
+void bldc_perseus::update_position(int from_scratch) 
 {
   // pid portion
   m_reading.position = bldc_perseus::read_angle();
   float error = m_target.position - m_reading.position;
   sec curr_time = hal_time_duration_to_sec(get_clock_time(*m_clock));
   sec dt = curr_time - m_PID_prev_position_values.prev_dt_time;
+  if (from_scratch) { 
+    m_PID_prev_position_values.integral = 0.0f; 
+  }
   m_PID_prev_position_values.integral += error * dt; 
   float derivative = (error - m_PID_prev_position_values.last_error) / dt; 
   float pTerm = m_reading_position_settings.kp * error; 
