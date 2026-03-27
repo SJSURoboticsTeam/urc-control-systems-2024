@@ -152,7 +152,7 @@ hal::degrees bldc_perseus::read_angle() {
   return m_encoder->read().angle / m_servo_values.gear_ratio; 
 }
 
-void bldc_perseus::update_velocity(int from_scratch) 
+void bldc_perseus::update_velocity(bool from_scratch) 
 {
   // TODO : implement velocity PID control
   if (from_scratch) m_PID_prev_velocity_values.integral = 0; 
@@ -184,7 +184,7 @@ hal::time_duration bldc_perseus::get_clock_time(hal::steady_clock& p_clock)
   return period * p_clock.uptime();
 }
 // position 
-void bldc_perseus::update_position(int from_scratch) 
+void bldc_perseus::update_position(bool from_scratch) 
 {
   // pid portion
   m_reading.position = bldc_perseus::read_angle();

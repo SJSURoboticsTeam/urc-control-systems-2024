@@ -142,12 +142,17 @@ public:
 
   /**
     * @brief Update velocity to the target velocity using PID control and feedforward. 
+      @param from_scratch A bool indicator of if the target being moved to is new (1) or not (0). 
+                          If the target is new, reset integral value to 0. 
+
   */
-  void update_velocity(int from_scratch); 
+  void update_velocity(bool from_scratch); 
   /**
     * @brief Update position to the target position using PID control and feedforward. 
+      @param from_scratch A bool indicator of if the target being moved to is new (1) or not (0). 
+                          If the target is new, reset integral value to 0. 
   */
-  void update_position(int from_scratch); 
+  void update_position(bool from_scratch); 
   /**
    * @brief Feedforward values to account for gravity/weight 
    * @return Current feedforward value 
