@@ -19,7 +19,6 @@
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -27,7 +26,6 @@
 #include <libhal-arm-mcu/stm32f1/input_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/output_pin.hpp>
 #include <libhal-arm-mcu/stm32f1/pin.hpp>
-//#include <libhal-arm-mcu/stm32f1/spi.hpp>
 #include <libhal-arm-mcu/stm32f1/timer.hpp>
 #include <libhal-arm-mcu/stm32f1/uart.hpp>
 #include <libhal-arm-mcu/stm32f1/usart.hpp>
@@ -42,7 +40,6 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
-#include "../hardware_map.hpp"
 #include <libhal/pointers.hpp>
 
 namespace sjsu::mimic::resources {
@@ -89,10 +86,14 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
+hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
-  return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
-    driver_allocator(), hal::port<1>, hal::buffer<128>);
+  if (not console_ptr) {
+    console_ptr = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
+      driver_allocator(), hal::port<1>, hal::buffer<128>);
+  }
+  return console_ptr;
 }
 
 // sree promised status led
@@ -107,99 +108,90 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
+// adc copied from hub stm32f103c8
+// adc1-15- pc5
+// adc2-12 - pc2
+// adc3-11 - pc1
+// adc4- 9 - pb1
+hal::v5::strong_ptr<hal::adc> test_servo_feedback_adc_0()
+{
+  static hal::atomic_spin_lock adc_lock0;
+  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
+  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
+}
+
 // From i2c I access my tla -> adc
 // design choice: in hardware map: do i create tla here or in application?
 // driver allocator, allocates memory for this item
 // still using bit bang
-hal::v5::strong_ptr<hal::i2c> i2c()
-{
-  static auto sda_output_pin = gpio_b().acquire_output_pin(7);
-  static auto scl_output_pin = gpio_b().acquire_output_pin(6);
-  auto clock = resources::clock();
-  return hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
-                                                     hal::bit_bang_i2c::pins{
-                                                       .sda = &sda_output_pin,
-                                                       .scl = &scl_output_pin,
-                                                     },
-                                                     *clock);
-}
+// hal::v5::strong_ptr<hal::i2c> i2c()
+// {
+//   static auto sda_output_pin = gpio_b().acquire_output_pin(7);
+//   static auto scl_output_pin = gpio_b().acquire_output_pin(6);
+//   auto clock = resources::clock();
+//   return hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
+//                                                      hal::bit_bang_i2c::pins{
+//                                                        .sda = &sda_output_pin,
+//                                                        .scl = &scl_output_pin,
+//                                                      },
+//                                                      *clock);
+// }
 
 // each timer gives 4 pwm, pwms are broken out on the stm
 // encoder needs two timer pins
-auto& timer1()
-{
-  static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
-  return timer1;
-}
+// auto& timer1()
+// {
+//   static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
+//   return timer1;
+// }
 
-auto& timer2()
+// auto& timer2()
+// {
+//   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
+//   return timer2;
+// }
+
+auto& timer3()
 {
-  static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
-  return timer2;
+  static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
+  return timer3;
 }
 
 //pwm0 - 32 -> ch8
 //pwm1 - 47 -> ch1
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
+
+// WHAT DOES pa6 or pa8 mean? difference between advanced and general purpose timer?
+hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0()
 {
   auto timer_pwm_channel =
-    timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
+    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
-{
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
-}
 //PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
-{
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
-}
+// hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
+// {
+//   auto timer_pwm_channel =
+//     timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
+//   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+//     driver_allocator(), std::move(timer_pwm_channel));
+// }
 
-hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
-{
-  auto timer_pwm_frequency = timer1().acquire_pwm_group_frequency();
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
-    driver_allocator(), std::move(timer_pwm_frequency));
-}
+// Set the waveform frequency for pwm channels managed by this driver
+// hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
+// {
+//   auto timer_pwm_frequency = timer1().acquire_pwm_group_frequency();
+//   return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
+//     driver_allocator(), std::move(timer_pwm_frequency));
+// }
 
-hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
-{
-  auto timer_pwm_frequency = timer2().acquire_pwm_group_frequency();
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
-    driver_allocator(), std::move(timer_pwm_frequency));
-}
-
-hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
-{
-  throw hal::operation_not_supported(nullptr);
-  // CAN is commented out in original due to potential stalling issues
-  // TODO(#125): Initializing the can peripheral without it connected to a can
-  // transceiver causes it to stall on occasion.
-}
-
-hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
-{
-  throw hal::operation_not_supported(nullptr);
-}
-
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
-{
-  throw hal::operation_not_supported(nullptr);
-}
-
-hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
-{
-  throw hal::operation_not_supported(nullptr);
-}
+// hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
+// {
+//   auto timer_pwm_frequency = timer2().acquire_pwm_group_frequency();
+//   return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
+//     driver_allocator(), std::move(timer_pwm_frequency));
+// }
 
 [[noreturn]] void terminate_handler() noexcept
 {
@@ -227,12 +219,12 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
   }
 }
 
-}  // namespace sjsu::hub::resources
-namespace sjsu::hub {
+}  // namespace sjsu::mimic::resources
+namespace sjsu::mimic {
 void initialize_platform()
 {
   using namespace hal::literals;
-  hal::set_terminate(sjsu::hub::resources::terminate_handler);
+  hal::set_terminate(sjsu::mimic::resources::terminate_handler);
   // Set the MCU to the maximum clock speed
 
   hal::stm32f1::configure_clocks(hal::stm32f1::clock_tree{
@@ -265,4 +257,6 @@ void initialize_platform()
 
   hal::stm32f1::release_jtag_pins();
 }
-}  // namespace sjsu::hub
+// void resources::stop()
+// stop power? tell real arm to home or stop
+}  // namespace sjsu::mimic
