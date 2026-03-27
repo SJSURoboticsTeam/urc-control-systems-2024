@@ -24,7 +24,6 @@ void application()
   int count = 0;
   while (true) {
     hal::delay(*clock, 100ms);
-    // hal::print(*console, "loop");
 
     can_transceiver->send({ .id = 0x98, .length = 0 });
     auto dv = drive_can_finder.find();
