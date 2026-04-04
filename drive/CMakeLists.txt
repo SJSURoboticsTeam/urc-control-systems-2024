@@ -7,10 +7,10 @@ libhal_build_demos(
 
 DEMOS
     application
-    # can_stability_test
+    can_stability_test
     chassis_vel_demo
     iterate_state
-    # poll_motor_connections
+    limit_switch_test
     prop_motor_test
     sequential_homing_demo
     serial_command_demo
@@ -22,17 +22,10 @@ INCLUDES
     include
 SOURCES
     ../drivers/src/serial_commands.cpp
-    ../drivers/src/perseus_bldc.cpp
-    ../drivers/src/velocity_motor_mock.cpp
-    ../drivers/src/velocity_servo_mock.cpp
     src/drivetrain.cpp
     src/drivetrain_math.cpp
     src/mission_control_manager.cpp
     src/swerve_module.cpp
-    src/propulsion_controller_mock.cpp
-    src/propulsion_controller_rmd_x7.cpp
-    src/steer_controller_mock.cpp
-    src/steer_controller_perseus.cpp
 
 PACKAGES
 #    libhal-__device__
