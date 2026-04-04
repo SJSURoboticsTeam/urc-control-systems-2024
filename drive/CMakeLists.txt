@@ -7,10 +7,10 @@ libhal_build_demos(
 
 DEMOS
     application
+    can_stability_test
     chassis_vel_demo
     iterate_state
     limit_switch_test
-    mc_stability_test
     prop_motor_test
     sequential_homing_demo
     serial_command_demo
