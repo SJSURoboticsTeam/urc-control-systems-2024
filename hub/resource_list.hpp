@@ -78,8 +78,10 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
-hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_0();
-hal::v5::strong_ptr<hal::pwm> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1();
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2();
 hal::v5::strong_ptr<hal::pwm> under_chassis_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
 hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
@@ -87,7 +89,6 @@ hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 hal::v5::strong_ptr<custom::watchdog> watchdog();
 
 inline void reset()

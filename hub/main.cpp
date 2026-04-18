@@ -12,18 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <libhal-exceptions/control.hpp>
+#include <libhal-util/serial.hpp>
+#include <libhal-util/steady_clock.hpp>
+#include <libhal/error.hpp>
 #include <resource_list.hpp>
 
 int main()
 {
   sjsu::hub::initialize_platform();
-  sjsu::hub::application();
+  try {
+    sjsu::hub::application();
+  } catch (hal::exception e) {
+    auto console_ref = sjsu::hub::resources::console();
+    print<64>(*console_ref, "App Failed, error code: %d\n", e.error_code());
+  }
   std::terminate();
 }
 
 extern "C"
 {
-  void __assert_func()
+  // This gets rid of an issue with libhal-exceptions in Debug mode.
+  void __assert_func()  // NOLINT
   {
   }
+}
+
+// Override global new operator
+void* operator new(std::size_t)
+{
+  throw std::bad_alloc();
+}
+
+// Override global new[] operator
+void* operator new[](std::size_t)
+{
+  throw std::bad_alloc();
+}
+
+void* operator new(unsigned int, std::align_val_t)
+{
+  throw std::bad_alloc();
+}
+
+// Override global delete operator
+void operator delete(void*) noexcept
+{
+}
+
+// Override global delete[] operator
+void operator delete[](void*) noexcept
+{
+}
+
+// Optional: Override sized delete operators (C++14 and later)
+void operator delete(void*, std::size_t) noexcept
+{
+}
+
+void operator delete[](void*, std::size_t) noexcept
+{
+}
+
+void operator delete[](void*, std::align_val_t) noexcept
+{
+}
+
+void operator delete(void*, std::align_val_t) noexcept
+{
 }
