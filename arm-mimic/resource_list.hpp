@@ -14,6 +14,7 @@
 #include <libhal/timer.hpp>
 #include <libhal/usb.hpp>
 #include <libhal/zero_copy_serial.hpp>
+#include <libhal-actuator/rc_servo.hpp>
 
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.
@@ -25,8 +26,9 @@ hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // define a pwm channel servo input
 // separate output pin for potentiometer feedback - analog read
-hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0();
 hal::v5::strong_ptr<hal::adc> test_servo_feedback_adc_0();
+hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0();
+hal::v5::strong_ptr<hal::actuator::rc_servo> rc_servo();
 
 // void stop();
 

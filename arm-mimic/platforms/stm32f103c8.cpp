@@ -32,8 +32,6 @@
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/atomic_spin_lock.hpp>
-#include <libhal-util/bit_bang_i2c.hpp>
-#include <libhal-util/bit_bang_spi.hpp>
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -41,6 +39,8 @@
 #include <libhal/units.hpp>
 
 #include <libhal/pointers.hpp>
+#include <libhal-actuator/rc_servo.hpp>
+
 
 namespace sjsu::mimic::resources {
 using namespace hal::literals;
@@ -108,48 +108,19 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-// adc copied from hub stm32f103c8
-// adc1-15- pc5
-// adc2-12 - pc2
-// adc3-11 - pc1
-// adc4- 9 - pb1
+// Reads ADC value from A0
 hal::v5::strong_ptr<hal::adc> test_servo_feedback_adc_0()
 {
   static hal::atomic_spin_lock adc_lock0;
   static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
+  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
 }
 
-// From i2c I access my tla -> adc
-// design choice: in hardware map: do i create tla here or in application?
-// driver allocator, allocates memory for this item
-// still using bit bang
-// hal::v5::strong_ptr<hal::i2c> i2c()
-// {
-//   static auto sda_output_pin = gpio_b().acquire_output_pin(7);
-//   static auto scl_output_pin = gpio_b().acquire_output_pin(6);
-//   auto clock = resources::clock();
-//   return hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
-//                                                      hal::bit_bang_i2c::pins{
-//                                                        .sda = &sda_output_pin,
-//                                                        .scl = &scl_output_pin,
-//                                                      },
-//                                                      *clock);
-// }
-
-// each timer gives 4 pwm, pwms are broken out on the stm
-// encoder needs two timer pins
-// auto& timer1()
-// {
-//   static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
-//   return timer1;
-// }
-
-// auto& timer2()
-// {
-//   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
-//   return timer2;
-// }
+auto& timer2()
+{
+  static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
+  return timer2;
+}
 
 auto& timer3()
 {
@@ -160,37 +131,50 @@ auto& timer3()
 //pwm0 - 32 -> ch8
 //pwm1 - 47 -> ch1
 
-// WHAT DOES pa6 or pa8 mean? difference between advanced and general purpose timer?
+// Passes in PWM to CIPO1
 hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0()
 {
   auto timer_pwm_channel =
     timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
+  timer3().acquire_pwm_group_frequency().frequency(50_Hz);
   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-//PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-// hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
-// {
-//   auto timer_pwm_channel =
-//     timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
-//   return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-//     driver_allocator(), std::move(timer_pwm_channel));
-// }
+// hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
 
-// Set the waveform frequency for pwm channels managed by this driver
-// hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
+// hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
 // {
-//   auto timer_pwm_frequency = timer1().acquire_pwm_group_frequency();
-//   return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
-//     driver_allocator(), std::move(timer_pwm_frequency));
+//   if (not rc_servo_ptr) {
+//     hal::v5::strong_ptr<hal::pwm16_channel> pwm = test_servo_pwm_channel_0();
+//     hal::actuator::rc_servo16::settings rc_servo_settings{
+//       .frequency = 50,
+//       .min_angle = 0,
+//       .max_angle = 180,
+//       .min_microseconds = 500,  // 
+//       .max_microseconds = 2500, //
+//     };
+//     rc_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+//       driver_allocator(), pwm, rc_servo_settings);
+//   }
+//   return rc_servo_ptr;
 // }
-
-// hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
+// hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
 // {
-//   auto timer_pwm_frequency = timer2().acquire_pwm_group_frequency();
-//   return hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
-//     driver_allocator(), std::move(timer_pwm_frequency));
+//   hal::v5::strong_ptr<hal::pwm16_channel> pwm = test_servo_pwm_channel_0();
+//   hal::actuator::rc_servo16::settings rc_servo_settings{
+//     .frequency = 50,
+//     // Total 180 deg, change for your use case.
+//     .min_angle = -90,
+//     .max_angle = 90,
+//     // Change to 500us and 2500us if your rc servo
+//     // supports those pulse widths.
+//     .min_microseconds = 750,
+//     .max_microseconds = 2250,
+//   };
+//   static hal::actuator::rc_servo16 servo(pwm, rc_servo_settings);
+//   return hal::v5::make_strong_ptr<decltype(servo)>(
+//     driver_allocator(), std::move(servo));
 // }
 
 [[noreturn]] void terminate_handler() noexcept

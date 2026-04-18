@@ -24,3 +24,4 @@ class demos(ConanFile):
     def requirements(self):
         self.requires("libhal-util/5.8.1")
         self.requires("libhal-arm-mcu/1.19.1")
+        self.requires("libhal-actuator/[1.3.0 || latest]")

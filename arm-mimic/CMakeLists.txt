@@ -32,10 +32,11 @@ PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import
     #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal-rmd"
+    libhal-actuator
 
 LINK_LIBRARIES
     #Template for linking libhal namespaces is "libhal::__device__"
     #replace "__device__" with the libhal device you wish to import
     #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
-    
+    libhal::actuator
 )
