@@ -12,49 +12,51 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
   hal::print(*console, "app starting\n");
-  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> steer[] = {
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> steer_motor_array[] = {
     resources::front_left_steer(),
     resources::front_right_steer(),
     resources::back_left_steer(),
     resources::back_right_steer()
   };
-  for (int i = 0; i < 4; i++) {
-    steer[i]->feedback_request(
+  std::span steer_motors = {steer_motor_array};
+  for (uint8_t i = 0; i < steer_motors.size(); i++) {
+    steer_motors[i]->feedback_request(
       hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
-    float angle = steer[i]->feedback().angle();
-    steer[i]->position_control(angle, 120);
+    float angle = steer_motors[i]->feedback().angle();
+    steer_motors[i]->position_control(angle, 120);
   }
   hal::print(*console, "steer locked\n");
 
-  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> prop[] = {
+  hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> prop_motor_array[] = {
     resources::front_left_prop(),
     resources::front_right_prop(),
     resources::back_left_prop(),
     resources::back_right_prop()
   };
+  std::span prop_motors{prop_motor_array};
   hal::delay(*clock, 3s);
-  float rpm = 20;
   hal::print(*console, "forward\n");
-  for (int i = 0; i < 4; i++) {
+  float rpm = 20;
+  for (uint8_t i = 0; i < prop_motors.size(); i++) {
     if (i % 2) {
-      prop[i]->velocity_control(rpm);
+      prop_motors[i]->velocity_control(rpm);
     } else {
-      prop[i]->velocity_control(-rpm);
+      prop_motors[i]->velocity_control(-rpm);
     }
   }
   hal::delay(*clock, 8s);
   hal::print(*console, "backward\n");
-  for (int i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < prop_motors.size(); i++) {
     if (i % 2) {
-      prop[i]->velocity_control(-rpm);
+      prop_motors[i]->velocity_control(-rpm);
     } else {
-      prop[i]->velocity_control(rpm);
+      prop_motors[i]->velocity_control(rpm);
     }
   }
   hal::delay(*clock, 8s);
   hal::print(*console, "Fin\n");
-  for (int i = 0; i < 4; i++) {
-    prop[i]->velocity_control(0);
+  for (uint8_t i = 0; i < prop_motors.size(); i++) {
+    prop_motors[i]->velocity_control(0);
   }
 }
 }  // namespace sjsu::drive

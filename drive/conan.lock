@@ -8,6 +8,7 @@
         "libhal-util/5.8.1#dca6ef7baf4f47bcc0eba9baf3c7dbf1%1761614359.953",
         "libhal-mock/4.0.0#e2a2cc593adc03806c6a8b80c5a89638%1715616381.717",
         "libhal-arm-mcu/1.19.6#54553cd730a92e3c11da7924a5c149a6%1766154640.666",
+        "libhal-exceptions/1.5.0#5e72e396cbd871411ac3def36522350d%1756855565.289",
         "libhal-actuator/1.2.3#c9604e30af20eb688d32b6a6440ad6ea%1761181221.054",
         "libhal/4.18.1#8d15efecea9aadb357c23770627b0341%1761511486.387",
         "boost-ext-ut/2.1.0#aec3873a3273d96f85093971c6c8b206%1749912871.352",
