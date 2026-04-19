@@ -238,6 +238,23 @@ hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
   throw hal::operation_not_supported(nullptr);
 }
 
+hal::v5::strong_ptr<hal::spi> spi()
+{
+  return hal::make_strong_ptr<hal::stm32f1::spi>(driver_allocator(),
+                                                 hal::bus<1>,
+                                                hal::spi::settings{
+                                                    .clock_rate = 3'200.0_kHz,
+                                                    .clock_polarity = false,
+                                                    .clock_phase = false,
+                                                });
+}
+
+hal::v5::strong_ptr<hal::output_pin> spi_chip_select()
+{
+  return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(4))>(
+    driver_allocator(), gpio_a().acquire_output_pin(4));
+}
+
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {
