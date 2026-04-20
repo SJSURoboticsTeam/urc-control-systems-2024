@@ -18,7 +18,7 @@ public:
             float p_avcc);
     
     // reads a single channel and returns a raw 12-bit adc code
-    uint16_t read_channel (hal::byte p_channel);
+    hal::u16 read_channel (hal::byte p_channel);
 
     // converts raw 12-bit ADC code to voltage
     float adc_code_to_voltage(uint16_t p_raw);
@@ -26,6 +26,7 @@ public:
     //read a single channel and return its voltage
     float read_voltage(hal::byte p_channel);
 
+private:
     hal::v5::strong_ptr<hal::spi> m_spi;
     hal::v5::strong_ptr<hal::output_pin> m_cs;
     float m_avcc;

@@ -8,7 +8,7 @@ namespace{
 constexpr hal::byte channel_address_shift = 3;
 
 // mask to extract 12-bit result from 16-bit DOUT
-constexpr uint16_t result_mask = 0x0FFF;
+constexpr hal::u16 result_mask = 0x0FFF;
 
 // ADC resolution = 2^12
 constexpr float adc_resolution = 4096.0f;
@@ -30,7 +30,7 @@ constexpr float adc_resolution = 4096.0f;
         m_cs->level(true);
     }
 
-    uint16_t adc1283::read_channel(hal::byte p_channel)
+    hal::u16 adc1283::read_channel(hal::byte p_channel)
     {
         if (p_channel >= channel_count){
             hal::safe_throw(hal::argument_out_of_domain(this));
@@ -51,7 +51,7 @@ constexpr float adc_resolution = 4096.0f;
         m_spi->transfer(tx, rx, hal::spi::default_filler);
         m_cs->level(true);
 
-        uint16_t raw = 
+        hal::u16 raw = 
             (static_cast<uint16_t>(rx[0]) << 8) | static_cast<uint16_t>(rx[1]);
         return raw & result_mask;
     }
