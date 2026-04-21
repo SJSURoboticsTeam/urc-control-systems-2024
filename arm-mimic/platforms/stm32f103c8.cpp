@@ -141,41 +141,24 @@ hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0()
     driver_allocator(), std::move(timer_pwm_channel));
 }
 
-// hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
+hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
 
-// hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
-// {
-//   if (not rc_servo_ptr) {
-//     hal::v5::strong_ptr<hal::pwm16_channel> pwm = test_servo_pwm_channel_0();
-//     hal::actuator::rc_servo16::settings rc_servo_settings{
-//       .frequency = 50,
-//       .min_angle = 0,
-//       .max_angle = 180,
-//       .min_microseconds = 500,  // 
-//       .max_microseconds = 2500, //
-//     };
-//     rc_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-//       driver_allocator(), pwm, rc_servo_settings);
-//   }
-//   return rc_servo_ptr;
-// }
-// hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
-// {
-//   hal::v5::strong_ptr<hal::pwm16_channel> pwm = test_servo_pwm_channel_0();
-//   hal::actuator::rc_servo16::settings rc_servo_settings{
-//     .frequency = 50,
-//     // Total 180 deg, change for your use case.
-//     .min_angle = -90,
-//     .max_angle = 90,
-//     // Change to 500us and 2500us if your rc servo
-//     // supports those pulse widths.
-//     .min_microseconds = 750,
-//     .max_microseconds = 2250,
-//   };
-//   static hal::actuator::rc_servo16 servo(pwm, rc_servo_settings);
-//   return hal::v5::make_strong_ptr<decltype(servo)>(
-//     driver_allocator(), std::move(servo));
-// }
+hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
+{
+  if (not rc_servo_ptr) {
+    hal::v5::strong_ptr<hal::pwm16_channel> pwm = test_servo_pwm_channel_0();
+    hal::actuator::rc_servo16::settings rc_servo_settings{
+      .frequency = 50,
+      .min_angle = -90,
+      .max_angle = 90,
+      .min_microseconds = 750,  // try 750
+      .max_microseconds = 2250, // try 2250
+    };
+    rc_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+      driver_allocator(), pwm, rc_servo_settings);
+  }
+  return rc_servo_ptr;
+}
 
 [[noreturn]] void terminate_handler() noexcept
 {
