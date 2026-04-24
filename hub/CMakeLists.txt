@@ -18,7 +18,7 @@ project(demos LANGUAGES CXX)
 
 libhal_build_demos(
 DEMOS
-  #application
+  application
   can_test
   
 
