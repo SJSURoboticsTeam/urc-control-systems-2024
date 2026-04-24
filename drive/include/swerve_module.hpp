@@ -130,9 +130,9 @@ private:
   // velocity_servo handles normal steer operation: position set + position read
   hal::v5::strong_ptr<hal::velocity_servo> m_steer_servo;
   // velocity_motor handles steer homing: free spin until limit switch triggers
-  // TODO: resource file must provide both m_steer_servo and m_steer_homing_motor
+  // TODO: resource file must provide both m_steer_servo and m_homing_motor
   //       as two interface views of the same underlying steer motor hardware
-  hal::v5::strong_ptr<hal::velocity_motor> m_steer_homing_motor;
+  hal::v5::strong_ptr<hal::velocity_motor> m_steer_motor;
   hal::v5::strong_ptr<hal::velocity_motor> m_prop_motor;
   hal::v5::strong_ptr<hal::input_pin> m_limit_switch;
   hal::v5::strong_ptr<hal::steady_clock> m_clock;

@@ -23,7 +23,7 @@ swerve_module::swerve_module(
   swerve_module_settings p_settings)
   : settings(p_settings)
   , m_steer_servo(p_steer_servo)
-  , m_steer_homing_motor(p_steer_homing_motor)
+  , m_steer_motor(p_steer_homing_motor)
   , m_prop_motor(p_prop_motor)
   , m_limit_switch(p_limit_switch)
   , m_clock(p_clock)
@@ -252,7 +252,7 @@ void swerve_module::set_steer_motor_velocity(hal::rpm p_velocity)
   while (true) {
     hal::print(*console, "tg_steer_vel");
     try {
-      m_steer_homing_motor->drive(p_velocity);
+      m_steer_motor->drive(p_velocity);
       return;
     } catch (hal::exception e) {
       attempts--;
