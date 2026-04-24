@@ -23,7 +23,7 @@ public:
    * @brief First clears the screen, then displays a string on the LCD, handling
    * newlines and line wrapping.
    *
-   * @param str refers to the text to display. Characters beyond the
+   * @param p_str refers to the text to display. Characters beyond the
    * display's 80-character capacity (4 lines x 20 columns) may not be
    * visible.
    */
@@ -32,67 +32,57 @@ public:
   /**
    * @brief Turns the display on or off.
    *
-   * Display on sends 0xFE 0x41; display off sends 0xFE 0x42. The display
-   * contents are preserved in DDRAM when off and reappear when turned back
-   * on. Default state after power-up is on. Execution time: 100 us.
+   * The display contents are preserved in DDRAM when off and reappear when
+   * turned back on. Default state after power-up is on. 
+   * 
+   * Execution time: 100 us.
    *
-   * @param on set to true to turn the display on, false to turn it off.
+   * @param p_on set to true to turn the display on, false to turn it off.
    */
   void power(bool p_on);
 
   /**
    * @brief Writes a single ASCII character at the current cursor position.
    *
-   * Sends the 0xFE prefix followed by the character byte. The cursor
-   * advances one position automatically on the display. Valid displayable
-   * ranges from the datasheet:
+   * The cursor advances one position automatically on the display. Valid
+   * displayable ranges from the datasheet:
    *   - 0x00-0x07: user-defined custom characters
    *   - 0x20-0x7F: standard ASCII character set
    *   - 0xA0-0xFD: factory-masked characters on the ST7066U
    *   - 0xFE: reserved (command prefix, do not use as a character)
    *
-   * Note: this method does NOT update the software-tracked cursor
-   * position (m_cursor_line / m_cursor_column). Callers that need
-   * tracking should update those fields separately.
+   * Note: this method does NOT update the cursor tracker
+   * TODO: fix to update cursor tracker
    *
    * Execution time: 100 us.
    *
-   * @param c refers to the character to display.
+   * @param p_character refers to the character to display.
    */
   void write_char(char p_character);
 
   /**
    * @brief Moves the cursor to a specific row and column on the display.
    *
-   * Sends the Set Cursor command (0xFE 0x45 <pos>) where <pos> is the
-   * DDRAM address computed by coordinates_to_position(). Also updates
-   * the software-tracked cursor position (m_cursor_line and
-   * m_cursor_column) to the provided values.
-   *
    * Execution time: 100 us.
    *
-   * @param line refers to the row index (0-3). Values outside this range
-   * will address non-viewable DDRAM locations.
-   * @param column refers to the column index (0-19).
+   * @param p_line refers to the row index by 0 index (0-3)
+   * @param p_column refers to the column index by 0 index (0-19).
    */
   void set_cursor_position(hal::byte p_line = 0, hal::byte p_column = 0);
 
   /**
    * @brief Moves the cursor one position to the right.
    *
-   * Sends command 0xFE 0x4A. Increments the software-tracked
-   * m_cursor_line counter. If m_cursor_line reaches (display_columns - 1)
-   * the command is suppressed and no I2C transaction occurs.
+   * If cursor tracker is at the end of row the command is suppressed
    *
-   * Execution time: 100 us per the datasheet.
+   * Execution time: 100 us.
    */
   void move_cursor_right();
 
   /**
-   * @brief Returns the cursor to line 1, column 1 (DDRAM address 0x00).
+   * @brief Returns the cursor to top left
    *
-   * Sends command 0xFE 0x46. The display contents are not altered.
-   * Resets both m_cursor_line and m_cursor_column to 0.
+   * The display contents are not altered
    *
    * Execution time: 1.5 ms.
    */
@@ -102,9 +92,8 @@ public:
    * @brief Clears all displayed text and resets the cursor to line 1,
    * column 1.
    *
-   * Sends command 0xFE 0x51. Note: does NOT reset the software-tracked
-   * cursor position. Call home_cursor() or set_cursor_position(0, 0)
-   * afterward if cursor tracking needs to stay in sync.
+   * Note: does NOT update cursor tracker
+   * TODO: fix cursor tracker
    *
    * Execution time: 1.5 ms.
    */
@@ -116,9 +105,9 @@ private:
   hal::byte m_cursor_line = 0;    // Current row (0-3)
   hal::byte m_cursor_column = 0;  // Current column (0-19)
 
-  constexpr hal::byte display_lines = 4;
-  constexpr hal::byte display_columns = 20;
-  constexpr hal::byte default_i2c_address = 0x28;
+  constexpr static hal::byte display_lines = 4;
+  constexpr static hal::byte display_columns = 20;
+  constexpr static hal::byte default_i2c_address = 0x28;
 
   /**
    * @brief Converts a (line, column) coordinate to a DDRAM address byte.
