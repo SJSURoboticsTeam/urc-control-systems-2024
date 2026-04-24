@@ -40,6 +40,10 @@ int16_axis round_clamp_int16(float init_x, float init_y, float init_z)
   };
 }
 
+// This test verifies the full CAN + IMU pipeline without servos.
+// Tests: receiving gimbal commands (0x300), IMU toggle (0x305),
+// sending servo position heartbeat (0x306), and IMU data (0x301-0x303).
+// Servos are not initialized -- servo position is tracked in software only.
 void application()
 {
   auto clock = resources::clock();
@@ -89,11 +93,13 @@ void application()
   hal::print(*console, "NOTE: servos disabled (no hardware)\n");
   hal::print(*console, "=== ENTERING MAIN LOOP ===\n");
 
-  // Track last commanded angles (no servos, just tracking)
+  // Simulated servo position, starts centered
+  // Updates when 0x300 is received, sent back on 0x306 as heartbeat
   uint8_t x_angle = 90;
   uint8_t y_angle = 90;
 
-  // IMU stream toggle state (all off by default)
+  // IMU stream toggle state, all off by default
+  // Updated when 0x305 is received
   bool accel_on = false;
   bool gyro_on = false;
   bool mag_on = false;
@@ -105,6 +111,7 @@ void application()
     hal::u64 frame_end = hal::future_deadline(*clock, 10ms);
 
     // Check for gimbal target command (0x300)
+    // Updates tracked servo angles, no actual servo movement
     auto gimbal_req = mcm.read_gimbal_target_request();
     if (gimbal_req) {
       x_angle = gimbal_req->x_angle;
@@ -115,6 +122,7 @@ void application()
     }
 
     // Check for IMU toggle command (0x305)
+    // Controls which IMU streams are sent on 0x301-0x303
     auto toggle_req = mcm.read_imu_toggle_request();
     if (toggle_req) {
       accel_on = toggle_req->accel_on;
@@ -125,20 +133,20 @@ void application()
                      accel_on, gyro_on, mag_on);
     }
 
-    // Read sensors (always read, only send when toggled)
+    // Always read sensors, only send when toggled on
     auto raw_accel = accel->read_acceleration();
     auto raw_gyro = gyro->read_gyroscope();
     auto raw_mag = mag->read_magnetometer();
 
-    // Periodic sends at ~10Hz
+    // Periodic sends at ~10Hz (every 100ms)
     send_count++;
     if (send_count >= send_interval) {
       send_count = 0;
 
-      // Always send servo position (acts as heartbeat)
+      // Servo position acts as heartbeat for MC (0x306)
       mcm.send_servo_position(x_angle, y_angle);
 
-      // Send IMU data only when toggled on
+      // IMU data only sent when toggled on via 0x305
       if (accel_on) {
         mcm.send_imu_accel(
           round_clamp_int16(raw_accel.x, raw_accel.y, raw_accel.z));

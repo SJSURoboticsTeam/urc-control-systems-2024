@@ -4,6 +4,9 @@
 
 namespace sjsu::hub {
 
+/**
+ * @brief generic 3-axis sensor reading
+ */
 struct sensor_axis
 {
   float x;
@@ -11,6 +14,10 @@ struct sensor_axis
   float z;
 };
 
+/**
+ * @brief abstract interface for any accelerometer source. Implement this to
+ * support different IMU hardware (ICM20948, MPU6050, etc.)
+ */
 class accel_source
 {
 public:
@@ -18,6 +25,9 @@ public:
   virtual ~accel_source() = default;
 };
 
+/**
+ * @brief abstract interface for any gyroscope source
+ */
 class gyro_source
 {
 public:
@@ -25,6 +35,9 @@ public:
   virtual ~gyro_source() = default;
 };
 
+/**
+ * @brief abstract interface for any magnetometer source
+ */
 class mag_source
 {
 public:

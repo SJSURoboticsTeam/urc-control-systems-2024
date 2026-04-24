@@ -7,9 +7,16 @@
 
 namespace sjsu::hub {
 
+/**
+ * @brief ICM20948 accelerometer adapter. Wraps the ICM20948 driver to
+ * implement the accel_source interface
+ */
 class icm20948_accel_source : public accel_source
 {
 public:
+  /**
+   * @param p_icm shared pointer to the ICM20948 device
+   */
   explicit icm20948_accel_source(
     hal::v5::strong_ptr<hal::sensor::icm20948> p_icm)
     : m_icm(p_icm)
@@ -26,9 +33,16 @@ private:
   hal::v5::strong_ptr<hal::sensor::icm20948> m_icm;
 };
 
+/**
+ * @brief ICM20948 gyroscope adapter. Wraps the ICM20948 driver to implement
+ * the gyro_source interface
+ */
 class icm20948_gyro_source : public gyro_source
 {
 public:
+  /**
+   * @param p_icm shared pointer to the ICM20948 device
+   */
   explicit icm20948_gyro_source(
     hal::v5::strong_ptr<hal::sensor::icm20948> p_icm)
     : m_icm(p_icm)
@@ -45,9 +59,16 @@ private:
   hal::v5::strong_ptr<hal::sensor::icm20948> m_icm;
 };
 
+/**
+ * @brief ICM20948 magnetometer adapter. Wraps the ICM20948 driver to
+ * implement the mag_source interface
+ */
 class icm20948_mag_source : public mag_source
 {
 public:
+  /**
+   * @param p_icm shared pointer to the ICM20948 device
+   */
   explicit icm20948_mag_source(
     hal::v5::strong_ptr<hal::sensor::icm20948> p_icm)
     : m_icm(p_icm)
