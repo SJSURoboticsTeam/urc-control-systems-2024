@@ -1,0 +1,49 @@
+name: 🏗️ Build Applications
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_drive:
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    with:
+      compiler_profile: hal/tc/arm-gcc-14.2
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: drive
+    secrets: inherit
+
+  build_hub:
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    with:
+      compiler_profile: hal/tc/arm-gcc-14.2
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: hub
+    secrets: inherit
+
+  build_science:
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    with:
+      compiler_profile: hal/tc/arm-gcc-14.2
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: science
+    secrets: inherit
+
+  build_perseus:
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    with:
+      compiler_profile: hal/tc/arm-gcc-14.2
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: perseus
+    secrets: inherit
