@@ -128,9 +128,6 @@ auto& timer3()
   return timer3;
 }
 
-//pwm0 - 32 -> ch8
-//pwm1 - 47 -> ch1
-
 // Passes in PWM to CIPO1
 hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0()
 {
@@ -142,7 +139,6 @@ hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0()
 }
 
 hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
-
 hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
 {
   if (not rc_servo_ptr) {
@@ -225,5 +221,4 @@ void initialize_platform()
   hal::stm32f1::release_jtag_pins();
 }
 // void resources::stop()
-// stop power? tell real arm to home or stop
 }  // namespace sjsu::mimic

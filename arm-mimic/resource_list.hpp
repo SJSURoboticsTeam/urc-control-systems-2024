@@ -24,9 +24,9 @@ namespace resources {
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
-// define a pwm channel servo input
 // separate output pin for potentiometer feedback - analog read
 hal::v5::strong_ptr<hal::adc> test_servo_feedback_adc_0();
+// define a pwm channel servo input
 hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0();
 hal::v5::strong_ptr<hal::actuator::rc_servo> rc_servo();
 

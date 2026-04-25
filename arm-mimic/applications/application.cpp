@@ -1,26 +1,3 @@
-
-
-// rc servo x 8
-// analog
-// clock
-// serial
-
-// 4 servos
-//      make adc
-//      
-// 1 dc motor/encoder
-// lights
-
-
-// class to take in adc and rc servo
-// read and write to feedback_servo
-//      start record funxtion - an array to be recorded?
-
-// copy conan, cmakelists, and main.cpp for things to work and hardwaremap.hpp
-//      refer to hub
-
-// main file is application
-
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
