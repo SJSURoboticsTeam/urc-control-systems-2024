@@ -11,11 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <memory_resource>
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
-#include <libhal-arm-mcu/stm32f1/can.hpp>
+#include <libhal-arm-mcu/stm32f1/can2.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -35,6 +36,8 @@
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/can.hpp>
+#include <libhal/error.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
@@ -48,7 +51,7 @@ using st_peripheral = hal::stm32f1::peripheral;
 
 std::pmr::polymorphic_allocator<> driver_allocator()
 {
-  static std::array<hal::byte, 1024> driver_memory{};
+  static std::array<hal::byte, 4096> driver_memory{};
   static std::pmr::monotonic_buffer_resource resource(
     driver_memory.data(),
     driver_memory.size(),
@@ -83,10 +86,14 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
+hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
-  return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
-    driver_allocator(), hal::port<1>, hal::buffer<128>);
+  if (not console_ptr) {
+    console_ptr = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
+      driver_allocator(), hal::port<1>, hal::buffer<128>);
+  }
+  return console_ptr;
 }
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
@@ -100,10 +107,6 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-// adc1-15- pc5
-// adc2-12 - pc2
-// adc3-11 - pc1
-// adc4- 9 - pb1
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
 {
   static hal::atomic_spin_lock adc_lock0;
@@ -118,26 +121,31 @@ hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1()
   return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
 }
 
+hal::v5::optional_ptr<hal::i2c> i2c_ptr;
 hal::v5::strong_ptr<hal::i2c> i2c()
 {
-  static auto sda_output_pin = gpio_b().acquire_output_pin(7);
-  static auto scl_output_pin = gpio_b().acquire_output_pin(6);
-  auto clock = resources::clock();
-  return hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
-                                                     hal::bit_bang_i2c::pins{
-                                                       .sda = &sda_output_pin,
-                                                       .scl = &scl_output_pin,
-                                                     },
-                                                     *clock);
+  if (not i2c_ptr) {
+    static auto sda_output_pin = gpio_b().acquire_output_pin(7);
+    static auto scl_output_pin = gpio_b().acquire_output_pin(6);
+    auto clock_ref = resources::clock();
+    i2c_ptr = hal::v5::make_strong_ptr<hal::bit_bang_i2c>(
+      driver_allocator(),
+      hal::bit_bang_i2c::pins{
+        .sda = &sda_output_pin,
+        .scl = &scl_output_pin,
+      },
+      *clock_ref);
+  }
+  return i2c_ptr;
 }
 
-hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()  // G0 -> PA0
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
     driver_allocator(), gpio_a().acquire_output_pin(0));
 }
 
-hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
+hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()
 {
   return hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
     driver_allocator(), gpio_a().acquire_output_pin(15));
@@ -155,30 +163,42 @@ auto& timer2()
   return timer2;
 }
 
-// pwm0 - 32 -> ch8
-// pwm1 - 47 -> ch1
+hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
 {
-  auto timer_pwm_channel =
-    timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if (not mast_servo_pwm_channel_0_ptr) {
+    auto timer_pwm_channel =
+      timer1().acquire_pwm16_channel(hal::stm32f1::timer1_pin::pa8);
+    mast_servo_pwm_channel_0_ptr =
+      hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+        driver_allocator(), std::move(timer_pwm_channel));
+  }
+  return mast_servo_pwm_channel_0_ptr;
 }
 
+hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
 {
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if (not mast_servo_pwm_channel_1_ptr) {
+    auto timer_pwm_channel =
+      timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa1);
+    mast_servo_pwm_channel_1_ptr =
+      hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+        driver_allocator(), std::move(timer_pwm_channel));
+  }
+  return mast_servo_pwm_channel_1_ptr;
 }
-// PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
+
+hal::v5::optional_ptr<hal::pwm> under_chassis_servo_pwm_channel_2_ptr;
+hal::v5::strong_ptr<hal::pwm> under_chassis_servo_pwm_channel_2()
 {
-  auto timer_pwm_channel =
-    timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+  if (not under_chassis_servo_pwm_channel_2_ptr) {
+    auto pwm = timer2().acquire_pwm(hal::stm32f1::timer2_pin::pa2);
+    under_chassis_servo_pwm_channel_2_ptr =
+      hal::v5::make_strong_ptr<decltype(pwm)>(driver_allocator(),
+                                              std::move(pwm));
+  }
+  return under_chassis_servo_pwm_channel_2_ptr;
 }
 
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1()
@@ -195,39 +215,72 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
     driver_allocator(), std::move(timer_pwm_frequency));
 }
 
+hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
+
+void initialize_can()
+{
+  if (not can_manager) {
+    auto clock_ref = clock();
+    can_manager =
+      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
+        driver_allocator(),
+        32,
+        driver_allocator(),
+        1'000'000,
+        *clock_ref,
+        std::chrono::milliseconds(1),
+        hal::stm32f1::can_pins::pb9_pb8);
+
+    auto f = hal::acquire_can_mask_filter(driver_allocator(), can_manager);
+
+    can_mask[0] = f[0];
+    can_mask[1] = f[1];
+
+    // Hub messages: 0x300-0x3FF (covers 0x300, 0x305)
+    hal::can_mask_filter::pair hub_msgs;
+    hub_msgs.id = 0x300;
+    hub_msgs.mask = 0x700;
+    can_mask[0]->allow(hub_msgs);
+  }
+}
+
+hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
-  throw hal::operation_not_supported(nullptr);
-  // CAN is commented out in original due to potential stalling issues
-  // TODO(#125): Initializing the can peripheral without it connected to a can
-  // transceiver causes it to stall on occasion.
+  initialize_can();
+  if (not can_transceiver_ptr) {
+    can_transceiver_ptr =
+      hal::acquire_can_transceiver(driver_allocator(), can_manager);
+  }
+  return can_transceiver_ptr;
 }
 
+hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  throw hal::operation_not_supported(nullptr);
-}
-
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
-{
-  throw hal::operation_not_supported(nullptr);
+  initialize_can();
+  if (not can_bus_manager_ptr) {
+    can_bus_manager_ptr =
+      hal::acquire_can_bus_manager(driver_allocator(), can_manager);
+  }
+  return can_bus_manager_ptr;
 }
 
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
 {
-  throw hal::operation_not_supported(nullptr);
+  initialize_can();
+  return hal::acquire_can_interrupt(driver_allocator(), can_manager);
 }
 
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {
-    // spin here until debugger is connected
     while (true) {
       continue;
     }
   }
 
-  // Otherwise, blink the led in a pattern
   auto status_led = resources::status_led();
   auto clock = resources::clock();
 
@@ -250,7 +303,6 @@ void initialize_platform()
 {
   using namespace hal::literals;
   hal::set_terminate(sjsu::hub::resources::terminate_handler);
-  // Set the MCU to the maximum clock speed
 
   hal::stm32f1::configure_clocks(hal::stm32f1::clock_tree{
     .high_speed_external = 8.0_MHz,
@@ -276,9 +328,6 @@ void initialize_platform()
       },
     },
   });
-  // pwm0 uses pa8
-  // hal::stm32f1::activate_mco_pa8(
-  //  hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
