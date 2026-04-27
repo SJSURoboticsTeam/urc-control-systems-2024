@@ -1,4 +1,4 @@
-# TODO(kammce): remove this todo before merging
+# TODO(kammce): remove this todo before merging 2
 name: 🏗️ Build Applications
 
 on:
@@ -40,6 +40,7 @@ jobs:
               - 'science/*'
 
   build_drive:
+    needs: check_which_projects_changed
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
     if: ${{ needs.check_which_projects_changed.outputs.drive == 'true' }}
     with:
@@ -51,6 +52,7 @@ jobs:
     secrets: inherit
 
   build_drivers:
+    needs: check_which_projects_changed
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
     if: ${{ needs.check_which_projects_changed.outputs.drivers == 'true' }}
     with:
@@ -62,6 +64,7 @@ jobs:
     secrets: inherit
 
   build_hub:
+    needs: check_which_projects_changed
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
     if: ${{ needs.check_which_projects_changed.outputs.hub == 'true' }}
     with:
@@ -73,6 +76,7 @@ jobs:
     secrets: inherit
 
   build_perseus:
+    needs: check_which_projects_changed
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
     if: ${{ needs.check_which_projects_changed.outputs.perseus == 'true' }}
     with:
@@ -84,6 +88,7 @@ jobs:
     secrets: inherit
 
   build_science:
+    needs: check_which_projects_changed
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
     if: ${{ needs.check_which_projects_changed.outputs.science == 'true' }}
     with:
