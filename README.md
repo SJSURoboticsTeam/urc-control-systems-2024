@@ -2,7 +2,7 @@
 This Repository will host the code for the new SJSU Robotics Rover.
 ## To build:
 ```
-conan build PATH -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
+conan build PATH -pr hal/tc/arm-gcc-14.2 -pr hal/mcu/stm32f103c8 -b missing
 ```
 
 Replace `PATH` with the corelating path to subsystem or driver(s). The folder contain a `conan.py` file. 
@@ -12,7 +12,7 @@ If the conan.lock prevents you from building due to inconsequential package diff
 If you are already in in the folder run (for quick copy paste):
 
 ```
-conan build . -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
+conan build . -pr hal/tc/arm-gcc-14.2 -pr hal/mcu/stm32f103c8 -b missing
 ```
 ## To flash to controller:
 ```
