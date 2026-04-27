@@ -29,19 +29,19 @@ jobs:
         with:
           filters: |
             drive:
-              - 'drive'
+              - 'drive/*'
             drivers:
-              - 'drivers'
+              - 'drivers/*'
             hub:
-              - 'hub'
+              - 'hub/*'
             perseus:
-              - 'perseus'
+              - 'perseus/*'
             science:
-              - 'science'
+              - 'science/*'
 
   build_drive:
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
-    if: ${{ needs.changes.outputs.drive == 'true' }}
+    if: ${{ needs.check_which_projects_changed.outputs.drive == 'true' }}
     with:
       compiler_profile: hal/tc/gcc
       platform_profile: hal/mcu/stm32f103c8
@@ -52,7 +52,7 @@ jobs:
 
   build_drivers:
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
-    if: ${{ needs.changes.outputs.drivers == 'true' }}
+    if: ${{ needs.check_which_projects_changed.outputs.drivers == 'true' }}
     with:
       compiler_profile: hal/tc/gcc
       platform_profile: hal/mcu/stm32f103c8
@@ -63,7 +63,7 @@ jobs:
 
   build_hub:
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
-    if: ${{ needs.changes.outputs.hub == 'true' }}
+    if: ${{ needs.check_which_projects_changed.outputs.hub == 'true' }}
     with:
       compiler_profile: hal/tc/gcc
       platform_profile: hal/mcu/stm32f103c8
@@ -74,7 +74,7 @@ jobs:
 
   build_perseus:
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
-    if: ${{ needs.changes.outputs.perseus == 'true' }}
+    if: ${{ needs.check_which_projects_changed.outputs.perseus == 'true' }}
     with:
       compiler_profile: hal/tc/gcc
       platform_profile: hal/mcu/stm32f103c8
@@ -85,7 +85,7 @@ jobs:
 
   build_science:
     uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
-    if: ${{ needs.changes.outputs.science == 'true' }}
+    if: ${{ needs.check_which_projects_changed.outputs.science == 'true' }}
     with:
       compiler_profile: hal/tc/gcc
       platform_profile: hal/mcu/stm32f103c8
