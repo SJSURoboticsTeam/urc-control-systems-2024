@@ -1,0 +1,100 @@
+# TODO(kammce): remove this todo before merging 2
+name: 🏗️ Build Applications
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check_which_projects_changed:
+    name: 🔎 Check Which Projects Changed
+    runs-on: ubuntu-24.04
+    outputs:
+      drive: ${{ steps.filter.outputs.drive }}
+      drivers: ${{ steps.filter.outputs.drivers }}
+      hub: ${{ steps.filter.outputs.hub }}
+      perseus: ${{ steps.filter.outputs.perseus }}
+      science: ${{ steps.filter.outputs.science }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            drive:
+              - 'drive/*'
+            drivers:
+              - 'drivers/*'
+            hub:
+              - 'hub/*'
+            perseus:
+              - 'perseus/*'
+            science:
+              - 'science/*'
+
+  build_drive:
+    needs: check_which_projects_changed
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    if: ${{ needs.check_which_projects_changed.outputs.drive == 'true' }}
+    with:
+      compiler_profile: hal/tc/gcc
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: drive
+      extra_conan_arguments: -b missing
+    secrets: inherit
+
+  build_drivers:
+    needs: check_which_projects_changed
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    if: ${{ needs.check_which_projects_changed.outputs.drivers == 'true' }}
+    with:
+      compiler_profile: hal/tc/gcc
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: drivers
+      extra_conan_arguments: -b missing
+    secrets: inherit
+
+  build_hub:
+    needs: check_which_projects_changed
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    if: ${{ needs.check_which_projects_changed.outputs.hub == 'true' }}
+    with:
+      compiler_profile: hal/tc/gcc
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: hub
+      extra_conan_arguments: -b missing
+    secrets: inherit
+
+  build_perseus:
+    needs: check_which_projects_changed
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    if: ${{ needs.check_which_projects_changed.outputs.perseus == 'true' }}
+    with:
+      compiler_profile: hal/tc/gcc
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: perseus
+      extra_conan_arguments: -b missing
+    secrets: inherit
+
+  build_science:
+    needs: check_which_projects_changed
+    uses: libhal/ci/.github/workflows/app_builder2.yml@5.x.y
+    if: ${{ needs.check_which_projects_changed.outputs.science == 'true' }}
+    with:
+      compiler_profile: hal/tc/gcc
+      platform_profile: hal/mcu/stm32f103c8
+      conan_version: 2.23.0
+      dir: science
+      extra_conan_arguments: -b missing
+    secrets: inherit
