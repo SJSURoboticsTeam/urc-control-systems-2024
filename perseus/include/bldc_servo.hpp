@@ -6,6 +6,8 @@
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/units.hpp>
 
+#include <resource_list.hpp>
+
 
 using sec = float;
 
@@ -140,12 +142,17 @@ public:
 
   /**
     * @brief Update velocity to the target velocity using PID control and feedforward. 
+      @param from_scratch A bool indicator of if the target being moved to is new (1) or not (0). 
+                          If the target is new, reset integral value to 0. 
+
   */
-  void update_velocity(); 
+  void update_velocity(bool from_scratch); 
   /**
     * @brief Update position to the target position using PID control and feedforward. 
+      @param from_scratch A bool indicator of if the target being moved to is new (1) or not (0). 
+                          If the target is new, reset integral value to 0. 
   */
-  void update_position(); 
+  void update_position(bool from_scratch); 
   /**
    * @brief Feedforward values to account for gravity/weight 
    * @return Current feedforward value 
@@ -180,6 +187,7 @@ public:
     * facing the motor, a positive value will spin clockwise and negative will spin counterclockwise. 
   */
   float get_power();
+
 
   /**
    * @brief Resets the internal time tracking for the servo, this will be done

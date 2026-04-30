@@ -2,17 +2,17 @@
 This Repository will host the code for the new SJSU Robotics Rover.
 ## To build:
 ```
-conan build PATH -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
+conan build PATH -pr:a hal/tc/gcc -pr hal/mcu/stm32f103c8 -b missing
 ```
 
-Replace `PATH` with the corelating path to subsystem or driver(s). The folder contain a `conan.py` file. 
+Replace `PATH` with the corelating path to subsystem or driver(s). The folder contain a `conan.py` file.
 
 If the conan.lock prevents you from building due to inconsequential package differences based on your system use the `--lockfile-partial` flag to bypass the lock
 
 If you are already in in the folder run (for quick copy paste):
 
 ```
-conan build . -pr stm32f103c8  -pr arm-gcc-14.2 -b missing
+conan build . -pr:a hal/tc/gcc -pr hal/mcu/stm32f103c8 -b missing
 ```
 ## To flash to controller:
 ```
@@ -34,7 +34,7 @@ If you are already in the folder and want run the main application (for quick co
 stm32loader -e -w -v -B -p /dev/tty.usbserial-## ./build/stm32f103c8/MinSizeRel/application.elf.bin
 ```
 
-**Windows:** 
+**Windows:**
 ```
 stm32loader -e -w -v -B -p COM## .\build\stm32f103c8\MinSizeRel\application.elf.bin
 ```
