@@ -21,6 +21,7 @@ libhal_build_demos(
 
 DEMOS
     application
+    feedback_servo_demo
 INCLUDES
     include
     .

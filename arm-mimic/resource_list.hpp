@@ -25,10 +25,10 @@ hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // separate output pin for potentiometer feedback - analog read
-hal::v5::strong_ptr<hal::adc> test_servo_feedback_adc_0();
+hal::v5::strong_ptr<hal::adc> a0_feedback_adc();
 // define a pwm channel servo input
-hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0();
-hal::v5::strong_ptr<hal::actuator::rc_servo> rc_servo();
+hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel();
+hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo();
 
 // void stop();
 

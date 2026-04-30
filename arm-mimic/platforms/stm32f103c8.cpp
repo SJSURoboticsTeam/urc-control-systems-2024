@@ -16,6 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "resource_list.hpp"
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
@@ -109,11 +110,16 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
 }
 
 // Reads ADC value from A0
-hal::v5::strong_ptr<hal::adc> test_servo_feedback_adc_0()
+hal::v5::optional_ptr<hal::adc> a0_feedback_adc_ptr;
+hal::v5::strong_ptr<hal::adc> a0_feedback_adc()
 {
-  static hal::atomic_spin_lock adc_lock0;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+  if (not a0_feedback_adc_ptr) {
+    static hal::atomic_spin_lock adc_lock0;
+    static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
+    a0_feedback_adc_ptr = hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+  }
+  
+  return a0_feedback_adc_ptr;
 }
 
 auto& timer2()
@@ -129,26 +135,30 @@ auto& timer3()
 }
 
 // Passes in PWM to CIPO1
-hal::v5::strong_ptr<hal::pwm16_channel> test_servo_pwm_channel_0()
+hal::v5::optional_ptr<hal::pwm16_channel> cipo1_pwm_channel_ptr;
+hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel()
 {
-  auto timer_pwm_channel =
-    timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
-  timer3().acquire_pwm_group_frequency().frequency(50_Hz);
-  return hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+  if (not cipo1_pwm_channel_ptr) {
+    auto timer_pwm_channel =
+      timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
+    timer3().acquire_pwm_group_frequency().frequency(50_Hz);
+    cipo1_pwm_channel_ptr = hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
     driver_allocator(), std::move(timer_pwm_channel));
+  }
+  return cipo1_pwm_channel_ptr;
 }
 
 hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
 {
   if (not rc_servo_ptr) {
-    hal::v5::strong_ptr<hal::pwm16_channel> pwm = test_servo_pwm_channel_0();
+    hal::v5::strong_ptr<hal::pwm16_channel> pwm = cipo1_pwm_channel();
     hal::actuator::rc_servo16::settings rc_servo_settings{
       .frequency = 50,
       .min_angle = -90,
       .max_angle = 90,
-      .min_microseconds = 750,  // try 750
-      .max_microseconds = 2250, // try 2250
+      .min_microseconds = 500,
+      .max_microseconds = 2500,
     };
     rc_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
       driver_allocator(), pwm, rc_servo_settings);
@@ -220,5 +230,4 @@ void initialize_platform()
 
   hal::stm32f1::release_jtag_pins();
 }
-// void resources::stop()
 }  // namespace sjsu::mimic
