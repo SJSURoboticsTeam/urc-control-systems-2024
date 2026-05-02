@@ -74,7 +74,6 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();

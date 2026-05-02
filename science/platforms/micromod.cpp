@@ -42,6 +42,7 @@
 #include <libhal-micromod/micromod.hpp>
 #include <applications/application.hpp>
 
+// TODO: remove or update this file
 namespace sjsu::science {
 
 hardware_map_t initialize_platform()

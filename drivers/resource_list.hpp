@@ -72,7 +72,6 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::input_pin> input_pin_0();
 hal::v5::strong_ptr<hal::input_pin> input_pin_1();
 hal::v5::strong_ptr<hal::input_pin> input_pin_2();

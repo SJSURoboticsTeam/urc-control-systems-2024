@@ -137,7 +137,6 @@ void initialize_can()
   }
 }
 
-// set to 4 since not filters have been made yet
 unsigned int can_filters_index = 0;
 std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 8>
   can_identifier_filters;
