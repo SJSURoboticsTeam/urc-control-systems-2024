@@ -1,0 +1,20 @@
+name: 🧹 Lint
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pre-commit:
+    name: 🧹 Pre-commit Lint Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get install -y doxygen
+      - uses: pre-commit/action@v3.0.1
