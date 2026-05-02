@@ -1,0 +1,29 @@
+{
+    "version": "0.5",
+    "requires": [
+        "tl-function-ref/1.0.0#8efcfa342c5169b3c260a290257d7eee%1685725656.215",
+        "scope-lite/0.2.0#3d661c43163ac4ebc53ec5e3f9e77490%1661467774.415",
+        "ring-span-lite/0.7.0#73c13ef86652f52ad6b52048b15af784%1716299614.015",
+        "prebuilt-picolibc/14#976aa3ceea36f69f8c3713efee7fea79%1771169549.521",
+        "libhal-util/5.8.1#dca6ef7baf4f47bcc0eba9baf3c7dbf1%1761614359.953",
+        "libhal-mock/4.0.0#e2a2cc593adc03806c6a8b80c5a89638%1715616381.717",
+        "libhal-arm-mcu/1.21.2#ae0a97b5e8a240d7680e3d9363729b61%1776466111.1",
+        "libhal/4.21.0#f8715ee339306248b3a9c28467a8d1a3%1773358772.954",
+        "boost-ext-ut/2.3.1#e0a2761f845926e65a8aee07e3995ed5%1749912869.147",
+        "boost-ext-ut/2.1.0#aec3873a3273d96f85093971c6c8b206%1749912871.352",
+        "boost-ext-ut/1.1.9#09b31ef61352d71b2a4374caa826d485%1749912876.292"
+    ],
+    "build_requires": [
+        "ninja/1.13.2#c8c5dc2a52ed6e4e42a66d75b4717ceb%1764096931.974",
+        "multiarch-gnu-toolchain/14#dd685a11b603d4d1f8f6669690bc7a71%1769713896.773",
+        "make/4.4.1#c47f1ee3241ca8bd56f97c6ca4d0a082%1703967201.413",
+        "libhal-cmake-util/4.4.4#4a5486fc59453c3deae46396f218813c%1770089422.376",
+        "cmake/4.3.2#c740c22f711eb5ef0cec51c40b84657b%1776934625.055",
+        "cmake/3.27.1#7d5f14447c023feef9f59640be53619a%1691315387.882"
+    ],
+    "python_requires": [
+        "libhal-bootstrap/4.6.1#86fb510b6d787a1d12197befd98b5cac%1765569402.933",
+        "libhal-bootstrap/4.3.0#bf1b8f851221d7b59695e4267eecafe8%1748368690.981"
+    ],
+    "config_requires": []
+}
