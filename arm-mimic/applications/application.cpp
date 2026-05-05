@@ -7,6 +7,5 @@
 namespace sjsu::mimic {
 void application()
 {
-  
 }
 }  // namespace sjsu::mimic

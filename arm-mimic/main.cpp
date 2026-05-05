@@ -21,13 +21,7 @@
 int main()
 {
   sjsu::mimic::initialize_platform();
-  try {
-      sjsu::mimic::application();
-    } catch (hal::exception e) {
-      auto console_ref = sjsu::mimic::resources::console();
-      print<64>(*console_ref, "App Failed, error code: %d\n", e.error_code());
-      // sjsu::mimic::resources::stop();
-  }
+  sjsu::mimic::application();
   std::terminate();
 }
 // libhal-arm-mcu specific APIs defined to reduce code size

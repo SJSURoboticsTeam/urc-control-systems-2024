@@ -39,9 +39,8 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
-#include <libhal/pointers.hpp>
 #include <libhal-actuator/rc_servo.hpp>
-
+#include <libhal/pointers.hpp>
 
 namespace sjsu::mimic::resources {
 using namespace hal::literals;
@@ -75,7 +74,8 @@ auto& gpio_c()
   return gpio;
 }
 
-// optional pointer could be empty, initially null and then initialized to something
+// optional pointer could be empty, initially null and then initialized to
+// something
 hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
 hal::v5::strong_ptr<hal::steady_clock> clock()
 {
@@ -116,9 +116,10 @@ hal::v5::strong_ptr<hal::adc> a0_feedback_adc()
   if (not a0_feedback_adc_ptr) {
     static hal::atomic_spin_lock adc_lock0;
     static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
-    a0_feedback_adc_ptr = hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+    a0_feedback_adc_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
   }
-  
+
   return a0_feedback_adc_ptr;
 }
 
@@ -142,8 +143,9 @@ hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel()
     auto timer_pwm_channel =
       timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
     timer3().acquire_pwm_group_frequency().frequency(50_Hz);
-    cipo1_pwm_channel_ptr = hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-    driver_allocator(), std::move(timer_pwm_channel));
+    cipo1_pwm_channel_ptr =
+      hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+        driver_allocator(), std::move(timer_pwm_channel));
   }
   return cipo1_pwm_channel_ptr;
 }
@@ -224,9 +226,9 @@ void initialize_platform()
       },
     },
   });
-  //pwm0 uses pa8
-  //hal::stm32f1::activate_mco_pa8(
-  // hal::stm32f1::mco_source::pll_clock_divided_by_2);
+  // pwm0 uses pa8
+  // hal::stm32f1::activate_mco_pa8(
+  //  hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }
