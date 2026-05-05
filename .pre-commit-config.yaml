@@ -2,7 +2,31 @@
 # See https://pre-commit.com/hooks.html for more hooks
 default_stages: [pre-commit, pre-push, commit-msg]
 repos:
--   repo: https://github.com/SJSURoboticsTeam/hooks
+  - repo: https://github.com/SJSURoboticsTeam/hooks
     rev: v1.1.0
     hooks:
-    -   id: word-blacklist-files
+      - id: word-blacklist-files
+
+  # General file fixes
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # Spell checking
+  - repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v8.6.0
+    hooks:
+      - id: cspell
+        files: \.(cpp|cppm|hpp|h|md)$
+
+  # C++ formatting with clang-format
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v21.1.8
+    hooks:
+      - id: clang-format
+        types_or: [c, c++]
+        files: \.(cpp|cppm|hpp|h|c)$

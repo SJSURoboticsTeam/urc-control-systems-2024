@@ -1,5 +1,10 @@
 # urc-control-systems-2024
+
+[![🏗️ Build Applications](https://github.com/SJSURoboticsTeam/urc-control-systems-2024/actions/workflows/build_apps.yml/badge.svg)](https://github.com/SJSURoboticsTeam/urc-control-systems-2024/actions/workflows/build_apps.yml)
+[![🧹 Lint](https://github.com/SJSURoboticsTeam/urc-control-systems-2024/actions/workflows/lint.yml/badge.svg)](https://github.com/SJSURoboticsTeam/urc-control-systems-2024/actions/workflows/lint.yml)
+
 This Repository will host the code for the new SJSU Robotics Rover.
+
 ## To build:
 ```
 conan build PATH -pr:a hal/tc/gcc -pr hal/mcu/stm32f103c8 -b missing

@@ -13,7 +13,7 @@ class demos(ConanFile):
         # self.requires("libhal-canrouter/[3.0.0]")
         self.requires("libhal/4.18.1")
         self.requires("libhal-util/5.8.1")
-        self.requires("libhal-arm-mcu/1.19.6")
+        self.requires("libhal-arm-mcu/1.21.2")
         self.requires("libhal-actuator/1.2.3")
         self.requires("libhal-expander/1.3.1")
 
