@@ -63,23 +63,23 @@ std::pmr::polymorphic_allocator<> driver_allocator()
   return &resource;
 }
 
-auto& gpio_a()
+[[maybe_unused]] static auto& gpio_a() 
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_a> gpio;
   return gpio;
 }
-auto& gpio_b()
+[[maybe_unused]] static auto& gpio_b()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_b> gpio;
   return gpio;
 }
-auto& gpio_c()
+[[maybe_unused]] static auto& gpio_c()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_c> gpio;
   return gpio;
 }
 
-hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
+static hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
 hal::v5::strong_ptr<hal::steady_clock> clock()
 {
   if (not clock_ptr) {
@@ -90,7 +90,7 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
-hal::v5::optional_ptr<hal::serial> console_ptr;
+static hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
   if (not console_ptr) {
@@ -100,7 +100,7 @@ hal::v5::strong_ptr<hal::serial> console()
   return console_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> led_ptr;
+static hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
 {
   if (not led_ptr) {
@@ -111,9 +111,9 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
-std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
-void initialize_can()
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+static std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
+static void initialize_can()
 {
   if (not can_manager) {
     auto clock_ref = clock();
@@ -137,8 +137,8 @@ void initialize_can()
   }
 }
 
-unsigned int can_filters_index = 0;
-std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 8>
+static unsigned int can_filters_index = 0;
+static std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 8>
   can_identifier_filters;
 hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
 {
@@ -158,7 +158,7 @@ hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
   return can_id_filter;
 }
 
-hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
+static hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
   initialize_can();
@@ -169,7 +169,7 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
   return can_transceiver_ptr;
 }
 
-hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
+static hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
   initialize_can();
@@ -180,7 +180,7 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return can_bus_manager_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> front_left_limit_switch_ptr;
+static hal::v5::optional_ptr<hal::input_pin> front_left_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> front_left_limit_switch()
 {
   if (not front_left_limit_switch_ptr) {
@@ -192,7 +192,7 @@ hal::v5::strong_ptr<hal::input_pin> front_left_limit_switch()
   return front_left_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> front_right_limit_switch_ptr;
+static hal::v5::optional_ptr<hal::input_pin> front_right_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> front_right_limit_switch()
 {
   if (not front_right_limit_switch_ptr) {
@@ -204,7 +204,7 @@ hal::v5::strong_ptr<hal::input_pin> front_right_limit_switch()
   return front_right_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> back_left_limit_switch_ptr;
+static hal::v5::optional_ptr<hal::input_pin> back_left_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> back_left_limit_switch()
 {
   if (not back_left_limit_switch_ptr) {
@@ -216,7 +216,7 @@ hal::v5::strong_ptr<hal::input_pin> back_left_limit_switch()
   return back_left_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> back_right_limit_switch_ptr;
+static hal::v5::optional_ptr<hal::input_pin> back_right_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch()
 {
   if (not back_right_limit_switch_ptr) {
@@ -228,16 +228,16 @@ hal::v5::strong_ptr<hal::input_pin> back_right_limit_switch()
   return back_right_limit_switch_ptr;
 }
 
-constexpr uint16_t front_left_steer_can_id = 0x14C;
-constexpr uint16_t front_left_prop_can_id = 0x141;
-constexpr uint16_t front_right_steer_can_id = 0x142;
-constexpr uint16_t front_right_prop_can_id = 0x145;
-constexpr uint16_t back_left_steer_can_id = 0x144;
-constexpr uint16_t back_left_prop_can_id = 0x148;
-constexpr uint16_t back_right_steer_can_id = 0x14F;
-constexpr uint16_t back_right_prop_can_id = 0x153;
+static constexpr uint16_t front_left_steer_can_id = 0x14C;
+static constexpr uint16_t front_left_prop_can_id = 0x141;
+static constexpr uint16_t front_right_steer_can_id = 0x142;
+static constexpr uint16_t front_right_prop_can_id = 0x145;
+static constexpr uint16_t back_left_steer_can_id = 0x144;
+static constexpr uint16_t back_left_prop_can_id = 0x148;
+static constexpr uint16_t back_right_steer_can_id = 0x14F;
+static constexpr uint16_t back_right_prop_can_id = 0x153;
 
-hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> make_rmd(uint16_t p_address)
+static hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> make_rmd(uint16_t p_address)
 {
   auto clock_ref = resources::clock();
   auto transceiver = resources::can_transceiver();
@@ -246,7 +246,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> make_rmd(uint16_t p_address)
     driver_allocator(), *transceiver, *idf, *clock_ref, 36.0f, p_address);
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer()
 {
   auto c = console();
@@ -265,7 +265,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_steer()
   return front_left_steer_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop()
 {
   if (not front_left_prop_ptr) {
@@ -283,7 +283,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_left_prop()
   return front_left_prop_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
 {
   if (not front_right_steer_ptr) {
@@ -301,7 +301,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_steer()
   return front_right_steer_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop()
 {
   if (not front_right_prop_ptr) {
@@ -319,7 +319,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> front_right_prop()
   return front_right_prop_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer()
 {
   if (not back_left_steer_ptr) {
@@ -337,7 +337,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_steer()
   return back_left_steer_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop()
 {
   if (not back_left_prop_ptr) {
@@ -355,7 +355,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_left_prop()
   return back_left_prop_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer()
 {
   if (not back_right_steer_ptr) {
@@ -373,7 +373,7 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_steer()
   return back_right_steer_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop_ptr;
+static hal::v5::optional_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop_ptr;
 hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop()
 {
   if (not back_right_prop_ptr) {
@@ -391,31 +391,31 @@ hal::v5::strong_ptr<hal::actuator::rmd_mc_x_v2> back_right_prop()
   return back_right_prop_ptr;
 }
 
-constexpr swerve_module_settings front_left_settings{
+static constexpr swerve_module_settings front_left_settings{
   .position = vector2d(0.487, 0.340),
   .limit_switch_position = 135.0,
   .home_clockwise = false,
   .drive_forward_clockwise = true
 };
-constexpr swerve_module_settings front_right_settings{
+static constexpr swerve_module_settings front_right_settings{
   .position = vector2d(0.487, -0.340),
   .limit_switch_position = -135.0,
   .home_clockwise = true,
   .drive_forward_clockwise = false
 };
-constexpr swerve_module_settings back_left_settings{
+static constexpr swerve_module_settings back_left_settings{
   .position = vector2d(-0.487, 0.340),
   .limit_switch_position = 135.0,
   .home_clockwise = false,
   .drive_forward_clockwise = true
 };
-constexpr swerve_module_settings back_right_settings{
+static constexpr swerve_module_settings back_right_settings{
   .position = vector2d(-0.487, -0.340),
   .limit_switch_position = -135.0,
   .home_clockwise = true,
   .drive_forward_clockwise = false
 };
-hal::v5::optional_ptr<swerve_module> front_left_swerve_module_ptr;
+static hal::v5::optional_ptr<swerve_module> front_left_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> front_left_swerve_module()
 {
   if (not front_left_swerve_module_ptr) {
@@ -429,7 +429,7 @@ hal::v5::strong_ptr<swerve_module> front_left_swerve_module()
   }
   return front_left_swerve_module_ptr;
 }
-hal::v5::optional_ptr<swerve_module> front_right_swerve_module_ptr;
+static hal::v5::optional_ptr<swerve_module> front_right_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> front_right_swerve_module()
 {
   if (not front_right_swerve_module_ptr) {
@@ -444,7 +444,7 @@ hal::v5::strong_ptr<swerve_module> front_right_swerve_module()
   return front_right_swerve_module_ptr;
 }
 
-hal::v5::optional_ptr<swerve_module> back_left_swerve_module_ptr;
+static hal::v5::optional_ptr<swerve_module> back_left_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> back_left_swerve_module()
 {
   if (not back_left_swerve_module_ptr) {
@@ -459,7 +459,7 @@ hal::v5::strong_ptr<swerve_module> back_left_swerve_module()
   return back_left_swerve_module_ptr;
 }
 
-hal::v5::optional_ptr<swerve_module> back_right_swerve_module_ptr;
+static hal::v5::optional_ptr<swerve_module> back_right_swerve_module_ptr;
 hal::v5::strong_ptr<swerve_module> back_right_swerve_module()
 {
   if (not back_right_swerve_module_ptr) {
@@ -474,7 +474,7 @@ hal::v5::strong_ptr<swerve_module> back_right_swerve_module()
   return back_right_swerve_module_ptr;
 }
 
-hal::v5::optional_ptr<
+static hal::v5::optional_ptr<
   std::array<hal::v5::strong_ptr<swerve_module>, module_count>>
   swerve_modules_ptr;
 hal::v5::strong_ptr<

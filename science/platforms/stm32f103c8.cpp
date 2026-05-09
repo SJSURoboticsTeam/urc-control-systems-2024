@@ -41,10 +41,8 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
-
 #include <libhal/pointers.hpp>
 #include <resource_list.hpp>
-
 
 namespace sjsu::science::resources {
 using namespace hal::literals;
@@ -60,23 +58,23 @@ std::pmr::polymorphic_allocator<> driver_allocator()
   return &resource;
 }
 
-auto& gpio_a()
+[[maybe_unused]] static auto& gpio_a()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_a> gpio;
   return gpio;
 }
-auto& gpio_b()
+[[maybe_unused]] static auto& gpio_b()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_b> gpio;
   return gpio;
 }
-auto& gpio_c()
+[[maybe_unused]] static auto& gpio_c()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_c> gpio;
   return gpio;
 }
 
-hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
+static hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
 hal::v5::strong_ptr<hal::steady_clock> clock()
 {
   if (not clock_ptr) {
@@ -87,7 +85,7 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
-hal::v5::optional_ptr<hal::serial> console_ptr;
+static hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
   if (not console_ptr) {
@@ -97,7 +95,7 @@ hal::v5::strong_ptr<hal::serial> console()
   return console_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> led_ptr;
+static hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
 {
   if (not led_ptr) {
@@ -108,7 +106,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::optional_ptr<hal::expander::pca9685> pca_ptr;
+static hal::v5::optional_ptr<hal::expander::pca9685> pca_ptr;
 hal::v5::strong_ptr<hal::expander::pca9685> pca()
 {
   if (not pca_ptr) {
@@ -119,34 +117,49 @@ hal::v5::strong_ptr<hal::expander::pca9685> pca()
   return pca_ptr;
 }
 
+hal::v5::optional_ptr<hal::adc> adc_0_ptr;
 hal::v5::strong_ptr<hal::adc> adc_0()
 {
-  static hal::atomic_spin_lock adc_lock;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+  if (not adc_0_ptr) {
+    static hal::atomic_spin_lock adc_lock;
+    static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
+    adc_0_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+  }
+  return adc_0_ptr;
 }
 
+hal::v5::optional_ptr<hal::adc> adc_1_ptr;
 hal::v5::strong_ptr<hal::adc> adc_1()
 {
-  static hal::atomic_spin_lock adc_lock;
-  static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
-  return hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb1);
+  if (not adc_1_ptr) {
+    static hal::atomic_spin_lock adc_lock;
+    static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock);
+    adc_1_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb1);
+  }
+  return adc_1_ptr;
 }
 
+static hal::v5::optional_ptr<hal::i2c> i2c_ptr;
 hal::v5::strong_ptr<hal::i2c> i2c()
 {
-  static auto sda_output_pin = gpio_b().acquire_output_pin(7);
-  static auto scl_output_pin = gpio_b().acquire_output_pin(6);
-  auto clock = resources::clock();
-  return hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
-                                                     hal::bit_bang_i2c::pins{
-                                                       .sda = &sda_output_pin,
-                                                       .scl = &scl_output_pin,
-                                                     },
-                                                     *clock);
+  if (not i2c_ptr) {
+    static auto sda_output_pin = gpio_b().acquire_output_pin(7);
+    static auto scl_output_pin = gpio_b().acquire_output_pin(6);
+    auto clock = resources::clock();
+    i2c_ptr =
+      hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
+                                                  hal::bit_bang_i2c::pins{
+                                                    .sda = &sda_output_pin,
+                                                    .scl = &scl_output_pin,
+                                                  },
+                                                  *clock);
+  }
+  return i2c_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> input_pin_0_ptr;
+static hal::v5::optional_ptr<hal::input_pin> input_pin_0_ptr;
 hal::v5::strong_ptr<hal::input_pin> input_pin_0()
 {
   if (not input_pin_0_ptr) {
@@ -157,7 +170,7 @@ hal::v5::strong_ptr<hal::input_pin> input_pin_0()
   return input_pin_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> input_pin_1_ptr;
+static hal::v5::optional_ptr<hal::input_pin> input_pin_1_ptr;
 hal::v5::strong_ptr<hal::input_pin> input_pin_1()
 {
   if (not input_pin_1_ptr) {
@@ -168,7 +181,7 @@ hal::v5::strong_ptr<hal::input_pin> input_pin_1()
   return input_pin_1_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> input_pin_2_ptr;
+static hal::v5::optional_ptr<hal::input_pin> input_pin_2_ptr;
 hal::v5::strong_ptr<hal::input_pin> input_pin_2()
 {
   if (not input_pin_2_ptr) {
@@ -179,7 +192,7 @@ hal::v5::strong_ptr<hal::input_pin> input_pin_2()
   return input_pin_2_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> top_door_limit_switch_ptr;
+static hal::v5::optional_ptr<hal::input_pin> top_door_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch()
 {
   if (not top_door_limit_switch_ptr) {
@@ -192,7 +205,7 @@ hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch()
   return top_door_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::input_pin> bottom_door_limit_switch_ptr;
+static hal::v5::optional_ptr<hal::input_pin> bottom_door_limit_switch_ptr;
 hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch()
 {
   if (not bottom_door_limit_switch_ptr) {
@@ -205,75 +218,80 @@ hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch()
   return bottom_door_limit_switch_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
+static hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
   if (not output_pin_0_ptr) {
-  output_pin_0_ptr = hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
-    driver_allocator(), gpio_a().acquire_output_pin(0));
+    output_pin_0_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
+        driver_allocator(), gpio_a().acquire_output_pin(0));
   }
   return output_pin_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> kalling_reagent_pump_ptr;
+static hal::v5::optional_ptr<hal::output_pin> kalling_reagent_pump_ptr;
 hal::v5::strong_ptr<hal::output_pin> kalling_reagent_pump()
 {
   if (not kalling_reagent_pump_ptr) {
-  kalling_reagent_pump_ptr = hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
-    driver_allocator(), gpio_a().acquire_output_pin(15));
+    kalling_reagent_pump_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
+        driver_allocator(), gpio_a().acquire_output_pin(15));
   }
   return kalling_reagent_pump_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> biuret_reagent_pump_ptr;
+static hal::v5::optional_ptr<hal::output_pin> biuret_reagent_pump_ptr;
 hal::v5::strong_ptr<hal::output_pin> biuret_reagent_pump()
 {
   if (not biuret_reagent_pump_ptr) {
-  biuret_reagent_pump_ptr = hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
-    driver_allocator(), gpio_b().acquire_output_pin(3));
+    biuret_reagent_pump_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(3))>(
+        driver_allocator(), gpio_b().acquire_output_pin(3));
   }
   return biuret_reagent_pump_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> benedict_reagent_pump_ptr;
+static hal::v5::optional_ptr<hal::output_pin> benedict_reagent_pump_ptr;
 hal::v5::strong_ptr<hal::output_pin> benedict_reagent_pump()
 {
   if (not benedict_reagent_pump_ptr) {
-  benedict_reagent_pump_ptr = hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
-    driver_allocator(), gpio_b().acquire_output_pin(4));
+    benedict_reagent_pump_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(4))>(
+        driver_allocator(), gpio_b().acquire_output_pin(4));
   }
   return benedict_reagent_pump_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> deionized_water_pump_ptr;
+static hal::v5::optional_ptr<hal::output_pin> deionized_water_pump_ptr;
 hal::v5::strong_ptr<hal::output_pin> deionized_water_pump()
 {
   if (not deionized_water_pump_ptr) {
-  deionized_water_pump_ptr = hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
-    driver_allocator(), gpio_b().acquire_output_pin(12));
+    deionized_water_pump_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_b().acquire_output_pin(12))>(
+        driver_allocator(), gpio_b().acquire_output_pin(12));
   }
   return deionized_water_pump_ptr;
 }
 
-auto& timer1()
+[[maybe_unused]] static auto& timer1()
 {
   static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
   return timer1;
 }
 
-auto& timer2()
+[[maybe_unused]] static auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
 
-auto& timer3()
+[[maybe_unused]] static auto& timer3()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
   return timer3;
 }
 
-hal::v5::optional_ptr<hal::actuator::rc_servo> mixer_servo_ptr;
+static hal::v5::optional_ptr<hal::actuator::rc_servo> mixer_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> mixer_servo()
 {
   if (not mixer_servo_ptr) {
@@ -290,7 +308,7 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> mixer_servo()
   return mixer_servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rc_servo> door_servo_ptr;
+static hal::v5::optional_ptr<hal::actuator::rc_servo> door_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> door_servo()
 {
   if (not door_servo_ptr) {
@@ -309,7 +327,7 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> door_servo()
   return door_servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rc_servo> trap_door_servo_ptr;
+static hal::v5::optional_ptr<hal::actuator::rc_servo> trap_door_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> trap_door_servo()
 {
   if (not trap_door_servo_ptr) {
@@ -328,7 +346,7 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> trap_door_servo()
   return trap_door_servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rc_servo> arm_servo_ptr;
+static hal::v5::optional_ptr<hal::actuator::rc_servo> arm_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> arm_servo()
 {
   if (not arm_servo_ptr) {
@@ -347,11 +365,10 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> arm_servo()
   return arm_servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rc_servo> carousel_servo_ptr;
+static hal::v5::optional_ptr<hal::actuator::rc_servo> carousel_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo()
 {
   if (not carousel_servo_ptr) {
-    static auto carousel_servo_pwm = pwm0();
     auto servo_pca_ptr = pca();
     static auto carousel_pwm4 = servo_pca_ptr->get_pwm_channel<4>();
     constexpr hal::actuator::rc_servo::settings carousel_servo_settings{
@@ -367,7 +384,7 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo()
   return carousel_servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::actuator::rc_servo> cache_servo_ptr;
+static hal::v5::optional_ptr<hal::actuator::rc_servo> cache_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo> cache_servo()
 {
   if (not cache_servo_ptr) {
@@ -384,9 +401,10 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> cache_servo()
   return cache_servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
-std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
-void initialize_can()
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2>
+  can_manager;
+static std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
+static void initialize_can()
 {
   if (not can_manager) {
     auto clock_ref = clock();
@@ -410,7 +428,7 @@ void initialize_can()
   }
 }
 
-hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
+static hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
   initialize_can();
@@ -421,7 +439,7 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
   return can_transceiver_ptr;
 }
 
-hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
+static hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
   initialize_can();

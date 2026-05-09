@@ -46,23 +46,23 @@ std::pmr::polymorphic_allocator<> driver_allocator()
   return &resource;
 }
 
-auto& gpio_a()
+[[maybe_unused]] static auto& gpio_a()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_a> gpio;
   return gpio;
 }
-auto& gpio_b()
+[[maybe_unused]] static auto& gpio_b()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_b> gpio;
   return gpio;
 }
-auto& gpio_c()
+[[maybe_unused]] static auto& gpio_c()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_c> gpio;
   return gpio;
 }
 
-hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
+static hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
 hal::v5::strong_ptr<hal::steady_clock> clock()
 {
   if (not clock_ptr) {
@@ -73,7 +73,7 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
-hal::v5::optional_ptr<hal::serial> console_ptr;
+static hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
   if (not console_ptr) {
@@ -83,7 +83,7 @@ hal::v5::strong_ptr<hal::serial> console()
   return console_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> led_ptr;
+static hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
 {
   if (not led_ptr) {
@@ -94,7 +94,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
+static hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
   if (not output_pin_0_ptr) {
@@ -105,7 +105,7 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_0()
   return output_pin_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_1_ptr;
+static hal::v5::optional_ptr<hal::output_pin> output_pin_1_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_1()
 {
   if (not output_pin_1_ptr) {
@@ -116,25 +116,25 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_1()
   return output_pin_1_ptr;
 }
 
-auto& timer1()
+[[maybe_unused]] static auto& timer1()
 {
   static hal::stm32f1::advanced_timer<st_peripheral::timer1> timer1{};
   return timer1;
 }
 
-auto& timer2()
+[[maybe_unused]] static auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
 
-auto& timer3()
+[[maybe_unused]] static auto& timer3()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
   return timer3;
 }
 
-hal::v5::optional_ptr<hal::output_pin> pwm0_a8_ptr;
+static hal::v5::optional_ptr<hal::output_pin> pwm0_a8_ptr;
 hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
 {
   if (not pwm0_a8_ptr) {
@@ -145,7 +145,7 @@ hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
   return pwm0_a8_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> rx1_a3_ptr;
+static hal::v5::optional_ptr<hal::output_pin> rx1_a3_ptr;
 hal::v5::strong_ptr<hal::output_pin> rx1_a3()
 {
   if (not rx1_a3_ptr) {
@@ -155,7 +155,7 @@ hal::v5::strong_ptr<hal::output_pin> rx1_a3()
   }
   return rx1_a3_ptr;
 }
-hal::v5::optional_ptr<hal::output_pin> tx1_a2_ptr;
+static hal::v5::optional_ptr<hal::output_pin> tx1_a2_ptr;
 hal::v5::strong_ptr<hal::output_pin> tx1_a2()
 {
   if (not tx1_a2_ptr) {
@@ -165,7 +165,7 @@ hal::v5::strong_ptr<hal::output_pin> tx1_a2()
   }
   return tx1_a2_ptr;
 }
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_0_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_0_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   if (not pwm_channel_0_ptr) {
@@ -176,7 +176,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
   }
   return pwm_channel_0_ptr;
 }
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_1_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_1_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
 {
   if (not pwm_channel_1_ptr) {
@@ -187,7 +187,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
   }
   return pwm_channel_1_ptr;
 }
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_2_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_2()
 {
   if (not pwm_channel_2_ptr) {
@@ -198,7 +198,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_2()
   }
   return pwm_channel_2_ptr;
 }
-hal::v5::optional_ptr<hal::rotation_sensor> encoder_ptr;
+static hal::v5::optional_ptr<hal::rotation_sensor> encoder_ptr;
 hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 {
   if (not encoder_ptr) {
@@ -214,7 +214,7 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
   return encoder_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr;
+static hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr;
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
   // auto a_low = resources::pwm0_a8();
@@ -232,8 +232,8 @@ hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
     resources::driver_allocator(), std::move(h_bridge));
 }
 
-hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
-void initialize_can()
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+static void initialize_can()
 {
   if (not can_manager) {
     auto clock_ref = clock();
@@ -250,8 +250,8 @@ void initialize_can()
   }
 }
 
-unsigned int can_filters_index = 0;
-std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
+static unsigned int can_filters_index = 0;
+static std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
   can_identifier_filters;
 hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
 {
@@ -271,7 +271,7 @@ hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
   return can_id_filter;
 }
 
-hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
+static hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
   initialize_can();
@@ -282,7 +282,7 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
   return can_transceiver_ptr;
 }
 
-hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
+static hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
   initialize_can();
