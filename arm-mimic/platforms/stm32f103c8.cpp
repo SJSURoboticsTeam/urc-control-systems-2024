@@ -33,6 +33,7 @@
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/atomic_spin_lock.hpp>
+#include <libhal-util/bit_bang_i2c.hpp>
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -95,6 +96,25 @@ hal::v5::strong_ptr<hal::serial> console()
       driver_allocator(), hal::port<1>, hal::buffer<128>);
   }
   return console_ptr;
+}
+
+// Bit bang i2c using PB6 and PB7, labeled SCL1 and SDA1
+hal::v5::optional_ptr<hal::i2c> i2c_ptr;
+hal::v5::strong_ptr<hal::i2c> i2c()
+{
+  if (not i2c_ptr) {
+    static auto sda_output_pin = gpio_b().acquire_output_pin(7);
+    static auto scl_output_pin = gpio_b().acquire_output_pin(6);
+    auto clock = resources::clock();
+    i2c_ptr =
+      hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
+                                                  hal::bit_bang_i2c::pins{
+                                                    .sda = &sda_output_pin,
+                                                    .scl = &scl_output_pin,
+                                                  },
+                                                  *clock);
+  }
+  return i2c_ptr;
 }
 
 // sree promised status led
