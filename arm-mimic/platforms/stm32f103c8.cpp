@@ -123,6 +123,19 @@ hal::v5::strong_ptr<hal::adc> a0_feedback_adc()
   return a0_feedback_adc_ptr;
 }
 
+hal::v5::optional_ptr<hal::adc> a1_adc;
+hal::v5::strong_ptr<hal::adc> a1_adc()
+{
+  if (not a1_adc) {
+    static hal::atomic_spin_lock adc_lock0;
+    static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
+    a1_adc =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
+  }
+
+  return a1_adc;
+}
+
 auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
@@ -148,6 +161,20 @@ hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel()
         driver_allocator(), std::move(timer_pwm_channel));
   }
   return cipo1_pwm_channel_ptr;
+}
+
+hal::v5::optional_ptr<hal::pwm16_channel> copi1_pwm_channel_ptr;
+hal::v5::strong_ptr<hal::pwm16_channel> copi1_pwm_channel()
+{
+  if (not copi1_pwm_channel_ptr) {
+    auto timer_pwm_channel =
+      timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
+    timer3().acquire_pwm_group_frequency().frequency(50_Hz);
+    copi1_pwm_channel_ptr =
+      hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+        driver_allocator(), std::move(timer_pwm_channel));
+  }
+  return copi1_pwm_channel_ptr;
 }
 
 hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
