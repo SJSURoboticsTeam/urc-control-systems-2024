@@ -123,17 +123,17 @@ hal::v5::strong_ptr<hal::adc> a0_feedback_adc()
   return a0_feedback_adc_ptr;
 }
 
-hal::v5::optional_ptr<hal::adc> a1_adc;
+hal::v5::optional_ptr<hal::adc> a1_adc_ptr;
 hal::v5::strong_ptr<hal::adc> a1_adc()
 {
-  if (not a1_adc) {
+  if (not a1_adc_ptr) {
     static hal::atomic_spin_lock adc_lock0;
     static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
-    a1_adc =
+    a1_adc_ptr =
       hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pb0);
   }
 
-  return a1_adc;
+  return a1_adc_ptr;
 }
 
 auto& timer2()
