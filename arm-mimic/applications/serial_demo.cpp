@@ -25,22 +25,45 @@ void application()
   while (true) {
     hal::print(*console, "Enter a servo angle: ");
 
-    // TODO: buffer value is set arbitrarily right now
     std::array<char, 4> buffer{};  // initializes buffer to be 0
 
-    // TODO: have to check for \n to wait for buffer to fill up
-    std::span<hal::byte> input{ reinterpret_cast<hal::byte*>(buffer.data()),
-                                buffer.size() - 1 };
-    hal::read(*console, input, hal::never_timeout());
+    // Checks for end of input -- note, with the schema between firmware and mc,
+    // it won't be this complicated
+    size_t index = 0;
+    bool started_reading = false;
+    while (index < buffer.size() - 1) {  // to ensure last byte is '\0'
+      std::array<hal::byte, 1> single_byte;
+      hal::read(*console, single_byte, hal::never_timeout());
+
+      char c = static_cast<char>(single_byte[0]);
+      // Skip leading whitespace
+      if (!started_reading && (c == '\r' || c == '\n' || c == ' ')) {
+        continue;
+      }
+
+      started_reading = true;
+      if (c == '\r') {
+        continue;  // Skip carriage return
+      }
+      if (c == '\n') {
+        buffer[index] = '\0';
+        break;
+      }
+      buffer[index] = c;
+      index++;
+    }
     hal::print<64>(*console, "Input degree: %s\n", buffer.data());
 
     // Make sure user does not blow up servo
     float deg_value = std::strtof(buffer.data(), nullptr);
     hal::degrees angle = deg_value;
     if (angle > servo_settings.max_angle || angle < servo_settings.min_angle) {
-      hal::print<64>(*console, "Invalid angle. Please enter a value between %f and %f\n\n",
-                 servo_settings.min_angle,
-                 servo_settings.max_angle);
+      hal::print<64>(
+        *console,
+        "Invalid angle. Please enter a value between %f and %f",
+        servo_settings.min_angle,
+        servo_settings.max_angle);
+      hal::print(*console, "\n\n");
       continue;
     }
 
@@ -50,7 +73,8 @@ void application()
     hal::delay(*clock, 2000ms);
 
     // Map potentiometer value to 180 degrees
-    std::pair servo_output_range = { 0.06, 0.89 };
+    std::pair servo_output_range = { 0.06,
+                                     0.89 };  // The values from 0 to 180 in ADC
     std::pair output_percent = { 0, 180 };
     float servo_pos = test_servo_feedback->read();
     float servo_percent_pos =
