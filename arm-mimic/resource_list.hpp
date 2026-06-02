@@ -30,6 +30,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led();
 hal::v5::strong_ptr<hal::adc> a0_feedback_adc();
 // define a pwm channel servo input
 hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel();
+hal::actuator::rc_servo16::settings rc_servo_settings();
 hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo();
 
 // void stop();

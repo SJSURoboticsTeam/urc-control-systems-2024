@@ -170,20 +170,25 @@ hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel()
   return cipo1_pwm_channel_ptr;
 }
 
+hal::actuator::rc_servo16::settings rc_servo_settings()
+{
+  hal::actuator::rc_servo16::settings rc_servo_settings{
+    .frequency = 50,
+    .min_angle = 0,
+    .max_angle = 180,
+    .min_microseconds = 500,
+    .max_microseconds = 2500,
+  };
+  return rc_servo_settings;
+}
+
 hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
 {
   if (not rc_servo_ptr) {
     hal::v5::strong_ptr<hal::pwm16_channel> pwm = cipo1_pwm_channel();
-    hal::actuator::rc_servo16::settings rc_servo_settings{
-      .frequency = 50,
-      .min_angle = -90,
-      .max_angle = 90,
-      .min_microseconds = 500,
-      .max_microseconds = 2500,
-    };
     rc_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-      driver_allocator(), pwm, rc_servo_settings);
+      driver_allocator(), pwm, rc_servo_settings());
   }
   return rc_servo_ptr;
 }

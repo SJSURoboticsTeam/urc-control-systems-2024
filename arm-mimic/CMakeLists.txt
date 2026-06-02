@@ -23,6 +23,7 @@ DEMOS
     application
     feedback_servo_demo
     pca9685_demo
+    serial_demo
 INCLUDES
     include
     .
