@@ -29,6 +29,7 @@ DEMOS
   tla2528_input_pin_demo
   tla2528_analog_input_demo
   serial_commands_demo
+  adc1283_demo
 
 INCLUDES
   include
@@ -45,6 +46,8 @@ SOURCES
     src/h_bridge.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
+    src/adc1283.cpp
+    src/adc1283_adapters.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
