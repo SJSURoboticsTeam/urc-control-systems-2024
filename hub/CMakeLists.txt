@@ -20,6 +20,8 @@ libhal_build_demos(
 DEMOS
   application
   can_test
+  servo_test
+  pid_test
   
 
 INCLUDES
