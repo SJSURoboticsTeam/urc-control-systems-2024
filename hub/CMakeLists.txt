@@ -21,7 +21,7 @@ DEMOS
   application
   can_test
   servo_test
-  pid_test
+  imu_servo_test
   
 
 INCLUDES
