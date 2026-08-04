@@ -1,13 +1,12 @@
 #pragma once
-#include <h_bridge.hpp>
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/units.hpp>
 
+#include <h_bridge.hpp>
 #include <resource_list.hpp>
-// #include <can_messaging.hpp>
 
 
 using sec = float;
@@ -63,6 +62,8 @@ public:
     // for safety
     float high_clamped_value; 
     float low_clamped_value; 
+    // which way does it spin (mainly for wrist)
+    bool flipped_direction; 
   };
   /**
     * @brief Set the target position of the servo.
