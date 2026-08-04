@@ -73,18 +73,23 @@ std::pmr::polymorphic_allocator<> driver_allocator();
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
 hal::v5::strong_ptr<hal::output_pin> status_led();
-// to instantiate H-bridge
+// instantiate H-bridge instantiation
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+// switches instatiation 
+hal::v5::strong_ptr<hal::input_pin> switch_g1(); 
+hal::v5::strong_ptr<hal::input_pin> switch_g2(); 
+hal::v5::strong_ptr<hal::input_pin> switch_g3(); 
+hal::v5::strong_ptr<hal::input_pin> switch_g4(); 
+hal::v5::strong_ptr<hal::input_pin> switch_g5(); 
+hal::v5::strong_ptr<hal::input_pin> switch_g6(); 
+hal::v5::strong_ptr<hal::input_pin> switch_g7(); 
 // can instantiation
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter(); 
-
-// hal::v5::strong_ptr<hal::output_pin> usart2_cts();
-// hal::v5::strong_ptr<hal::output_pin> tim2_ch2();
 
 
 inline void reset()
