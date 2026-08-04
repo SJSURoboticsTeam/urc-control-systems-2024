@@ -23,8 +23,6 @@ void application()
 {
   using namespace hal::literals;
   using namespace std::chrono_literals;
-  // auto pwm_pin = resources::pwm_pin(); 
-  // pwm_pin->level(false); 
 
   // gen
   auto clock = resources::clock();
@@ -35,14 +33,15 @@ void application()
   bldc_perseus servo(h_bridge, encoder);
   hal::print(*console, "BLDC Servo created...\n");
   auto servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
-  
+  // servo values (shoulder)
   bldc_perseus::servo_values servo_values = {
-    .gear_ratio = 73935.4, // 5281.1 * 28 / 2
-    .angle_offset = 0, 
-    .fight_gravity = 0, 
-    .high_clamped_value = 0.3, 
-    .low_clamped_value = -0.3 
-  }; 
+    .gear_ratio = 5281.1, // 5281.1 * 2 / 2
+        .angle_offset = 0, 
+        .fight_gravity = 0.15, 
+        .high_clamped_value = 0.1, 
+        .low_clamped_value = -0.3, 
+        .flipped_direction = false 
+      }; 
   servo_ptr->set_servo_values(servo_values); 
 
 
@@ -55,19 +54,8 @@ void application()
     // hal::delay(*clock, 5000ms);
     // hal::print(*console, "Switch 0.3\n");
   
-    hal::print<64> (*console, "position: %f\n", servo_ptr->get_actual_position());
+    hal::print<64> (*console, "position: %f\n", servo_ptr->get_reading_velocity());
     hal::delay(*clock,100ms);
-
-  // auto e_pin1 = resources::usart2_cts(); 
-  // auto e_pin2 = resources::tim2_ch2(); 
-  // while(true){
-
-  //   e_pin1->level(true); 
-  //   e_pin2->level(false); 
-  //   hal::delay(*clock,5000ms);
-  //   e_pin1->level(false); 
-  //   e_pin2->level(true); 
-  //   hal::delay(*clock,5000ms);
   }
 
 }

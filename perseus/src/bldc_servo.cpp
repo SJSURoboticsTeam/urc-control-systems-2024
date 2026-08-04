@@ -1,8 +1,6 @@
-#include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal/units.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
-#include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <sys/types.h>
 
@@ -45,7 +43,8 @@ bldc_perseus::bldc_perseus(hal::v5::strong_ptr<sjsu::drivers::h_bridge> p_hbridg
     .angle_offset = 0.01, 
     .fight_gravity = 0.01, 
     .high_clamped_value = 0.01, 
-    .low_clamped_value = -0.01 
+    .low_clamped_value = -0.01, 
+    .flipped_direction = false
   }; 
 // CHANGE SERVO
   m_actual_position = m_servo_values.angle_offset;  
@@ -63,19 +62,6 @@ float bldc_perseus::get_target_position()
   return m_target.position;
 }
 
-// float bldc_perseus::get_reading_position()
-// {
-//   m_reading.position = bldc_perseus::read_angle();
-//   return m_reading.position;
-// }
-
-// void bldc_perseus::set_reading_position(float position)
-// {
-//   m_reading.position = position;
-//   auto console = resources::console(); 
-//   hal::print(*console, "\nHH\n"); 
-// }
-
 void bldc_perseus::set_target_velocity(float target_velocity)
 {
   m_target.velocity = target_velocity;
@@ -87,26 +73,14 @@ float bldc_perseus::get_target_velocity()
 }
 float bldc_perseus::get_reading_velocity()
 {
-
-  const hal::u64 now_time = m_clock->uptime();
-  const hal::u64 dt_time = now_time - m_last_clock_check;
-
-  const float  dt_sec = static_cast<float>(dt_time) / static_cast<float>(m_clock->frequency());
-
-  if (dt_sec <= 0.0f){
-    return m_reading.velocity;
-  }
-  
-  const hal::degrees current_position = bldc_perseus::read_angle();
-  const float d_theta = (current_position - m_prev_encoder_value);
-  
-  m_reading.velocity = d_theta / dt_sec;
-
-  m_prev_encoder_value = current_position;
-  m_last_clock_check = now_time;
-  
-  return m_reading.velocity;
-
+  hal::u64 time_t0 = m_clock->uptime();
+  hal::degrees pos_p0 = read_angle(); 
+  hal::delay(*m_clock, 100ms); 
+  hal::u64 time_t1 = m_clock->uptime(); 
+  hal::degrees pos_p1 = read_angle(); 
+  float dt = static_cast<float>(time_t1 - time_t0) / m_clock->frequency(); 
+  float dp_over_dt = (pos_p1 - pos_p0) / dt; 
+  return dp_over_dt; 
 }
 
 float bldc_perseus::get_power() {
@@ -189,7 +163,7 @@ float bldc_perseus::get_neg_clamped_power() {
 hal::time_duration bldc_perseus::get_clock_time(hal::steady_clock& p_clock)
 {
   hal::time_duration const period =
-    sec_to_hal_time_duration(1.0 / p_clock.frequency());
+    sec_to_hal_time_duration(1.0f / p_clock.frequency());
   return period * p_clock.uptime();
 }
 // position 
@@ -206,31 +180,17 @@ void bldc_perseus::update_position(bool from_scratch)
   }
   m_PID_prev_position_values.integral += error * dt; 
   float derivative = (error - m_PID_prev_position_values.last_error) / dt; 
-  float pTerm = m_reading_position_settings.kp * error; 
-  float iTerm  = m_reading_position_settings.ki * m_PID_prev_position_values.integral; 
-  float dTerm = m_reading_position_settings.kd * derivative; 
+  float p_term = m_reading_position_settings.kp * error; 
+  float i_term  = m_reading_position_settings.ki * m_PID_prev_position_values.integral; 
+  float d_term = m_reading_position_settings.kd * derivative; 
   m_PID_prev_position_values.last_error = error; 
   m_PID_prev_position_values.prev_timestamp = curr_time;
-  float pid_sum = pTerm + iTerm + dTerm;
+  float pid_sum = p_term + i_term + d_term;
   // feed forward 
   float feedforward = bldc_perseus::position_feedforward(); 
   // apply 
   float projected_power = pid_sum + feedforward; 
-  // CHANGE SERVO
-  // // use actual position here once can be communicated/calculated via can 
-  // if (m_actual_position < 0) 
-  // { 
-  //   projected_power = std::clamp(projected_power, -1 * m_clamped_power, m_clamped_power); 
-  // }
-  // else { 
-  //   projected_power = std::clamp(projected_power, -1 * m_clamped_power, m_clamped_power);
-  // }
   projected_power = std::clamp(projected_power, m_servo_values.low_clamped_value, m_servo_values.high_clamped_value);
-  // if (m_actual_position > 0) {
-  //   float t = m_servo_values.low_clamped_value; 
-  //   m_servo_values.low_clamped_value = m_servo_values.high_clamped_value * -1; 
-  //   m_servo_values.high_clamped_value = t * -1; 
-  // }
   hal::print<128>(*console, "Target: %f, Position: %f, Error: %f, pid: %f, projected: %f\n", m_target.position, m_actual_position, error, pid_sum, projected_power); 
   m_active_power = projected_power; 
   m_h_bridge->power(m_active_power);
@@ -239,7 +199,7 @@ void bldc_perseus::update_position(bool from_scratch)
 // use actual position here once can be communicated/calculated via can 
 float bldc_perseus::position_feedforward() 
 {
-  return std::sin(std::numbers::pi/180 * m_actual_position) 
+  return std::sin(static_cast<float>(std::numbers::pi/180) * m_actual_position) 
     * m_servo_values.fight_gravity; 
 }
 
@@ -260,7 +220,13 @@ float bldc_perseus::get_angle_offset() {
 }
 
 void bldc_perseus::set_actual_position() {
-  m_actual_position = read_angle() + m_servo_values.angle_offset + m_prev_joint_position; 
+  m_actual_position = read_angle() + m_servo_values.angle_offset; 
+  if (m_servo_values.flipped_direction) {
+    m_actual_position = m_actual_position - m_prev_joint_position; 
+  }
+  else {
+    m_actual_position = m_actual_position + m_prev_joint_position; 
+  }
 }
 
 float bldc_perseus::get_actual_position() {
@@ -272,7 +238,7 @@ void bldc_perseus::set_servo_values(servo_values p_servo_values) {
 }
 
 void bldc_perseus::periodic_action(bool new_action) {
-  auto console = resources::console(); 
+  // auto console = resources::console(); 
   switch (static_cast<can_perseus::action>(m_active_action)) {
     case can_perseus::action::homing: {
       home_encoder(); 
@@ -280,8 +246,8 @@ void bldc_perseus::periodic_action(bool new_action) {
     }
     case can_perseus::action::set_position_target: {
       update_position(new_action); 
-      hal::print<128>(*console, "Target pos: %f", get_target_position()); 
-      hal::delay(*m_clock, 1000ms);
+      // hal::print<128>(*console, "Target pos: %f", get_target_position()); 
+      // hal::delay(*m_clock, 1000ms);
       break;
     }
     default:
