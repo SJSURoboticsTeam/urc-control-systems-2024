@@ -103,10 +103,11 @@ constexpr std::array<hal::byte, 2> int16_to_byte_array_big_endian(
  *
  * @param p_byte_array bytes of integer in big endian
  */
-constexpr hal::i32 byte_array_to_int32_big_endian(std::array<hal::byte, 4> const& p_byte_array)
+constexpr hal::i32 byte_array_to_int32_big_endian(
+  std::array<hal::byte, 4> const& p_byte_array)
 {
   hal::i32 number = 0;
-  for (uint i = 0; i < p_byte_array.size(); i++) {
+  for (uint32_t i = 0; i < p_byte_array.size(); i++) {
     number = (number << 8) | p_byte_array[i];
   }
   return number;
@@ -120,14 +121,14 @@ constexpr hal::i16 byte_array_to_int16_big_endian(
   std::array<hal::byte, 2> const& p_byte_array)
 {
   hal::i16 number = 0;
-  for (uint i = 0; i < p_byte_array.size(); i++) {
+  for (uint32_t i = 0; i < p_byte_array.size(); i++) {
     number = (number << 8) | p_byte_array[i];
   }
   return number;
 }
 /**
  * @brief prints CAN message
- * 
+ *
  * @param p_console serial output
  * @param p_message CAN message to be printed
  */
