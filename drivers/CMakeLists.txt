@@ -19,17 +19,18 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
 
 DEMOS
+  adc1283_demo
+  can_demo
   color_sensor_demo
-  led_strip_demo
   h_bridge_demo
+  led_strip_demo
   pressure_sensor_demo
+  serial_commands_demo
   scd40_demo
   soil_sensor_demo
-  tla2528_output_pin_demo
-  tla2528_input_pin_demo
   tla2528_analog_input_demo
-  serial_commands_demo
-  adc1283_demo
+  tla2528_input_pin_demo
+  tla2528_output_pin_demo
 
 INCLUDES
   include
