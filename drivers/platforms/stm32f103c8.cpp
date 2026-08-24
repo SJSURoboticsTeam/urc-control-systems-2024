@@ -16,7 +16,6 @@
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/adc.hpp>
 #include <libhal-arm-mcu/stm32f1/can.hpp>
-#include <libhal-arm-mcu/stm32f1/can2.hpp>
 #include <libhal-arm-mcu/stm32f1/clock.hpp>
 #include <libhal-arm-mcu/stm32f1/constants.hpp>
 #include <libhal-arm-mcu/stm32f1/gpio.hpp>
@@ -39,9 +38,9 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
-
 #include <libhal/pointers.hpp>
 #include <resource_list.hpp>
+
 
 namespace sjsu::drivers::resources {
 using namespace hal::literals;
@@ -84,14 +83,10 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
-hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
-  if (not console_ptr) {
-    console_ptr = hal::v5::make_strong_ptr<hal::stm32f1::uart>(
-      driver_allocator(), hal::port<1>, hal::buffer<128>);
-  }
-  return console_ptr;
+  return hal::v5::make_strong_ptr<hal::stm32f1::uart>(
+    driver_allocator(), hal::port<1>, hal::buffer<128>);
 }
 
 hal::v5::optional_ptr<hal::output_pin> led_ptr;
@@ -220,78 +215,28 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency()
     driver_allocator(), std::move(timer_pwm_frequency));
 }
 
-
-
-hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
-std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
-void initialize_can()
-{
-  if (not can_manager) {
-    auto clock_ref = clock();
-    can_manager =
-      hal::v5::make_strong_ptr<hal::stm32f1::can_peripheral_manager_v2>(
-        driver_allocator(),
-        32,
-        driver_allocator(),
-        100'000,
-        *clock_ref,
-        std::chrono::milliseconds(1),
-        hal::stm32f1::can_pins::pb9_pb8);
-    can_manager->baud_rate(1.0_MHz);
-    auto f = hal::acquire_can_mask_filter(driver_allocator(), can_manager);
-    hal::can_mask_filter::pair p;
-    p.id = 0;
-    p.mask = 0;
-    can_mask[0] = f[0];
-    can_mask[1] = f[1];
-    can_mask.at(0)->allow(p);
-  }
-}
-
-// set to 4 since not filters have been made yet
-unsigned int can_filters_index = 0;
-std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 8>
-  can_identifier_filters;
-hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
-{
-  if (can_filters_index >= can_identifier_filters.size()) {
-    throw hal::unknown(nullptr);  // TODO: look for better exception
-  }
-  if (can_filters_index % 4 == 0) {
-    initialize_can();
-    auto filter_batch =
-      hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
-    for (unsigned int i = 0; i < filter_batch.size(); i++) {
-      can_identifier_filters[i + can_filters_index] = filter_batch[i];
-    }
-  }
-  auto can_id_filter = can_identifier_filters[can_filters_index];
-  can_filters_index++;
-  return can_id_filter;
-}
-
-hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
-  initialize_can();
-  if (not can_transceiver_ptr) {
-    can_transceiver_ptr =
-      hal::acquire_can_transceiver(driver_allocator(), can_manager);
-  }
-  return can_transceiver_ptr;
+  throw hal::operation_not_supported(nullptr);
+  // CAN is commented out in original due to potential stalling issues
+  // TODO(#125): Initializing the can peripheral without it connected to a can
+  // transceiver causes it to stall on occasion.
 }
 
-hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
-  initialize_can();
-  if (not can_bus_manager_ptr) {
-    can_bus_manager_ptr =
-      hal::acquire_can_bus_manager(driver_allocator(), can_manager);
-  }
-  return can_bus_manager_ptr;
+  throw hal::operation_not_supported(nullptr);
 }
 
+hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
+{
+  throw hal::operation_not_supported(nullptr);
+}
+
+hal::v5::strong_ptr<hal::can_interrupt> can_interrupt()
+{
+  throw hal::operation_not_supported(nullptr);
+}
 
 hal::v5::optional_ptr<hal::spi> spi_ptr;
 hal::v5::strong_ptr<hal::spi> spi()
