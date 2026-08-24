@@ -18,9 +18,7 @@ namespace sjsu::drivers::can_util {
 constexpr float fixed_to_floating_point_32(hal::i32 p_num,
                                            int const& p_exponent)
 {
-  // hal::print<64>(*console, "pure_binary: %x -- ", initial);
   float shifted = p_num / powf(2, p_exponent);
-  // hal::print<64>(*console, "float cast: %f\n", shifted);
   return shifted;
 }
 /**
@@ -32,10 +30,7 @@ constexpr float fixed_to_floating_point_32(hal::i32 p_num,
 constexpr float fixed_to_floating_point_16(hal::i16 p_num,
                                            int const& p_exponent)
 {
-  // auto console = resources::console();
-  // hal::print<64>(*console, "pure_binary: %x -- ", initial);
   float shifted = p_num / powf(2, p_exponent);
-  // hal::print<64>(*console, "float cast: %f\n", shifted);
   return shifted;
 }
 /**
@@ -48,11 +43,8 @@ constexpr float fixed_to_floating_point_16(hal::i16 p_num,
 constexpr hal::i32 floating_to_fixed_point_32(float const& p_num,
                                               int const& p_exponent)
 {
-  // auto console = resources::console();
   float initial = p_num * powf(2, p_exponent);
-  // hal::print<64>(*console, "moved: %f -- ", initial);
   hal::i32 shifted = static_cast<hal::i32>(initial);
-  // hal::print<64>(*console, "int cast: %d\n", shifted);
   return (shifted);
 }
 /**
@@ -64,13 +56,9 @@ constexpr hal::i32 floating_to_fixed_point_32(float const& p_num,
 constexpr hal::i16 floating_to_fixed_point_16(float const& p_num,
                                               int const& p_exponent)
 {
-  // auto console = resources::console();
   float initial = p_num * powf(2, p_exponent);
-  // hal::print<64>(*console, "moved: %f -- ", initial);
   hal::i16 shifted = static_cast<hal::i16>(initial);
-  // hal::print<64>(*console, "int cast: %d\n", shifted);
   return (shifted);
-  // return (static_cast<hal::i16>(n) << exponent);
 }
 /**
  * @brief breaks integer into a byte array that is big_endian
