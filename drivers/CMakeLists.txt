@@ -24,6 +24,8 @@ DEMOS
   color_sensor_demo
   h_bridge_demo
   led_strip_demo
+  perseus_demo
+  perseus_serial_demo
   pressure_sensor_demo
   serial_commands_demo
   scd40_demo
@@ -41,6 +43,7 @@ SOURCES
     src/color_sensor_opt4048.cpp
     src/mq4.cpp
     src/pressure_sensor_bme680.cpp
+    src/perseus_bldc.cpp
     src/scd40.cpp
     src/soil_sensor_sht21.cpp
     src/sk9822.cpp
