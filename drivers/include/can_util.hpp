@@ -18,9 +18,7 @@ namespace sjsu::drivers::can_util {
 constexpr float fixed_to_floating_point_32(hal::i32 p_num,
                                            int const& p_exponent)
 {
-  // hal::print<64>(*console, "pure_binary: %x -- ", initial);
   float shifted = p_num / powf(2, p_exponent);
-  // hal::print<64>(*console, "float cast: %f\n", shifted);
   return shifted;
 }
 /**
@@ -32,10 +30,7 @@ constexpr float fixed_to_floating_point_32(hal::i32 p_num,
 constexpr float fixed_to_floating_point_16(hal::i16 p_num,
                                            int const& p_exponent)
 {
-  // auto console = resources::console();
-  // hal::print<64>(*console, "pure_binary: %x -- ", initial);
   float shifted = p_num / powf(2, p_exponent);
-  // hal::print<64>(*console, "float cast: %f\n", shifted);
   return shifted;
 }
 /**
@@ -48,11 +43,8 @@ constexpr float fixed_to_floating_point_16(hal::i16 p_num,
 constexpr hal::i32 floating_to_fixed_point_32(float const& p_num,
                                               int const& p_exponent)
 {
-  // auto console = resources::console();
   float initial = p_num * powf(2, p_exponent);
-  // hal::print<64>(*console, "moved: %f -- ", initial);
   hal::i32 shifted = static_cast<hal::i32>(initial);
-  // hal::print<64>(*console, "int cast: %d\n", shifted);
   return (shifted);
 }
 /**
@@ -64,13 +56,9 @@ constexpr hal::i32 floating_to_fixed_point_32(float const& p_num,
 constexpr hal::i16 floating_to_fixed_point_16(float const& p_num,
                                               int const& p_exponent)
 {
-  // auto console = resources::console();
   float initial = p_num * powf(2, p_exponent);
-  // hal::print<64>(*console, "moved: %f -- ", initial);
   hal::i16 shifted = static_cast<hal::i16>(initial);
-  // hal::print<64>(*console, "int cast: %d\n", shifted);
   return (shifted);
-  // return (static_cast<hal::i16>(n) << exponent);
 }
 /**
  * @brief breaks integer into a byte array that is big_endian
@@ -103,10 +91,11 @@ constexpr std::array<hal::byte, 2> int16_to_byte_array_big_endian(
  *
  * @param p_byte_array bytes of integer in big endian
  */
-constexpr hal::i32 byte_array_to_int32_big_endian(std::array<hal::byte, 4> const& p_byte_array)
+constexpr hal::i32 byte_array_to_int32_big_endian(
+  std::array<hal::byte, 4> const& p_byte_array)
 {
   hal::i32 number = 0;
-  for (uint i = 0; i < p_byte_array.size(); i++) {
+  for (uint32_t i = 0; i < p_byte_array.size(); i++) {
     number = (number << 8) | p_byte_array[i];
   }
   return number;
@@ -120,14 +109,14 @@ constexpr hal::i16 byte_array_to_int16_big_endian(
   std::array<hal::byte, 2> const& p_byte_array)
 {
   hal::i16 number = 0;
-  for (uint i = 0; i < p_byte_array.size(); i++) {
+  for (uint32_t i = 0; i < p_byte_array.size(); i++) {
     number = (number << 8) | p_byte_array[i];
   }
   return number;
 }
 /**
  * @brief prints CAN message
- * 
+ *
  * @param p_console serial output
  * @param p_message CAN message to be printed
  */

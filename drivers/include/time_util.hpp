@@ -1,5 +1,7 @@
-#include <libhal/units.hpp>
 #include <libhal/steady_clock.hpp>
+#include <libhal/units.hpp>
+
+namespace sjsu::drivers::time_util {
 
 constexpr hal::time_duration sec_to_hal_time_duration(float p_time)
 {
@@ -15,3 +17,4 @@ constexpr hal::time_duration get_clock_time(hal::steady_clock& p_clock)
     sec_to_hal_time_duration(1.0 / p_clock.frequency());
   return period * p_clock.uptime();
 }
+}  // namespace sjsu::drivers
