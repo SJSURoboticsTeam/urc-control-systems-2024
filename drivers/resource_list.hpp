@@ -72,7 +72,6 @@ std::pmr::polymorphic_allocator<> driver_allocator();
  */
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
-hal::v5::strong_ptr<hal::zero_copy_serial> zero_copy_serial();
 hal::v5::strong_ptr<hal::input_pin> input_pin_0();
 hal::v5::strong_ptr<hal::input_pin> input_pin_1();
 hal::v5::strong_ptr<hal::input_pin> input_pin_2();
@@ -90,6 +89,7 @@ hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter();
 hal::v5::strong_ptr<hal::spi> spi();
 hal::v5::strong_ptr<hal::output_pin> spi_chip_select();
 
