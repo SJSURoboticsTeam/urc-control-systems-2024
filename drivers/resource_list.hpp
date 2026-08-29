@@ -86,6 +86,12 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1();
 hal::v5::strong_ptr<hal::adc> adc_0();
 hal::v5::strong_ptr<hal::adc> adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter();
+hal::v5::strong_ptr<hal::spi> spi();
+hal::v5::strong_ptr<hal::output_pin> spi_chip_select();
 
 inline void reset()
 {

@@ -38,10 +38,10 @@
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
+
 #include <libhal/pointers.hpp>
 #include <optional>
 #include <resource_list.hpp>
-
 
 namespace sjsu::drivers::resources {
 using namespace hal::literals;
@@ -313,6 +313,28 @@ static void initialize_can()
   }
 }
 
+// set to 4 since not filters have been made yet
+static unsigned int can_filters_index = 0;
+static std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 8>
+  can_identifier_filters;
+hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
+{
+  if (can_filters_index >= can_identifier_filters.size()) {
+    throw hal::unknown(nullptr);  // TODO: look for better exception
+  }
+  if (can_filters_index % 4 == 0) {
+    initialize_can();
+    auto filter_batch =
+      hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
+    for (unsigned int i = 0; i < filter_batch.size(); i++) {
+      can_identifier_filters[i + can_filters_index] = filter_batch[i];
+    }
+  }
+  auto can_id_filter = can_identifier_filters[can_filters_index];
+  can_filters_index++;
+  return can_id_filter;
+}
+
 static hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
@@ -333,6 +355,33 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
       hal::acquire_can_bus_manager(driver_allocator(), can_manager);
   }
   return can_bus_manager_ptr;
+}
+
+
+hal::v5::optional_ptr<hal::spi> spi_ptr;
+hal::v5::strong_ptr<hal::spi> spi()
+{
+  if (not spi_ptr){
+      spi_ptr = hal::make_strong_ptr<hal::stm32f1::spi>(driver_allocator(),
+                                                 hal::bus<1>,
+                                                hal::spi::settings{
+                                                    .clock_rate = 3'200.0_kHz,
+                                                    .clock_polarity = false,
+                                                    .clock_phase = false,
+                                                });
+  }
+  return spi_ptr;
+}
+
+hal::v5::optional_ptr<hal::output_pin> spi_chip_select_ptr;
+hal::v5::strong_ptr<hal::output_pin> spi_chip_select()
+{
+  if (not spi_chip_select_ptr){
+    auto pin = gpio_a().acquire_output_pin(4);
+    spi_chip_select_ptr = hal::v5::make_strong_ptr<decltype(pin)>(
+      driver_allocator(), std::move(pin));
+  }
+  return spi_chip_select_ptr;
 }
 
 [[noreturn]] void terminate_handler() noexcept
