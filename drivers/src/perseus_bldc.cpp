@@ -59,12 +59,12 @@ perseus_bldc::perseus_bldc(
       hal::can_message_finder(*p_can_transceiver, p_can_id + 0x100))
   , m_max_response_time(p_max_response_time)
 {
-  // throw hal::operation_not_supported(this);
+  //TODO: run any initialization code (such as killing power)
 }
 
 void perseus_bldc::kill_power()
 {
-  // throw hal::operation_not_supported(this);
+  // TODO: use kill_power command rather than `set_power(0);`
   set_power(0);
 }
 void perseus_bldc::heart_beat()
@@ -82,11 +82,9 @@ bool perseus_bldc::is_homing()
 }
 void perseus_bldc::set_target_position(hal::degrees p_target_position)
 {
-  // auto console = resources::console();
   int8_t exponent = 14;
   auto target_position_int =
     can_util::floating_to_fixed_point_32(p_target_position / 360.0f, exponent);
-  // hal::print<64>(*console, "Seting Target Int: %d\n", target_position_int);
   auto target_position_array =
     can_util::int32_to_byte_array_big_endian(target_position_int);
   send(
@@ -111,11 +109,8 @@ void perseus_bldc::set_target_velocity(hal::rpm p_target_velocity
 }
 void perseus_bldc::set_power(float p_portion)
 {
-  // auto console = resources::console();
-  // hal::print<64>(*console, "Seting Power: %f\n",p_portion);
   bool sign = p_portion < 0;
   uint16_t duty_cycle = std::abs(p_portion) * 0xFFFF;
-  // hal::print<64>(*console, "Duty Cycle: %x\n",duty_cycle);
   auto duty_cycle_array = can_util::int16_to_byte_array_big_endian(duty_cycle);
   send({ static_cast<hal::byte>(action::set_power),
          sign,
@@ -176,25 +171,17 @@ hal::can_message perseus_bldc::send(std::array<hal::byte, 8> const& p_payload,
     .length = length,
     .payload = p_payload,
   };
-  // auto console = resources::console();
-  // hal::print<64>(*console, "Sending Message\n");
 
   // Send payload
   m_can_transceiver->send(payload);
-  // auto console = resources::console();
-  // can_util::print_can_message(*console, payload);
   // Wait for reply in case of time out
   auto const deadline = hal::future_deadline(*m_clock, m_max_response_time);
   while (deadline > m_clock->uptime()) {
-    // hal::print<64>(*console, "Waiting for message\n");
     auto const message = m_reply_message_finder.find();
-    // hal::print<64>(*console, "Message Searched\n");
     if (message.has_value()) {
-      // hal::print<64>(*console, "Message Found\n");
       return message.value();
     }
   }
-  // hal::print<64>(*console, "Timed Out Throwing\n");
   throw hal::timed_out(this);
 }
 
