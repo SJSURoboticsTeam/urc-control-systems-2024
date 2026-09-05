@@ -59,7 +59,8 @@ perseus_bldc::perseus_bldc(
       hal::can_message_finder(*p_can_transceiver, p_can_id + 0x100))
   , m_max_response_time(p_max_response_time)
 {
-  //TODO: run any initialization code (such as killing power)
+  // TODO: run any initialization code (such as killing power)
+  kill_power();
 }
 
 void perseus_bldc::kill_power()
@@ -138,9 +139,9 @@ hal::degrees perseus_bldc::get_position()
     send({ static_cast<hal::byte>(action::read_position_reading) }, 1);
   return can_util::fixed_to_floating_point_32(
            can_util::byte_array_to_int32_big_endian({ message.payload[2],
-                                           message.payload[3],
-                                           message.payload[4],
-                                           message.payload[5] }),
+                                                      message.payload[3],
+                                                      message.payload[4],
+                                                      message.payload[5] }),
            message.payload[1]) *
          360.0f;
 }
