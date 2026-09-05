@@ -142,7 +142,7 @@ void drivetrain::periodic()
       // hal::print(*console, "skip CAN messages already at final state\n");
       return;
     } else {
-      hal::print(*console, "interpolating\n");
+      // hal::print(*console, "interpolating\n");
       next_target_states = m_final_target_module_states;
     }
   }
@@ -209,6 +209,8 @@ void drivetrain::hard_home()
 hal::degrees drivetrain::get_steer_offset(unsigned int p_module_index) const
 {
   if (p_module_index >= m_modules->size()) {
+    auto console = resources::console();
+    hal::print(*console,"invalid index get steer offset\n");
     throw hal::argument_out_of_domain(this);
   }
   return m_modules->at(p_module_index)->get_steer_offset();
