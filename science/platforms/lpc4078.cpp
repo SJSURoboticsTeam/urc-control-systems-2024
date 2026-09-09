@@ -31,6 +31,8 @@
 #include <libhal-util/units.hpp>
 
 #include "applications/application.hpp"
+
+// TODO: remove or update this file
 namespace sjsu::science {
 void initialize_processor()
 {
