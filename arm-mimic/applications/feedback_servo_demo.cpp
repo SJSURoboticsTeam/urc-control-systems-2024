@@ -19,20 +19,20 @@ void application()
   hal::print(*console, "Starting Feedback Servo Demo!\n");
 
   while (true) {
-    hal::print(*console, "Set to: -90 deg\n");
-    test_servo->position(-90.0);
-    hal::delay(*clock, 2000ms);
-    hal::print<64>(
-      *console, "Test servo position: %f\n", test_servo_feedback->read());
-
     hal::print(*console, "Set to: 0 deg\n");
-    test_servo->position(0.0);
+    test_servo->position(0);
     hal::delay(*clock, 2000ms);
     hal::print<64>(
       *console, "Test servo position: %f\n", test_servo_feedback->read());
 
     hal::print(*console, "Set to: 90 deg\n");
-    test_servo->position(90.0);
+    test_servo->position(90);
+    hal::delay(*clock, 2000ms);
+    hal::print<64>(
+      *console, "Test servo position: %f\n", test_servo_feedback->read());
+
+    hal::print(*console, "Set to: 180 deg\n");
+    test_servo->position(180);
     hal::delay(*clock, 2000ms);
     hal::print<64>(
       *console, "Test servo position: %f\n", test_servo_feedback->read());
