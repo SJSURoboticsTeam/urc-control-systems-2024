@@ -31,8 +31,8 @@ DEMOS
   scd40_demo
   soil_sensor_demo
   tla2528_analog_input_demo
-  tla2528_input_pin_demo
-  tla2528_output_pin_demo
+  serial_commands_demo
+  adc1283_demo
 
 INCLUDES
   include
