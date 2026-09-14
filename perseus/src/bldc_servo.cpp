@@ -1,11 +1,12 @@
+#include "bldc_servo.hpp"
 #include <libhal/units.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/units.hpp>
 #include <sys/types.h>
 
-#include <bldc_servo.hpp>
-#include <can_messaging.hpp>
+// #include <bldc_servo.hpp>
+// #include <can_messaging.hpp>
 #include <resource_list.hpp>
 
 using namespace std::chrono_literals;
@@ -171,8 +172,7 @@ void bldc_perseus::update_position(bool from_scratch)
 {
   auto console = resources::console(); 
   // pid portion
-  set_actual_position(); 
-  float error = m_target.position - m_actual_position;
+  float error = m_target.position - get_actual_position();
   sec curr_time = hal_time_duration_to_sec(get_clock_time(*m_clock));
   sec dt = curr_time - m_PID_prev_position_values.prev_timestamp;
   if (from_scratch) { 
@@ -219,7 +219,7 @@ float bldc_perseus::get_angle_offset() {
   return m_servo_values.angle_offset; 
 }
 
-void bldc_perseus::set_actual_position() {
+float bldc_perseus::get_actual_position() {
   m_actual_position = read_angle() + m_servo_values.angle_offset; 
   if (m_servo_values.flipped_direction) {
     m_actual_position = m_actual_position - m_prev_joint_position; 
@@ -227,14 +227,15 @@ void bldc_perseus::set_actual_position() {
   else {
     m_actual_position = m_actual_position + m_prev_joint_position; 
   }
-}
-
-float bldc_perseus::get_actual_position() {
   return m_actual_position; 
 }
 
 void bldc_perseus::set_servo_values(servo_values p_servo_values) {
   m_servo_values = p_servo_values; 
+}
+
+bldc_perseus::servo_values bldc_perseus::get_servo_values() {
+  return m_servo_values; 
 }
 
 void bldc_perseus::periodic_action(bool new_action) {

@@ -13,7 +13,6 @@
 // limitations under the License.
 #pragma once
 
-#include <h_bridge.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -29,7 +28,11 @@
 #include <libhal/steady_clock.hpp>
 #include <libhal/timer.hpp>
 
-#include <resource_list.hpp>
+#include <can_messaging.hpp>
+#include <bldc_servo.hpp>
+#include <switches.hpp>
+#include <h_bridge.hpp>
+// #include <resource_list.hpp>
 
 namespace sjsu::perseus {
 namespace custom {
@@ -76,6 +79,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led();
 // instantiate H-bridge instantiation
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge();
 hal::v5::strong_ptr<hal::rotation_sensor> encoder();
+hal::v5::strong_ptr<bldc_perseus> servo(); 
 // switches instatiation 
 hal::v5::strong_ptr<hal::input_pin> switch_g1(); 
 hal::v5::strong_ptr<hal::input_pin> switch_g2(); 
@@ -84,10 +88,10 @@ hal::v5::strong_ptr<hal::input_pin> switch_g4();
 hal::v5::strong_ptr<hal::input_pin> switch_g5(); 
 hal::v5::strong_ptr<hal::input_pin> switch_g6(); 
 hal::v5::strong_ptr<hal::input_pin> switch_g7(); 
+hal::v5::strong_ptr<switches_bldc> switches(); 
 // can instantiation
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
-hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter();
 hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter(); 
 

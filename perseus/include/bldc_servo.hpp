@@ -6,7 +6,7 @@
 #include <libhal/units.hpp>
 
 #include <h_bridge.hpp>
-#include <resource_list.hpp>
+// #include <resource_list.hpp>
 
 
 using sec = float;
@@ -54,15 +54,18 @@ public:
   */
   struct servo_values 
   {
-    // for reading value 
+    // convert from ticks to degrees or mm
     float gear_ratio; 
-    // for feedforward 
+    // offset of starting angle from 0 (perpendicular to ground)
     float angle_offset; 
+    // power needed to keep servo in place when link parallel to ground 
     float fight_gravity; 
-    // for safety
+    // limits on power for safety
     float high_clamped_value; 
     float low_clamped_value; 
-    // which way does it spin (mainly for wrist)
+    // whether motor direction is flipped 
+    // true: motor spins clockwise when positive power applied 
+    // false: motor spins counter-clockwise when positive power applied
     bool flipped_direction; 
   };
   /**
@@ -162,18 +165,6 @@ public:
   float position_feedforward();
 
 
-  // /**
-  //   * @brief Set the maximum power the PID controller is allowed to use.
-  //   * @param power The clamped power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
-  // */
-  // void set_pid_clamped_power(float power);
-
-  // /**
-  //   * @brief Get the maximum power the PID controller is allowed to use.
-  //   * @return The clamped power as a float between 0.0 and 1.0, representing 0% to 100% of maximum possible power.
-  // */
-  // float get_pid_clamped_power();
-
   void set_pos_clamped_power(float power);
   float get_pos_clamped_power();
   void set_neg_clamped_power(float power);
@@ -231,14 +222,45 @@ public:
     return static_cast<float>(p_time.count()) * 1e-9f;
   }
 
+  /**
+   * @brief Set the angle offset of the servo.
+   * @param angle_offset The new angle offset (float).
+   */
   void set_angle_offset(float angle_offset);
+  /**
+   * @brief Get the angle offset of the servo.
+   * @return The current angle offset (float).
+   */
   float get_angle_offset();
 
+  /**
+   * @brief Set the previous joint's recorded position. 
+   * @param prev_joint_pos The previous joint's position (float).
+   */
   void set_prev_joint_position(float prev_joint_pos); 
+  /**
+   * @brief Get the previous joint's recorded position.
+   * @return The previous joint's position (float).
+   */
   float get_prev_joint_position(); 
-  void set_actual_position(); 
+
+  /**
+   * @brief Get actual position of the servo (0 = perpendicular to ground). 
+  */
   float get_actual_position(); 
+
+  /**
+   * @brief Set servo values
+   * @param p_servo_values The values to set (servo_values class) 
+  */
   void set_servo_values(servo_values p_servo_values); 
+
+  /**
+   * @brief Get servo values object
+   * 
+   * @return servo_values 
+   */
+  servo_values get_servo_values(); 
 
   hal::time_duration get_clock_time(hal::steady_clock& p_clock);
 

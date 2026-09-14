@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "h_bridge.hpp"
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
 #include <libhal-arm-mcu/stm32f1/can2.hpp>
@@ -305,21 +304,32 @@ hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr;
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
   if (not h_bridge_ptr) {
-    // auto a_low = resources::pwm0_a8();
+    auto a_low = resources::pwm0_a8();
     auto b_low = resources::rx1_a3();
-    auto c_low = resources::tx1_a2(); 
+    // auto c_low = resources::tx1_a2(); 
     hal::print(*console_ptr, "Acquired h-bridge low pins\n");
-    // auto a_high = resources::pwm_channel_0();
+    auto a_high = resources::pwm_channel_0();
     auto b_high = resources::pwm_channel_1();
-    auto c_high = resources::pwm_channel_2(); 
+    // auto c_high = resources::pwm_channel_2(); 
     hal::print(*console_ptr, "Acquired h-bridge high pins\n");
     // auto h_bridge = sjsu::drivers::h_bridge({ a_high, a_low }, { b_high, b_low });
     auto h_bridge = sjsu::drivers::h_bridge(
-      { .p_high=c_high, .p_low=c_low }, { .p_high=b_high, .p_low=b_low });
+      { .p_high=a_high, .p_low=a_low }, { .p_high=b_high, .p_low=b_low });
     h_bridge_ptr = hal::v5::make_strong_ptr<decltype(h_bridge)>(
       resources::driver_allocator(), std::move(h_bridge));
   }
   return h_bridge_ptr; 
+}
+
+hal::v5::optional_ptr<sjsu::perseus::bldc_perseus> servo_ptr; 
+hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo() {
+  if (not servo_ptr) {
+    auto h_bridge = resources::h_bridge();
+    auto encoder = resources::encoder();
+    auto servo = sjsu::perseus::bldc_perseus(h_bridge, encoder); 
+    servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
+  }
+  return servo_ptr; 
 }
 
 hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
@@ -374,6 +384,25 @@ hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
   initialize_can();
   return hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
 }
+
+
+hal::v5::optional_ptr<sjsu::perseus::switches_bldc> switches_ptr; 
+hal::v5::strong_ptr<sjsu::perseus::switches_bldc> switches() {
+  if (not switches_ptr) {
+    auto console = resources::console();
+    auto switches = switches_bldc(resources::switch_g1(), 
+                    resources::switch_g2(), 
+                    resources::switch_g3(), 
+                    resources::switch_g4(), 
+                    resources::switch_g5(), 
+                    resources::switch_g6()); 
+    switches_ptr = hal::v5::make_strong_ptr<decltype(switches)>(
+      resources::driver_allocator(), std::move(switches)); 
+  }
+  return switches_ptr; 
+}
+
+
 
 // add one for quadrature encoder
 

@@ -22,14 +22,7 @@ void application()
     auto clock = resources::clock(); 
     auto console = resources::console(); 
 
-    auto switches = switches_bldc(resources::switch_g1(), 
-                    resources::switch_g2(), 
-                    resources::switch_g3(), 
-                    resources::switch_g4(), 
-                    resources::switch_g5(), 
-                    resources::switch_g6()); 
-    auto switches_ptr = hal::v5::make_strong_ptr<decltype(switches)>(resources::driver_allocator(), std::move(switches));
-
+    auto switches_ptr = resources::switches(); 
     while(true) {
     
         hal::print<64>(*console, "Pins: %d\n", switches_ptr->read_switch_value()); 

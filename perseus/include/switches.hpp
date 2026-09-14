@@ -4,7 +4,7 @@
 #include <libhal/units.hpp>
 #include <libhal/input_pin.hpp>
 
-#include <resource_list.hpp>
+// #include <resource_list.hpp>
 
 
 using sec = float;
@@ -29,12 +29,7 @@ public:
     hal::u8 read_switch_value(); 
 
 private: 
-    hal::v5::strong_ptr<hal::input_pin> m_s1;
-    hal::v5::strong_ptr<hal::input_pin> m_s2;
-    hal::v5::strong_ptr<hal::input_pin> m_s3;
-    hal::v5::strong_ptr<hal::input_pin> m_s4;
-    hal::v5::strong_ptr<hal::input_pin> m_s5;
-    hal::v5::strong_ptr<hal::input_pin> m_s6;
+    std::array<hal::v5::strong_ptr<hal::input_pin>, 6> m_switch_array; 
     hal::u8 m_switch_value; 
 };
 
