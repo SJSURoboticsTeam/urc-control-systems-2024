@@ -1,8 +1,10 @@
 #pragma once
 #include <libhal/can.hpp>
+#include <libhal-util/can.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
 
+#include <serial_commands.hpp>
 #include <bldc_servo.hpp>
 
 namespace sjsu::perseus {
@@ -65,16 +67,25 @@ public:
 
     void print_can_message(hal::serial& p_console,
                         hal::can_message const& p_message); 
-    float fixed_to_floating_point_32(hal::byte b0, hal::byte b1, hal::byte b2, hal::byte b3, float exponent); 
-    float fixed_to_floating_point_16(hal::byte b0, hal::byte b1, float exponent); 
     float floating_to_position(float floating);
     float position_to_floating(float position); 
-    hal::i32 floating_to_fixed_point_32(float n, float exponent); 
-    hal::i16 floating_to_fixed_point_16(float n, float exponent); 
-    void create_response(hal::v5::strong_ptr<hal::can_message> const& r_message, 
-                            hal::u16 r_id, hal::byte r_len, 
-                            hal::byte r0, hal::byte r1, hal::byte r2, hal::byte r3, 
-                            hal::byte r4, hal::byte r5, hal::byte r6, hal::byte r7); 
+    float float_setter(action act, 
+                        hal::can_message const& p_message, 
+                        hal::can_message& r_message); 
+    bldc_perseus::PID_settings pid_settings_setter(action act, 
+                        hal::can_message const& p_message, 
+                        hal::can_message& r_message); 
+    void float_getter(action act, 
+                        float read_value, 
+                        hal::i16 exponent, 
+                        hal::can_message& r_message); 
+    void pid_settings_getter(action act, 
+                        bldc_perseus::PID_settings settings, 
+                        hal::can_message& r_message);
+    void create_response(hal::can_message& r_message, 
+                        hal::u16 r_id, hal::byte r_len, 
+                        hal::byte r0, hal::byte r1, hal::byte r2, hal::byte r3, 
+                        hal::byte r4, hal::byte r5, hal::byte r6, hal::byte r7); 
     void process_can_message(hal::can_message const& p_message,
                         hal::v5::strong_ptr<bldc_perseus> const& bldc);
     std::optional<hal::can_message> check_for_mc_message(); 
