@@ -15,6 +15,7 @@ namespace sjsu::drive {
 void application()
 {
   auto console = resources::console();
+  hal::print(*console, "\nAppstart\n");
   auto clock = resources::clock();
   constexpr hal::time_duration cycle_time = 250ms;
   constexpr sec cycle_time_sec = hal_time_duration_to_sec(cycle_time);
@@ -32,7 +33,7 @@ void application()
       throw;
     }
 
-    hal::print(*console, "\ncommand handle\n");
+    // hal::print(*console, "\ncommand handle\n");
     bool home_req = mcm.read_homing_request();
     std::optional<chassis_velocities_request> cvr =
       mcm.read_set_velocity_request();
@@ -55,9 +56,9 @@ void application()
       mcm.reply_homing_request();
       // dt.hard_home();// TODO: replace with interuptable homing later
     }
-    hal::print(*console, "\ndata req\n");
+    // hal::print(*console, "\ndata req\n");
     mcm.fulfill_data_requests(dt);
-    hal::print(*console, "\nheartbeat\n");
+    // hal::print(*console, "\nheartbeat\n");
     mcm.reply_heartbeat();
 
     while (clock->uptime() < frame_end)

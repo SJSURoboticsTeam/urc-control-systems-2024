@@ -143,8 +143,7 @@ private:
   hal::can_message_finder m_reply_message_finder;
   hal::time_duration m_max_response_time;
 
-  hal::can_message send(
-    std::array<hal::byte, 8> const& p_payload,
-    hal::byte const& length);
+  hal::can_message send(std::array<hal::byte, 8> const& p_payload,
+                        hal::byte const& length);
 };
 }  // namespace sjsu::drivers
