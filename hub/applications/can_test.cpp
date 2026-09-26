@@ -11,6 +11,7 @@
 
 #include <mission_control_manager.hpp>
 #include <resource_list.hpp>
+#include <math_helpers.hpp>
 
 #include <icm20948_adapters.hpp>
 
@@ -20,25 +21,9 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 
 namespace {
-constexpr long int16_min = std::numeric_limits<std::int16_t>::min();
-constexpr long int16_max = std::numeric_limits<std::int16_t>::max();
-
 // ~10Hz: send every 10th loop iteration (10ms * 10 = 100ms)
 constexpr int send_interval = 10;
 }  // namespace
-
-int16_axis round_clamp_int16(float init_x, float init_y, float init_z)
-{
-  long const x_long = roundf(init_x);
-  long const y_long = roundf(init_y);
-  long const z_long = roundf(init_z);
-
-  return int16_axis{
-    .x = static_cast<int16_t>(std::clamp<long>(x_long, int16_min, int16_max)),
-    .y = static_cast<int16_t>(std::clamp<long>(y_long, int16_min, int16_max)),
-    .z = static_cast<int16_t>(std::clamp<long>(z_long, int16_min, int16_max))
-  };
-}
 
 // This test verifies the full CAN + IMU pipeline without servos.
 // Tests: receiving gimbal commands (0x300), IMU toggle (0x305),

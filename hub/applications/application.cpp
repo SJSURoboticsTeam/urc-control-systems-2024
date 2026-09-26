@@ -16,6 +16,8 @@
 
 #include <icm20948_adapters.hpp>
 
+#include <math_helpers.hpp>
+
 namespace sjsu::hub {
 
 using namespace hal::literals;
@@ -35,20 +37,6 @@ constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
   .min_microseconds = min_pulse_width_range,
   .max_microseconds = max_pulse_width_range,
 };
-
-int16_axis round_clamp_int16(float x, float y, float z)
-{
-  auto round_and_cast = [] (float f){
-    constexpr int16_t int16_min = std::numeric_limits<std::int16_t>::min();
-    constexpr int16_t int16_max = std::numeric_limits<std::int16_t>::max();
-    return static_cast<int16_t>(std::clamp<long>(lroundf(f), int16_min, int16_max));
-  };
-  return int16_axis{
-    .x = round_and_cast(x),
-    .y = round_and_cast(y),
-    .z = round_and_cast(z)
-  };
-}
 
 void application()
 {
