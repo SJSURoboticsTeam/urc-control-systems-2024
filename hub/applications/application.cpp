@@ -24,19 +24,9 @@ using namespace hal::literals;
 using namespace std::chrono_literals;
 
 namespace {
-constexpr int min_pulse_width_range = 900;
-constexpr int max_pulse_width_range = 2100;
 
 constexpr int send_interval = 10;
 }  // namespace
-
-constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
-  .frequency = 50,
-  .min_angle = 0,
-  .max_angle = 180,
-  .min_microseconds = min_pulse_width_range,
-  .max_microseconds = max_pulse_width_range,
-};
 
 void application()
 {
@@ -68,28 +58,20 @@ void application()
   mission_control_manager mcm(can_transceiver);
   hal::print(*console, "MCM OK\n");
 
-  hal::print(*console, "creating ICM20948...\n");
-  auto icm_device = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
-    resources::driver_allocator(), *i2c, *clock);
+  hal::print(*console, "creating & initializing ICM20948...\n");
+  auto icm_device = resources::icm();
   hal::print(*console, "ICM20948 OK\n");
 
-  hal::print(*console, "initializing magnetometer...\n");
-  icm_device->init_mag();
-  hal::print(*console, "magnetometer OK\n");
-
   hal::print(*console, "creating gyro source...\n");
-  auto gyro = hal::v5::make_strong_ptr<icm20948_gyroscope>(
-    resources::driver_allocator(), icm_device);
+  auto gyro = resources::gyroscope();
   hal::print(*console, "gyro source OK\n");
 
   hal::print(*console, "creating accel source...\n");
-  auto accel = hal::v5::make_strong_ptr<icm20948_accelerometer>(
-    resources::driver_allocator(), icm_device);
+  auto accel = resources::accelerometer();
   hal::print(*console, "accel source OK\n");
 
   hal::print(*console, "creating mag source...\n");
-  auto mag = hal::v5::make_strong_ptr<icm20948_magnetometer>(
-    resources::driver_allocator(), icm_device);
+  auto mag = resources::magnetometer();
   hal::print(*console, "mag source OK\n");
 
   hal::print(*console, "acquiring PWM frequency managers...\n");
@@ -97,27 +79,16 @@ void application()
   auto pwm_freq_tim2 = resources::pwm_frequency_tim2();
   hal::print(*console, "PWM frequency managers OK\n");
 
-  hal::print(*console, "creating X servo...\n");
-  auto p_yaw_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-    resources::driver_allocator(),
-    *pwm_freq_tim1,
-    mast_servo_pwm_channel_0,
-    gimbal_servo_settings);
-  hal::print(*console, "X servo OK\n");
+  hal::print(*console, "creating yaw servo...\n");
+  auto p_yaw_servo = resources::yaw_servo();
+  hal::print(*console, "yaw servo OK\n");
 
-  hal::print(*console, "creating Y servo...\n");
-  auto p_pitch_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-    resources::driver_allocator(),
-    *pwm_freq_tim2,
-    mast_servo_pwm_channel_1,
-    gimbal_servo_settings);
-  hal::print(*console, "Y servo OK\n");
+  hal::print(*console, "creating pitch servo...\n");
+  auto p_pitch_servo = resources::pitch_servo();
+  hal::print(*console, "pitch servo OK\n");
 
   hal::print(*console, "creating gimbal...\n");
-  gimbal mast(p_yaw_servo,
-              p_pitch_servo,
-              gimbal_servo_settings.min_angle,
-              gimbal_servo_settings.max_angle);
+  auto p_mast = resources::mast();
   hal::print(*console, "gimbal OK\n");
 
   bool accel_on = false;
@@ -135,7 +106,7 @@ void application()
     hal::print(*console, "a\n");
     auto gimbal_req = mcm.read_gimbal_target_request();
     if (gimbal_req) {
-      mast.set_target(gimbal_req->x_angle, gimbal_req->y_angle);
+      p_mast->set_target(gimbal_req->x_angle, gimbal_req->y_angle);
       hal::print<64>(*console,
                      "gimbal cmd: x=%d y=%d\n",
                      gimbal_req->x_angle,
@@ -162,7 +133,7 @@ void application()
     auto raw_mag = mag->read();
 
     hal::print(*console, "f\n");
-    mast.update_pitch_servo(dt, raw_accel, raw_gyro);
+    p_mast->update_pitch_servo(dt, raw_accel, raw_gyro);
 
     hal::print(*console, "g\n");
 
@@ -170,7 +141,7 @@ void application()
     if (send_count >= send_interval) {
       send_count = 0;
 
-      mcm.send_servo_position(mast.get_yaw_angle(), mast.pitch());
+      mcm.send_servo_position(p_mast->get_yaw_angle(), p_mast->pitch());
 
       if (accel_on) {
         mcm.send_imu_accel(

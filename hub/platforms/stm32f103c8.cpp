@@ -44,7 +44,6 @@
 #include <libhal/pointers.hpp>
 #include <resource_list.hpp>
 
-
 namespace sjsu::hub::resources {
 using namespace hal::literals;
 using st_peripheral = hal::stm32f1::peripheral;
@@ -128,13 +127,13 @@ hal::v5::strong_ptr<hal::i2c> i2c()
     static auto sda_output_pin = gpio_b().acquire_output_pin(7);
     static auto scl_output_pin = gpio_b().acquire_output_pin(6);
     auto clock_ref = resources::clock();
-    i2c_ptr = hal::v5::make_strong_ptr<hal::bit_bang_i2c>(
-      driver_allocator(),
-      hal::bit_bang_i2c::pins{
-        .sda = &sda_output_pin,
-        .scl = &scl_output_pin,
-      },
-      *clock_ref);
+    i2c_ptr =
+      hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
+                                                  hal::bit_bang_i2c::pins{
+                                                    .sda = &sda_output_pin,
+                                                    .scl = &scl_output_pin,
+                                                  },
+                                                  *clock_ref);
   }
   return i2c_ptr;
 }
@@ -161,6 +160,74 @@ auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
+}
+
+static hal::v5::optional_ptr<hal::sensor::icm20948> icm_ptr;
+hal::v5::strong_ptr<hal::sensor::icm20948> icm()
+{
+  auto i2c_ref = i2c();
+  auto clock_ref = clock();
+  if (not icm_ptr) {
+    icm_ptr = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
+      resources::driver_allocator(), *i2c_ref, *clock_ref);
+    icm_ptr->init_mag();
+  }
+  return icm_ptr;
+}
+
+hal::v5::strong_ptr<icm20948_gyroscope> gyroscope()
+{
+  return hal::v5::make_strong_ptr<icm20948_gyroscope>(driver_allocator(),
+                                                      icm());
+}
+
+hal::v5::strong_ptr<icm20948_accelerometer> accelerometer()
+{
+  return hal::v5::make_strong_ptr<icm20948_accelerometer>(driver_allocator(),
+                                                          icm());
+}
+
+hal::v5::strong_ptr<icm20948_magnetometer> magnetometer()
+{
+  return hal::v5::make_strong_ptr<icm20948_magnetometer>(driver_allocator(),
+                                                         icm());
+}
+
+constexpr int min_pulse_width_range = 900;
+constexpr int max_pulse_width_range = 2100;
+constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
+  .frequency = 50,
+  .min_angle = 0,
+  .max_angle = 180,
+  .min_microseconds = min_pulse_width_range,
+  .max_microseconds = max_pulse_width_range,
+};
+
+hal::v5::strong_ptr<hal::actuator::rc_servo16> yaw_servo()
+{
+  auto tim1 = pwm_frequency_tim1();
+  auto chan0 = mast_servo_pwm_channel_0();
+  return hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+    resources::driver_allocator(), *tim1, chan0, gimbal_servo_settings);
+}
+
+hal::v5::strong_ptr<hal::actuator::rc_servo16> pitch_servo()
+{
+  auto tim2 = pwm_frequency_tim2();
+  auto chan1 = mast_servo_pwm_channel_1();
+  return hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+    resources::driver_allocator(), *tim2, chan1, gimbal_servo_settings);
+}
+
+hal::v5::strong_ptr<gimbal> mast()
+{
+  auto yaw = yaw_servo();
+  auto pitch = pitch_servo();
+  return hal::v5::make_strong_ptr<gimbal>(driver_allocator(),
+                                   yaw,
+                                   pitch,
+                                   gimbal_servo_settings.min_angle,
+                                   gimbal_servo_settings.max_angle);
 }
 
 hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0_ptr;
@@ -332,3 +399,4 @@ void initialize_platform()
   hal::stm32f1::release_jtag_pins();
 }
 }  // namespace sjsu::hub
+
