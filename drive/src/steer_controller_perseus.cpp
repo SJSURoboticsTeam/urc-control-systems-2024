@@ -37,27 +37,16 @@ void steer_controller_perseus::home()
 
 void steer_controller_perseus::home_periodic()
 {
-  if (!m_is_homed) {
-    if (!m_perseus->is_homing()) {
-      // not done homing and no homing in progress -> finish
-      m_is_homed = true;
-      return;
-    } else {
-      // not done homing and homing in progress -> OK
-      return;
-    }
+  if (!m_perseus->is_homing()) {
+    // not done homing and no homing in progress -> finish
+    m_is_homed = true;
   } else {
-    if (m_perseus->is_homing()) {
-      // done homing and homing in progress -> something has gone wrong
-      throw hal::exception(std::errc::not_a_stream, &m_perseus);
-    } else {
-      // not done homing and homing not in progress -> something has gone wrong
-      throw hal::exception(std::errc::state_not_recoverable, &m_perseus);
-    }
+    // not done homing and homing in progress -> OK
   }
 }
 
-void steer_controller_perseus::stop_home() {
+void steer_controller_perseus::stop_home()
+{
   // effectively cancels homing by telling motor to stop moving
   m_perseus->set_target_velocity(0);
 }
