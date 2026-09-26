@@ -23,9 +23,6 @@ void steer_controller_perseus::stop()
 
 void steer_controller_perseus::hard_home()
 {
-  if (m_is_homed) {
-    return;
-  }
   m_perseus->home();
   while (m_perseus->is_homing()) {
     hal::delay(*m_clock, 10ms);
@@ -35,9 +32,6 @@ void steer_controller_perseus::hard_home()
 
 void steer_controller_perseus::home()
 {
-  if (m_is_homed) {
-    return;
-  }
   m_perseus->home();
 }
 
@@ -55,7 +49,7 @@ void steer_controller_perseus::home_periodic()
   } else {
     if (m_perseus->is_homing()) {
       // done homing and homing in progress -> something has gone wrong
-      throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+      throw hal::exception(std::errc::not_a_stream, &m_perseus);
     } else {
       // not done homing and homing not in progress -> something has gone wrong
       throw hal::exception(std::errc::state_not_recoverable, &m_perseus);
@@ -81,19 +75,27 @@ bool steer_controller_perseus::is_homed()
 void steer_controller_perseus::set_target_position(
   hal::degrees p_target_position)
 {
-  m_is_homed = false;
+  if (!m_is_homed) {
+    throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+  }
   m_target_position = p_target_position;
   m_perseus->set_target_position(p_target_position);
 }
 
 hal::degrees steer_controller_perseus::get_target_postion()
 {
+  if (!m_is_homed) {
+    throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+  }
   // TODO: make get target position on perseus when implemented
   return m_target_position;
 }
 
 hal::degrees steer_controller_perseus::get_actual_postion()
 {
+  if (!m_is_homed) {
+    throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+  }
   return m_perseus->get_position();
 }
 }  // namespace sjsu::drive
