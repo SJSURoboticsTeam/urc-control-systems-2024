@@ -23,7 +23,9 @@ void steer_controller_perseus::stop()
 
 void steer_controller_perseus::hard_home()
 {
-  m_is_homed = false;
+  if (m_is_homed) {
+    return;
+  }
   m_perseus->home();
   while (m_perseus->is_homing()) {
     hal::delay(*m_clock, 10ms);
@@ -33,7 +35,9 @@ void steer_controller_perseus::hard_home()
 
 void steer_controller_perseus::home()
 {
-  m_is_homed = false;
+  if (m_is_homed) {
+    return;
+  }
   m_perseus->home();
 }
 
@@ -62,7 +66,6 @@ void steer_controller_perseus::home_periodic()
 void steer_controller_perseus::stop_home() {
   // effectively cancels homing by telling motor to stop moving
   m_perseus->set_target_velocity(0);
-  m_is_homed = false;
 }
 
 bool steer_controller_perseus::is_homing()
@@ -78,6 +81,7 @@ bool steer_controller_perseus::is_homed()
 void steer_controller_perseus::set_target_position(
   hal::degrees p_target_position)
 {
+  m_is_homed = false;
   m_target_position = p_target_position;
   m_perseus->set_target_position(p_target_position);
 }
