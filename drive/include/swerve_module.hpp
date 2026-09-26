@@ -124,7 +124,7 @@ public:
   /**
    * @brief is the swerve module currently homing
    */
-  void is_homing();
+  bool is_homing();
   /**
    * @brief gets steer encoder offset
    * @return returns encoder reading in degrees when facing forward
