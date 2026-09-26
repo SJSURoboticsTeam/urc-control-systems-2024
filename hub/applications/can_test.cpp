@@ -12,7 +12,7 @@
 #include <mission_control_manager.hpp>
 #include <resource_list.hpp>
 
-#include <icm20948_sources.hpp>
+#include <icm20948_adapters.hpp>
 
 namespace sjsu::hub {
 
@@ -29,9 +29,9 @@ constexpr int send_interval = 10;
 
 int16_axis round_clamp_int16(float init_x, float init_y, float init_z)
 {
-  long const x_long = lroundf(init_x);
-  long const y_long = lroundf(init_y);
-  long const z_long = lroundf(init_z);
+  long const x_long = roundf(init_x);
+  long const y_long = roundf(init_y);
+  long const z_long = roundf(init_z);
 
   return int16_axis{
     .x = static_cast<int16_t>(std::clamp<long>(x_long, int16_min, int16_max)),
@@ -76,17 +76,17 @@ void application()
   hal::print(*console, "magnetometer OK\n");
 
   hal::print(*console, "creating gyro source...\n");
-  auto gyro = hal::v5::make_strong_ptr<icm20948_gyro_source>(
+  auto gyro = hal::v5::make_strong_ptr<icm20948_gyroscope>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "gyro source OK\n");
 
   hal::print(*console, "creating accel source...\n");
-  auto accel = hal::v5::make_strong_ptr<icm20948_accel_source>(
+  auto accel = hal::v5::make_strong_ptr<icm20948_accelerometer>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "accel source OK\n");
 
   hal::print(*console, "creating mag source...\n");
-  auto mag = hal::v5::make_strong_ptr<icm20948_mag_source>(
+  auto mag = hal::v5::make_strong_ptr<icm20948_magnetometer>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "mag source OK\n");
 
@@ -118,7 +118,8 @@ void application()
       y_angle = gimbal_req->y_angle;
       hal::print<64>(*console,
                      "gimbal cmd: x=%d y=%d (servos disabled)\n",
-                     x_angle, y_angle);
+                     x_angle,
+                     y_angle);
     }
 
     // Check for IMU toggle command (0x305)
@@ -130,13 +131,15 @@ void application()
       mag_on = toggle_req->mag_on;
       hal::print<64>(*console,
                      "imu toggle: accel=%d gyro=%d mag=%d\n",
-                     accel_on, gyro_on, mag_on);
+                     accel_on,
+                     gyro_on,
+                     mag_on);
     }
 
     // Always read sensors, only send when toggled on
-    auto raw_accel = accel->read_acceleration();
-    auto raw_gyro = gyro->read_gyroscope();
-    auto raw_mag = mag->read_magnetometer();
+    auto raw_accel = accel->read();
+    auto raw_gyro = gyro->read();
+    auto raw_mag = mag->read();
 
     // Periodic sends at ~10Hz (every 100ms)
     send_count++;
@@ -156,20 +159,23 @@ void application()
           round_clamp_int16(raw_gyro.x, raw_gyro.y, raw_gyro.z));
       }
       if (mag_on) {
-        mcm.send_imu_mag(
-          round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z));
+        mcm.send_imu_mag(round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z));
       }
     }
 
     // Debug print every ~1 second
     print_count++;
     if (print_count >= 100) {
-      hal::print<128>(
-        *console,
-        "pos=(%d,%d) imu=[%d,%d,%d] accel=(%.2f,%.2f,%.2f)\n",
-        x_angle, y_angle,
-        accel_on, gyro_on, mag_on,
-        raw_accel.x, raw_accel.y, raw_accel.z);
+      hal::print<128>(*console,
+                      "pos=(%d,%d) imu=[%d,%d,%d] accel=(%.2f,%.2f,%.2f)\n",
+                      x_angle,
+                      y_angle,
+                      accel_on,
+                      gyro_on,
+                      mag_on,
+                      raw_accel.x,
+                      raw_accel.y,
+                      raw_accel.z);
       print_count = 0;
     }
 

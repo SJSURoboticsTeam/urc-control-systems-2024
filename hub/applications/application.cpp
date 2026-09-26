@@ -14,7 +14,7 @@
 #include <mission_control_manager.hpp>
 #include <resource_list.hpp>
 
-#include <icm20948_sources.hpp>
+#include <icm20948_adapters.hpp>
 
 namespace sjsu::hub {
 
@@ -24,9 +24,6 @@ using namespace std::chrono_literals;
 namespace {
 constexpr int min_pulse_width_range = 900;
 constexpr int max_pulse_width_range = 2100;
-
-constexpr long int16_min = std::numeric_limits<std::int16_t>::min();
-constexpr long int16_max = std::numeric_limits<std::int16_t>::max();
 
 constexpr int send_interval = 10;
 }  // namespace
@@ -39,16 +36,17 @@ constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
   .max_microseconds = max_pulse_width_range,
 };
 
-int16_axis round_clamp_int16(float init_x, float init_y, float init_z)
+int16_axis round_clamp_int16(float x, float y, float z)
 {
-  long const x_long = lroundf(init_x);
-  long const y_long = lroundf(init_y);
-  long const z_long = lroundf(init_z);
-
+  auto round_and_cast = [] (float f){
+    constexpr int16_t int16_min = std::numeric_limits<std::int16_t>::min();
+    constexpr int16_t int16_max = std::numeric_limits<std::int16_t>::max();
+    return static_cast<int16_t>(std::clamp<long>(lroundf(f), int16_min, int16_max));
+  };
   return int16_axis{
-    .x = static_cast<int16_t>(std::clamp<long>(x_long, int16_min, int16_max)),
-    .y = static_cast<int16_t>(std::clamp<long>(y_long, int16_min, int16_max)),
-    .z = static_cast<int16_t>(std::clamp<long>(z_long, int16_min, int16_max))
+    .x = round_and_cast(x),
+    .y = round_and_cast(y),
+    .z = round_and_cast(z)
   };
 }
 
@@ -92,17 +90,17 @@ void application()
   hal::print(*console, "magnetometer OK\n");
 
   hal::print(*console, "creating gyro source...\n");
-  auto gyro = hal::v5::make_strong_ptr<icm20948_gyro_source>(
+  auto gyro = hal::v5::make_strong_ptr<icm20948_gyroscope>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "gyro source OK\n");
 
   hal::print(*console, "creating accel source...\n");
-  auto accel = hal::v5::make_strong_ptr<icm20948_accel_source>(
+  auto accel = hal::v5::make_strong_ptr<icm20948_accelerometer>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "accel source OK\n");
 
   hal::print(*console, "creating mag source...\n");
-  auto mag = hal::v5::make_strong_ptr<icm20948_mag_source>(
+  auto mag = hal::v5::make_strong_ptr<icm20948_magnetometer>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "mag source OK\n");
 
@@ -112,7 +110,7 @@ void application()
   hal::print(*console, "PWM frequency managers OK\n");
 
   hal::print(*console, "creating X servo...\n");
-  auto p_x_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+  auto p_yaw_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
     resources::driver_allocator(),
     *pwm_freq_tim1,
     mast_servo_pwm_channel_0,
@@ -120,7 +118,7 @@ void application()
   hal::print(*console, "X servo OK\n");
 
   hal::print(*console, "creating Y servo...\n");
-  auto p_y_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+  auto p_pitch_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
     resources::driver_allocator(),
     *pwm_freq_tim2,
     mast_servo_pwm_channel_1,
@@ -128,8 +126,8 @@ void application()
   hal::print(*console, "Y servo OK\n");
 
   hal::print(*console, "creating gimbal...\n");
-  gimbal mast(p_x_servo,
-              p_y_servo,
+  gimbal mast(p_yaw_servo,
+              p_pitch_servo,
               gimbal_servo_settings.min_angle,
               gimbal_servo_settings.max_angle);
   hal::print(*console, "gimbal OK\n");
@@ -150,8 +148,10 @@ void application()
     auto gimbal_req = mcm.read_gimbal_target_request();
     if (gimbal_req) {
       mast.set_target(gimbal_req->x_angle, gimbal_req->y_angle);
-      hal::print<64>(*console, "gimbal cmd: x=%d y=%d\n",
-                     gimbal_req->x_angle, gimbal_req->y_angle);
+      hal::print<64>(*console,
+                     "gimbal cmd: x=%d y=%d\n",
+                     gimbal_req->x_angle,
+                     gimbal_req->y_angle);
     }
 
     hal::print(*console, "b\n");
@@ -160,21 +160,21 @@ void application()
       accel_on = toggle_req->accel_on;
       gyro_on = toggle_req->gyro_on;
       mag_on = toggle_req->mag_on;
-      hal::print<64>(*console, "imu toggle: a=%d g=%d m=%d\n",
-                     accel_on, gyro_on, mag_on);
+      hal::print<64>(
+        *console, "imu toggle: a=%d g=%d m=%d\n", accel_on, gyro_on, mag_on);
     }
 
-     hal::print(*console, "c\n");
-    auto raw_accel = accel->read_acceleration();
+    hal::print(*console, "c\n");
+    auto raw_accel = accel->read();
 
     hal::print(*console, "d\n");
-    auto raw_gyro = gyro->read_gyroscope();
+    auto raw_gyro = gyro->read();
 
     hal::print(*console, "e\n");
-    auto raw_mag = mag->read_magnetometer();
+    auto raw_mag = mag->read();
 
     hal::print(*console, "f\n");
-    mast.update_y_servo(dt, raw_accel, raw_gyro);
+    mast.update_pitch_servo(dt, raw_accel, raw_gyro);
 
     hal::print(*console, "g\n");
 
@@ -182,7 +182,7 @@ void application()
     if (send_count >= send_interval) {
       send_count = 0;
 
-      mcm.send_servo_position(mast.get_x_angle(), mast.get_y_angle());
+      mcm.send_servo_position(mast.get_yaw_angle(), mast.pitch());
 
       if (accel_on) {
         mcm.send_imu_accel(
@@ -193,8 +193,7 @@ void application()
           round_clamp_int16(raw_gyro.x, raw_gyro.y, raw_gyro.z));
       }
       if (mag_on) {
-        mcm.send_imu_mag(
-          round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z));
+        mcm.send_imu_mag(round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z));
       }
     }
 

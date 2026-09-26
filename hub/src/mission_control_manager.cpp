@@ -25,10 +25,10 @@ mission_control_manager::mission_control_manager(
   hal::v5::strong_ptr<hal::can_transceiver> p_can_transceiver)
   : m_can_transceiver(p_can_transceiver)
   , m_gimbal_message_finder(hal::can_message_finder(
-      *m_can_transceiver,
+      *p_can_transceiver,
       static_cast<uint32_t>(can_message_id::set_target_angle)))
   , m_imu_toggle_message_finder(hal::can_message_finder(
-      *m_can_transceiver,
+      *p_can_transceiver,
       static_cast<uint32_t>(can_message_id::toggle_imu_streams)))
 {
 }
@@ -115,11 +115,11 @@ void mission_control_manager::send_imu_accel(int16_axis accel)
 {
   std::array<hal::byte, 8> payload{
     static_cast<uint8_t>(accel.x & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(accel.x) >> 8) & 0xFF),
+    static_cast<uint8_t>((accel.x >> 8) & 0xFF),
     static_cast<uint8_t>(accel.y & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(accel.y) >> 8) & 0xFF),
+    static_cast<uint8_t>((accel.y >> 8) & 0xFF),
     static_cast<uint8_t>(accel.z & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(accel.z) >> 8) & 0xFF)
+    static_cast<uint8_t>((accel.z >> 8) & 0xFF)
   };
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::imu_accel),
@@ -131,11 +131,11 @@ void mission_control_manager::send_imu_gyro(int16_axis gyro)
 {
   std::array<hal::byte, 8> payload{
     static_cast<uint8_t>(gyro.x & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(gyro.x) >> 8) & 0xFF),
+    static_cast<uint8_t>((gyro.x >> 8) & 0xFF),
     static_cast<uint8_t>(gyro.y & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(gyro.y) >> 8) & 0xFF),
+    static_cast<uint8_t>((gyro.y >> 8) & 0xFF),
     static_cast<uint8_t>(gyro.z & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(gyro.z) >> 8) & 0xFF)
+    static_cast<uint8_t>((gyro.z >> 8) & 0xFF)
   };
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::imu_gyro),

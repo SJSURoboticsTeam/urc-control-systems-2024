@@ -10,7 +10,7 @@
 #include <gimbal.hpp>
 #include <resource_list.hpp>
 
-#include <icm20948_sources.hpp>
+#include <icm20948_adapters.hpp>
 
 namespace sjsu::hub {
 
@@ -54,9 +54,9 @@ void application()
   icm_device->auto_offsets();
 
   hal::print(*console, "creating sensor sources...\n");
-  auto gyro = hal::v5::make_strong_ptr<icm20948_gyro_source>(
+  auto gyro = hal::v5::make_strong_ptr<icm20948_gyroscope>(
     resources::driver_allocator(), icm_device);
-  auto accel = hal::v5::make_strong_ptr<icm20948_accel_source>(
+  auto accel = hal::v5::make_strong_ptr<icm20948_accelerometer>(
     resources::driver_allocator(), icm_device);
   hal::print(*console, "sensor sources OK\n");
 
@@ -71,7 +71,7 @@ void application()
   hal::print(*console, "PWM channels OK\n");
 
   hal::print(*console, "creating X servo...\n");
-  auto p_x_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+  auto p_yaw_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
     resources::driver_allocator(),
     *pwm_freq_tim1,
     pwm_ch0,
@@ -79,7 +79,7 @@ void application()
   hal::print(*console, "X servo OK\n");
 
   hal::print(*console, "creating Y servo...\n");
-  auto p_y_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+  auto p_pitch_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
     resources::driver_allocator(),
     *pwm_freq_tim2,
     pwm_ch1,
@@ -87,8 +87,8 @@ void application()
   hal::print(*console, "Y servo OK\n");
 
   hal::print(*console, "creating gimbal...\n");
-  gimbal mast(p_x_servo,
-              p_y_servo,
+  gimbal mast(p_yaw_servo,
+              p_pitch_servo,
               gimbal_servo_settings.min_angle,
               gimbal_servo_settings.max_angle);
   hal::print(*console, "gimbal OK\n");
@@ -101,21 +101,24 @@ void application()
   while (true) {
     hal::u64 frame_end = hal::future_deadline(*clock, 10ms);
 
-    auto raw_accel = accel->read_acceleration();
-    auto raw_gyro = gyro->read_gyroscope();
+    auto raw_accel = accel->read();
+    auto raw_gyro = gyro->read();
 
-
-
-    mast.update_y_servo(dt, raw_accel, raw_gyro);
+    mast.update_pitch_servo(dt, raw_accel, raw_gyro);
 
     print_count++;
     if (print_count >= 100) {
       hal::print<128>(
         *console,
         "pos=(%d,%d) accel=(%.2f,%.2f,%.2f) gyro=(%.2f,%.2f,%.2f)\n",
-        mast.get_x_angle(), mast.get_y_angle(),
-        raw_accel.x, raw_accel.y, raw_accel.z,
-        raw_gyro.x, raw_gyro.y, raw_gyro.z);
+        mast.get_yaw_angle(),
+        mast.pitch(),
+        raw_accel.x,
+        raw_accel.y,
+        raw_accel.z,
+        raw_gyro.x,
+        raw_gyro.y,
+        raw_gyro.z);
       print_count = 0;
     }
 

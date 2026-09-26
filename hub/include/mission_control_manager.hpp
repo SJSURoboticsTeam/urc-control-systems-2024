@@ -38,8 +38,8 @@ public:
     hal::v5::strong_ptr<hal::can_transceiver> p_can_transceiver);
 
   /**
-   * @brief reads the most recent gimbal target command (0x300) from the CAN
-   * buffer, discarding any older messages
+   * @brief reads the most recent gimbal target command from the CAN buffer,
+   * discarding any older messages
    *
    * @return the most recent gimbal target with x and y angles (0-180), or
    * std::nullopt if no command was received
@@ -47,8 +47,8 @@ public:
   std::optional<gimbal_target_request> read_gimbal_target_request();
 
   /**
-   * @brief reads the most recent IMU toggle command (0x305) from the CAN
-   * buffer, discarding any older messages
+   * @brief reads the most recent IMU toggle command from the CAN buffer,
+   * discarding any older messages.
    *
    * @return which IMU streams to enable or disable, or std::nullopt if no
    * toggle command was received
@@ -56,8 +56,8 @@ public:
   std::optional<imu_toggle_request> read_imu_toggle_request();
 
   /**
-   * @brief sends the current servo position over CAN (0x306). Sent
-   * periodically to act as a heartbeat for mission control
+   * @brief sends the current servo position over CAN. Sent periodically to act
+   * as a heartbeat for mission control
    *
    * @param x_angle current x servo angle (0-180)
    * @param y_angle current y servo angle (0-180)
@@ -65,24 +65,24 @@ public:
   void send_servo_position(uint8_t x_angle, uint8_t y_angle);
 
   /**
-   * @brief sends accelerometer data over CAN (0x301). Only called when
-   * accelerometer stream is toggled on via 0x305
+   * @brief sends accelerometer data over CAN. Only called when accelerometer
+   * stream is toggled on.
    *
    * @param accel 3-axis accelerometer data as 16-bit signed integers
    */
   void send_imu_accel(int16_axis accel);
 
   /**
-   * @brief sends gyroscope data over CAN (0x302). Only called when gyroscope
-   * stream is toggled on via 0x305
+   * @brief sends gyroscope data over CAN. Only called when gyroscope stream is
+   * toggled on.
    *
    * @param gyro 3-axis gyroscope data as 16-bit signed integers
    */
   void send_imu_gyro(int16_axis gyro);
 
   /**
-   * @brief sends magnetometer data over CAN (0x303). Only called when
-   * magnetometer stream is toggled on via 0x305
+   * @brief sends magnetometer data over CAN. Only called when magnetometer
+   * stream is toggled on.
    *
    * @param mag 3-axis magnetometer data as 16-bit signed integers
    */

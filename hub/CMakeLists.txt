@@ -31,6 +31,7 @@ INCLUDES
 SOURCES
   ./src/gimbal.cpp
   ./src/mission_control_manager.cpp
+  ./src/icm20948_adapters.cpp
 
     PACKAGES
     libhal-actuator
