@@ -33,6 +33,7 @@
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-exceptions/control.hpp>
 #include <libhal-util/atomic_spin_lock.hpp>
+#include <libhal-util/bit_bang_i2c.hpp>
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -58,25 +59,23 @@ std::pmr::polymorphic_allocator<> driver_allocator()
 
 // extra buttons for input/output e.g. recording something
 // lights, estop, button to swap modes
-auto& gpio_a()
+[[maybe_unused]] static auto& gpio_a()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_a> gpio;
   return gpio;
 }
-auto& gpio_b()
+[[maybe_unused]] static auto& gpio_b()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_b> gpio;
   return gpio;
 }
-auto& gpio_c()
+[[maybe_unused]] static auto& gpio_c()
 {
   static hal::stm32f1::gpio<st_peripheral::gpio_c> gpio;
   return gpio;
 }
 
-// optional pointer could be empty, initially null and then initialized to
-// something
-hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
+static hal::v5::optional_ptr<hal::cortex_m::dwt_counter> clock_ptr;
 hal::v5::strong_ptr<hal::steady_clock> clock()
 {
   if (not clock_ptr) {
@@ -87,7 +86,7 @@ hal::v5::strong_ptr<hal::steady_clock> clock()
   return clock_ptr;
 }
 
-hal::v5::optional_ptr<hal::serial> console_ptr;
+static hal::v5::optional_ptr<hal::serial> console_ptr;
 hal::v5::strong_ptr<hal::serial> console()
 {
   if (not console_ptr) {
@@ -97,8 +96,27 @@ hal::v5::strong_ptr<hal::serial> console()
   return console_ptr;
 }
 
+// Bit bang i2c using PB6 and PB7, labeled SCL1 and SDA1
+hal::v5::optional_ptr<hal::i2c> i2c_ptr;
+hal::v5::strong_ptr<hal::i2c> i2c()
+{
+  if (not i2c_ptr) {
+    static auto sda_output_pin = gpio_b().acquire_output_pin(7);
+    static auto scl_output_pin = gpio_b().acquire_output_pin(6);
+    auto clock = resources::clock();
+    i2c_ptr =
+      hal::v5::make_strong_ptr<hal::bit_bang_i2c>(driver_allocator(),
+                                                  hal::bit_bang_i2c::pins{
+                                                    .sda = &sda_output_pin,
+                                                    .scl = &scl_output_pin,
+                                                  },
+                                                  *clock);
+  }
+  return i2c_ptr;
+}
+
 // sree promised status led
-hal::v5::optional_ptr<hal::output_pin> led_ptr;
+static hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
 {
   if (not led_ptr) {
@@ -110,7 +128,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
 }
 
 // Reads ADC value from A0
-hal::v5::optional_ptr<hal::adc> a0_feedback_adc_ptr;
+static hal::v5::optional_ptr<hal::adc> a0_feedback_adc_ptr;
 hal::v5::strong_ptr<hal::adc> a0_feedback_adc()
 {
   if (not a0_feedback_adc_ptr) {
@@ -123,20 +141,20 @@ hal::v5::strong_ptr<hal::adc> a0_feedback_adc()
   return a0_feedback_adc_ptr;
 }
 
-auto& timer2()
+[[maybe_unused]] static auto& timer2()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer2> timer2{};
   return timer2;
 }
 
-auto& timer3()
+[[maybe_unused]] static auto& timer3()
 {
   static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
   return timer3;
 }
 
 // Passes in PWM to CIPO1
-hal::v5::optional_ptr<hal::pwm16_channel> cipo1_pwm_channel_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> cipo1_pwm_channel_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel()
 {
   if (not cipo1_pwm_channel_ptr) {
@@ -150,20 +168,25 @@ hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel()
   return cipo1_pwm_channel_ptr;
 }
 
+hal::actuator::rc_servo16::settings rc_servo_settings()
+{
+  hal::actuator::rc_servo16::settings rc_servo_settings{
+    .frequency = 50,
+    .min_angle = 0,
+    .max_angle = 180,
+    .min_microseconds = 500,
+    .max_microseconds = 2500,
+  };
+  return rc_servo_settings;
+}
+
 hal::v5::optional_ptr<hal::actuator::rc_servo16> rc_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo()
 {
   if (not rc_servo_ptr) {
     hal::v5::strong_ptr<hal::pwm16_channel> pwm = cipo1_pwm_channel();
-    hal::actuator::rc_servo16::settings rc_servo_settings{
-      .frequency = 50,
-      .min_angle = -90,
-      .max_angle = 90,
-      .min_microseconds = 500,
-      .max_microseconds = 2500,
-    };
     rc_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-      driver_allocator(), pwm, rc_servo_settings);
+      driver_allocator(), pwm, rc_servo_settings());
   }
   return rc_servo_ptr;
 }

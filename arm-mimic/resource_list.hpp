@@ -2,6 +2,7 @@
 
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/i2c.hpp>
 #include <libhal/adc.hpp>
 #include <libhal/functional.hpp>
 #include <libhal/interrupt_pin.hpp>
@@ -23,11 +24,13 @@ namespace resources {
 
 hal::v5::strong_ptr<hal::steady_clock> clock();
 hal::v5::strong_ptr<hal::serial> console();
+hal::v5::strong_ptr<hal::i2c> i2c();
 hal::v5::strong_ptr<hal::output_pin> status_led();
 // separate output pin for potentiometer feedback - analog read
 hal::v5::strong_ptr<hal::adc> a0_feedback_adc();
 // define a pwm channel servo input
 hal::v5::strong_ptr<hal::pwm16_channel> cipo1_pwm_channel();
+hal::actuator::rc_servo16::settings rc_servo_settings();
 hal::v5::strong_ptr<hal::actuator::rc_servo16> rc_servo();
 
 // void stop();
