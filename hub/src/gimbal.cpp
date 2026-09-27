@@ -46,9 +46,9 @@ hal::degrees gimbal::get_yaw_angle() const
   return m_curr_yaw_servo_angle;
 }
 
-hal::degrees gimbal::pitch() const
+hal::degrees gimbal::get_pitch_angle() const
 {
-  return m_curr_pitch_servo_angle;
+  return m_filtered_sensor_pitch;
 }
 
 void gimbal::update_pitch_servo(float p_delta_time,

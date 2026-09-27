@@ -70,16 +70,16 @@ public:
                           hal::gyroscope::read_t const& p_gyro);
 
   /**
-   * @brief returns the last commanded x servo angle
-   * @return x angle as (0-180)
+   * @brief returns the current yaw
+   * @return yaw within limits
    */
   hal::degrees get_yaw_angle() const;
 
   /**
-   * @brief returns the last commanded y servo angle
-   * @return y angle as (within pitch limits)
+   * @brief returns an estimated current pitch of the servo
+   * @return pitch within limits
    */
-  hal::degrees pitch() const;
+  hal::degrees get_pitch_angle() const;
 
 private:
   hal::v5::strong_ptr<hal::actuator::rc_servo16> m_yaw_servo;
