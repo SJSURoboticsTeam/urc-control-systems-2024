@@ -86,7 +86,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2();
-hal::v5::strong_ptr<hal::pwm> under_chassis_servo_pwm_channel_2();
+hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
 hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
