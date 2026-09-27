@@ -52,8 +52,7 @@ void application()
   hal::print(*console, "MCM OK\n");
 
   hal::print(*console, "creating ICM20948...\n");
-  auto icm_device = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
-    resources::driver_allocator(), *i2c, *clock);
+  auto icm_device = resources::icm();
   hal::print(*console, "ICM20948 OK\n");
 
   hal::print(*console, "initializing magnetometer...\n");
@@ -61,18 +60,15 @@ void application()
   hal::print(*console, "magnetometer OK\n");
 
   hal::print(*console, "creating gyro source...\n");
-  auto gyro = hal::v5::make_strong_ptr<icm20948_gyroscope>(
-    resources::driver_allocator(), icm_device);
+  auto gyro = resources::gyroscope();
   hal::print(*console, "gyro source OK\n");
 
   hal::print(*console, "creating accel source...\n");
-  auto accel = hal::v5::make_strong_ptr<icm20948_accelerometer>(
-    resources::driver_allocator(), icm_device);
+  auto accel = resources::accelerometer();
   hal::print(*console, "accel source OK\n");
 
   hal::print(*console, "creating mag source...\n");
-  auto mag = hal::v5::make_strong_ptr<icm20948_magnetometer>(
-    resources::driver_allocator(), icm_device);
+  auto mag = resources::magnetometer();
   hal::print(*console, "mag source OK\n");
 
   hal::print(*console, "NOTE: servos disabled (no hardware)\n");
