@@ -38,6 +38,9 @@ bool steer_controller_mock::is_homed()
 {
   return m_is_homed;
 }
+void steer_controller_mock::stop_home() {
+  return;
+}
 void steer_controller_mock::set_target_position(hal::degrees p_target_position)
 {
   m_target_position = p_target_position;
