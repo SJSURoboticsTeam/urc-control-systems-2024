@@ -141,7 +141,7 @@ void application()
     if (send_count >= send_interval) {
       send_count = 0;
 
-      mcm.send_servo_position(p_mast->get_yaw_angle(), p_mast->pitch());
+      mcm.send_servo_position(p_mast->get_yaw_angle(), p_mast->get_pitch_angle());
 
       if (accel_on) {
         mcm.send_imu_accel(

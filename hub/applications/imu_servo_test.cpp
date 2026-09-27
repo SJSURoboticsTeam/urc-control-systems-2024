@@ -85,7 +85,7 @@ void application()
         *console,
         "pos=(%d,%d) accel=(%.2f,%.2f,%.2f) gyro=(%.2f,%.2f,%.2f)\n",
         p_mast->get_yaw_angle(),
-        p_mast->pitch(),
+        p_mast->get_pitch_angle(),
         raw_accel.x,
         raw_accel.y,
         raw_accel.z,
