@@ -13,7 +13,10 @@
 // limitations under the License.
 #pragma once
 
+#include <libhal-actuator/rc_servo.hpp>
+#include <libhal-arm-mcu/stm32f1/independent_watchdog.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-sensor/imu/icm20948.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/adc.hpp>
 #include <libhal/can.hpp>
@@ -32,6 +35,8 @@
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
 
+#include <icm20948_adapters.hpp>
+#include <gimbal.hpp>
 
 namespace sjsu::hub {
 namespace custom {
@@ -52,6 +57,7 @@ public:
   virtual ~watchdog() = default;
 };
 }  // namespace custom
+
 namespace resources {
 // =======================================================
 // Defined by each platform file
@@ -78,10 +84,23 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1();
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2();
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
 hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
 hal::v5::strong_ptr<hal::i2c> i2c();
+hal::v5::strong_ptr<hal::can_transceiver> can_transceiver();
+hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
+hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
+hal::v5::strong_ptr<custom::watchdog> watchdog();
+hal::v5::strong_ptr<hal::sensor::icm20948> icm();
+hal::v5::strong_ptr<sjsu::hub::icm20948_gyroscope> gyroscope();
+hal::v5::strong_ptr<sjsu::hub::icm20948_accelerometer> accelerometer();
+hal::v5::strong_ptr<sjsu::hub::icm20948_magnetometer> magnetometer();
+hal::v5::strong_ptr<hal::actuator::rc_servo16> yaw_servo();
+hal::v5::strong_ptr<hal::actuator::rc_servo16> pitch_servo();
+hal::v5::strong_ptr<sjsu::hub::gimbal> mast();
 
 inline void reset()
 {
