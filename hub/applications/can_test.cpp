@@ -34,46 +34,15 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
   hal::print(*console, "=== HUB CAN TEST (no servos) ===\n");
-
-  hal::print(*console, "acquiring i2c...\n");
-  auto i2c = resources::i2c();
-  hal::print(*console, "i2c OK\n");
-
-  hal::print(*console, "acquiring CAN transceiver...\n");
+  
   auto can_transceiver = resources::can_transceiver();
-  hal::print(*console, "CAN transceiver OK\n");
-
-  hal::print(*console, "acquiring CAN bus manager...\n");
-  auto can_bus_manager = resources::can_bus_manager();
-  hal::print(*console, "CAN bus manager OK\n");
-
-  hal::print(*console, "creating mission control manager...\n");
   mission_control_manager mcm(can_transceiver);
-  hal::print(*console, "MCM OK\n");
-
-  hal::print(*console, "creating ICM20948...\n");
-  auto icm_device = resources::icm();
-  hal::print(*console, "ICM20948 OK\n");
-
-  hal::print(*console, "initializing magnetometer...\n");
-  icm_device->init_mag();
-  hal::print(*console, "magnetometer OK\n");
-
-  hal::print(*console, "creating gyro source...\n");
+  
   auto gyro = resources::gyroscope();
-  hal::print(*console, "gyro source OK\n");
-
-  hal::print(*console, "creating accel source...\n");
   auto accel = resources::accelerometer();
-  hal::print(*console, "accel source OK\n");
-
-  hal::print(*console, "creating mag source...\n");
   auto mag = resources::magnetometer();
-  hal::print(*console, "mag source OK\n");
-
-  hal::print(*console, "NOTE: servos disabled (no hardware)\n");
-  hal::print(*console, "=== ENTERING MAIN LOOP ===\n");
-
+  
+  
   // Simulated servo position, starts centered
   // Updates when 0x300 is received, sent back on 0x306 as heartbeat
   uint8_t x_angle = 90;

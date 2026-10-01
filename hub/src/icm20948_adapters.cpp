@@ -33,6 +33,7 @@ icm20948_magnetometer::icm20948_magnetometer(
   hal::v5::strong_ptr<hal::sensor::icm20948> p_icm)
   : m_icm(p_icm)
 {
+  m_icm->init_mag();
 }
 
 hal::magnetometer::read_t icm20948_magnetometer::driver_read()

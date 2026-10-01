@@ -21,12 +21,14 @@
 int main()
 {
   sjsu::hub::initialize_platform();
+  auto console_ref = sjsu::hub::resources::console();
   try {
+    print(*console_ref,"App Starting\n");
     sjsu::hub::application();
   } catch (hal::exception e) {
-    auto console_ref = sjsu::hub::resources::console();
     print<64>(*console_ref, "App Failed, error code: %d\n", e.error_code());
   }
+  print<64>(*console_ref, "App Terminated\n");
   std::terminate();
 }
 
