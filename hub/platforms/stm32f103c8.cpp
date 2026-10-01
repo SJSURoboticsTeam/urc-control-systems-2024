@@ -116,7 +116,8 @@ hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
   if (not voltage_sensor_adc_0_ptr) {
     static hal::atomic_spin_lock adc_lock0;
     static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
-    voltage_sensor_adc_0_ptr = hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
+    voltage_sensor_adc_0_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
   }
   return voltage_sensor_adc_0_ptr;
 }
@@ -127,7 +128,8 @@ hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1()
   if (not temperature_sensor_adc_1_ptr) {
     static hal::atomic_spin_lock adc_lock1;
     static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock1);
-    temperature_sensor_adc_1_ptr = hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
+    temperature_sensor_adc_1_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
   }
   return temperature_sensor_adc_1_ptr;
 }
@@ -154,8 +156,9 @@ static hal::v5::optional_ptr<hal::output_pin> beacon_output_pin_0_ptr;
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()  // G0 -> PA0
 {
   if (not beacon_output_pin_0_ptr) {
-    beacon_output_pin_0_ptr = hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
-      driver_allocator(), gpio_a().acquire_output_pin(0));
+    beacon_output_pin_0_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
+        driver_allocator(), gpio_a().acquire_output_pin(0));
   }
   return beacon_output_pin_0_ptr;
 }
@@ -163,8 +166,9 @@ static hal::v5::optional_ptr<hal::output_pin> beacon_output_pin_1_ptr;
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
 {
   if (not beacon_output_pin_1_ptr) {
-    beacon_output_pin_1_ptr = hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
-      driver_allocator(), gpio_a().acquire_output_pin(15));
+    beacon_output_pin_1_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
+        driver_allocator(), gpio_a().acquire_output_pin(15));
   }
   return beacon_output_pin_1_ptr;
 }
@@ -184,9 +188,9 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
 static hal::v5::optional_ptr<hal::sensor::icm20948> icm_ptr;
 hal::v5::strong_ptr<hal::sensor::icm20948> icm()
 {
-  auto i2c_ref = i2c();
-  auto clock_ref = clock();
   if (not icm_ptr) {
+    auto i2c_ref = i2c();
+    auto clock_ref = clock();
     icm_ptr = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
       resources::driver_allocator(), *i2c_ref, *clock_ref);
     icm_ptr->init_mag();
@@ -194,22 +198,34 @@ hal::v5::strong_ptr<hal::sensor::icm20948> icm()
   return icm_ptr;
 }
 
+static hal::v5::optional_ptr<icm20948_gyroscope> gyroscope_ptr;
 hal::v5::strong_ptr<icm20948_gyroscope> gyroscope()
 {
-  return hal::v5::make_strong_ptr<icm20948_gyroscope>(driver_allocator(),
-                                                      icm());
+  if (not gyroscope_ptr) {
+    gyroscope_ptr =
+      hal::v5::make_strong_ptr<icm20948_gyroscope>(driver_allocator(), icm());
+  }
+  return gyroscope_ptr;
 }
 
+static hal::v5::optional_ptr<icm20948_accelerometer> accelerometer_ptr;
 hal::v5::strong_ptr<icm20948_accelerometer> accelerometer()
 {
-  return hal::v5::make_strong_ptr<icm20948_accelerometer>(driver_allocator(),
-                                                          icm());
+  if (not accelerometer_ptr) {
+    accelerometer_ptr = hal::v5::make_strong_ptr<icm20948_accelerometer>(
+      driver_allocator(), icm());
+  }
+  return accelerometer_ptr;
 }
 
+static hal::v5::optional_ptr<icm20948_magnetometer> magnetometer_ptr;
 hal::v5::strong_ptr<icm20948_magnetometer> magnetometer()
 {
-  return hal::v5::make_strong_ptr<icm20948_magnetometer>(driver_allocator(),
-                                                         icm());
+  if (not magnetometer_ptr) {
+    magnetometer_ptr = hal::v5::make_strong_ptr<icm20948_magnetometer>(
+      driver_allocator(), icm());
+  }
+  return magnetometer_ptr;
 }
 
 constexpr int min_pulse_width_range = 900;
@@ -222,34 +238,47 @@ constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
   .max_microseconds = max_pulse_width_range,
 };
 
+static hal::v5::optional_ptr<hal::actuator::rc_servo16> yaw_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo16> yaw_servo()
 {
-  auto tim1 = pwm_frequency_tim1();
-  auto chan0 = mast_servo_pwm_channel_0();
-  return hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-    resources::driver_allocator(), *tim1, chan0, gimbal_servo_settings);
+  if (not yaw_servo_ptr) {
+    auto tim1 = pwm_frequency_tim1();
+    auto chan0 = mast_servo_pwm_channel_0();
+    yaw_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+      resources::driver_allocator(), *tim1, chan0, gimbal_servo_settings);
+  }
+  return yaw_servo_ptr;
 }
 
+static hal::v5::optional_ptr<hal::actuator::rc_servo16> pitch_servo_ptr;
 hal::v5::strong_ptr<hal::actuator::rc_servo16> pitch_servo()
 {
-  auto tim2 = pwm_frequency_tim2();
-  auto chan1 = mast_servo_pwm_channel_1();
-  return hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-    resources::driver_allocator(), *tim2, chan1, gimbal_servo_settings);
+  if (not pitch_servo_ptr) {
+    auto tim2 = pwm_frequency_tim2();
+    auto chan1 = mast_servo_pwm_channel_1();
+    pitch_servo_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+      resources::driver_allocator(), *tim2, chan1, gimbal_servo_settings);
+  }
+  return pitch_servo_ptr;
 }
 
+static hal::v5::optional_ptr<gimbal> mast_ptr;
 hal::v5::strong_ptr<gimbal> mast()
 {
-  auto yaw = yaw_servo();
-  auto pitch = pitch_servo();
-  return hal::v5::make_strong_ptr<gimbal>(driver_allocator(),
-                                   yaw,
-                                   pitch,
-                                   gimbal_servo_settings.min_angle,
-                                   gimbal_servo_settings.max_angle);
+  if (not mast_ptr) {
+    auto yaw = yaw_servo();
+    auto pitch = pitch_servo();
+    mast_ptr =
+      hal::v5::make_strong_ptr<gimbal>(driver_allocator(),
+                                       yaw,
+                                       pitch,
+                                       gimbal_servo_settings.min_angle,
+                                       gimbal_servo_settings.max_angle);
+  }
+  return mast_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
 {
   if (not mast_servo_pwm_channel_0_ptr) {
@@ -275,7 +304,8 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
   return mast_servo_pwm_channel_1_ptr;
 }
 // PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-static hal::v5::optional_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel>
+  under_chassis_servo_pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
 {
   if (not under_chassis_servo_pwm_channel_2_ptr) {
@@ -312,7 +342,8 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
   return pwm_frequency_tim2_ptr;
 }
 
-static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2>
+  can_manager;
 static std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
 static void initialize_can()
 {
@@ -440,4 +471,3 @@ void initialize_platform()
   hal::stm32f1::release_jtag_pins();
 }
 }  // namespace sjsu::hub
-
