@@ -333,7 +333,6 @@ hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo() {
 }
 
 hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
-std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
 void initialize_can()
 {
   constexpr hal::u32 baudrate = 1'000'000;
@@ -348,13 +347,6 @@ void initialize_can()
         *clock_ref,
         std::chrono::milliseconds(1),
         hal::stm32f1::can_pins::pb9_pb8);
-    auto f = hal::acquire_can_mask_filter(driver_allocator(), can_manager);
-    hal::can_mask_filter::pair p;
-    p.id = 0;
-    p.mask = 0;
-    can_mask[0] = f[0];
-    can_mask[1] = f[1];
-    can_mask.at(0)->allow(p);
   }
 }
 
@@ -379,17 +371,33 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return can_bus_manager_ptr;
 }
 
+hal::v5::optional_ptr<hal::can_identifier_filter> can_identifier_filter_ptr;
 hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
 {
   initialize_can();
-  return hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
+  if (not can_identifier_filter_ptr) {
+    can_identifier_filter_ptr = 
+        hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
+  }
+  return can_identifier_filter_ptr;
 }
 
+hal::v5::optional_ptr<hal::can_mask_filter> can_mask_filter_ptr; 
+hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter() 
+{
+  initialize_can(); 
+  if (not can_mask_filter_ptr) {
+    auto f = hal::acquire_can_mask_filter(driver_allocator(), can_manager);
+    auto p = hal::can_mask_filter::pair(0,0);
+    f.at(0)->allow(p); 
+    can_mask_filter_ptr = f.at(0); 
+  }
+  return can_mask_filter_ptr; 
+}
 
 hal::v5::optional_ptr<sjsu::perseus::switches_bldc> switches_ptr; 
 hal::v5::strong_ptr<sjsu::perseus::switches_bldc> switches() {
   if (not switches_ptr) {
-    auto console = resources::console();
     auto switches = switches_bldc(resources::switch_g1(), 
                     resources::switch_g2(), 
                     resources::switch_g3(), 

@@ -34,15 +34,15 @@ void application()
   hal::print(*console, "BLDC Servo created...\n");
   auto servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
   // servo values (elbow)
-  bldc_perseus::servo_values servo_values = {
+  bldc_perseus::physical_servo_values physical_servo_values = {
     .gear_ratio = 5281.1, // 5281.1 * 2 / 2
         .angle_offset = 0, 
         .fight_gravity = 0.15, 
         .high_clamped_value = 0.1, 
         .low_clamped_value = -0.3, 
-        .flipped_direction = false 
+        .clockwise_positive = false 
       }; 
-  servo_ptr->set_servo_values(servo_values); 
+  servo_ptr->set_physical_servo_values(physical_servo_values); 
 
 
   while(true) {
