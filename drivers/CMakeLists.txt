@@ -27,12 +27,11 @@ DEMOS
   perseus_demo
   perseus_serial_demo
   pressure_sensor_demo
-  serial_commands_demo
   scd40_demo
   soil_sensor_demo
   tla2528_analog_input_demo
   serial_commands_demo
-  adc1283_demo
+  nhd0420d3z_demo
 
 INCLUDES
   include
@@ -50,6 +49,7 @@ SOURCES
     src/h_bridge.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
+    src/nhd0420d3z.cpp
     src/adc1283.cpp
     src/adc1283_adapters.cpp
 
