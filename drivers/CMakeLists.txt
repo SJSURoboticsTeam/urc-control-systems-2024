@@ -20,6 +20,7 @@ libhal_build_demos(
 
 DEMOS
   adc1283_demo
+  blinker_demo
   can_demo
   color_sensor_demo
   h_bridge_demo
