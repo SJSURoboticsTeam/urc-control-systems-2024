@@ -40,7 +40,7 @@ public:
    * corelates to 2^p_expo in floating point
    * @returns fixed point values converted to float
    */
-    /**
+  /**
    * @brief converts a fixed point value into a float
    * @param p_fixed_point_num value being converted
    * @param p_expo fixed point exponent, i.e value of fixed point value of 1

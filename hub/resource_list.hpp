@@ -32,7 +32,6 @@
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
 
-
 namespace sjsu::hub {
 namespace custom {
 /**

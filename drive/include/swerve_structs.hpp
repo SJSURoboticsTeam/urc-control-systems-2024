@@ -2,7 +2,6 @@
 #include <libhal/units.hpp>
 #include <vector2d.hpp>
 
-
 namespace sjsu::drive {
 
 constexpr int module_count = 4;
@@ -19,7 +18,8 @@ struct swerve_module_state
   meters_per_sec propulsion_velocity = 0.0f;
   constexpr bool operator==(swerve_module_state const& b) const
   {
-    return steer_angle == b.steer_angle && propulsion_velocity == b.propulsion_velocity;
+    return steer_angle == b.steer_angle &&
+           propulsion_velocity == b.propulsion_velocity;
   }
   constexpr bool operator!=(swerve_module_state const& b) const
   {

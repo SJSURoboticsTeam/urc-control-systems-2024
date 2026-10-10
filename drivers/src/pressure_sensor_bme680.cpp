@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <pressure_sensor_bme680.hpp>
 #include <libhal/units.hpp>
+#include <pressure_sensor_bme680.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

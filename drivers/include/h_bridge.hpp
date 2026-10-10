@@ -1,8 +1,8 @@
 #pragma once
 #include <array>
-#include <libhal/pointers.hpp>
 #include <libhal/motor.hpp>
 #include <libhal/output_pin.hpp>
+#include <libhal/pointers.hpp>
 #include <libhal/pwm.hpp>
 namespace sjsu::drivers {
 

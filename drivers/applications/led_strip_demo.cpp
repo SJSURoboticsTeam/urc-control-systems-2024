@@ -5,9 +5,9 @@
 #include <libhal/pwm.hpp>
 #include <libhal/steady_clock.hpp>
 
-#include <sk9822.hpp>
 #include <array>
 #include <resource_list.hpp>
+#include <sk9822.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
