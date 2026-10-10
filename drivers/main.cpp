@@ -23,7 +23,7 @@ int main()
   sjsu::drivers::initialize_platform();
   auto console_ref = sjsu::drivers::resources::console();
   try {
-    print(*console_ref,"App Starting\n");
+    print(*console_ref, "App Starting\n");
     sjsu::drivers::application();
   } catch (hal::exception e) {
     print<64>(*console_ref, "App Failed, error code: %d\n", e.error_code());

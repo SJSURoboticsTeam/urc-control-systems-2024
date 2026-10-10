@@ -1,7 +1,7 @@
-#include <soil_sensor_sht21.hpp>
 #include <array>
 #include <libhal-util/i2c.hpp>
 #include <libhal/units.hpp>
+#include <soil_sensor_sht21.hpp>
 #include <span>
 
 namespace sjsu::drivers {

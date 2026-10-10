@@ -113,7 +113,8 @@ hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0()
   if (not voltage_sensor_adc_0_ptr) {
     static hal::atomic_spin_lock adc_lock0;
     static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock0);
-    voltage_sensor_adc_0_ptr = hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
+    voltage_sensor_adc_0_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc5);
   }
   return voltage_sensor_adc_0_ptr;
 }
@@ -124,7 +125,8 @@ hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1()
   if (not temperature_sensor_adc_1_ptr) {
     static hal::atomic_spin_lock adc_lock1;
     static hal::stm32f1::adc<st_peripheral::adc1> adc(adc_lock1);
-    temperature_sensor_adc_1_ptr = hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
+    temperature_sensor_adc_1_ptr =
+      hal::acquire_adc(driver_allocator(), adc, hal::stm32f1::adc_pins::pc2);
   }
   return temperature_sensor_adc_1_ptr;
 }
@@ -151,8 +153,9 @@ static hal::v5::optional_ptr<hal::output_pin> beacon_output_pin_0_ptr;
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0()  // G0 -> PA0
 {
   if (not beacon_output_pin_0_ptr) {
-    beacon_output_pin_0_ptr = hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
-      driver_allocator(), gpio_a().acquire_output_pin(0));
+    beacon_output_pin_0_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(0))>(
+        driver_allocator(), gpio_a().acquire_output_pin(0));
   }
   return beacon_output_pin_0_ptr;
 }
@@ -160,8 +163,9 @@ static hal::v5::optional_ptr<hal::output_pin> beacon_output_pin_1_ptr;
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
 {
   if (not beacon_output_pin_1_ptr) {
-    beacon_output_pin_1_ptr = hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
-      driver_allocator(), gpio_a().acquire_output_pin(15));
+    beacon_output_pin_1_ptr =
+      hal::v5::make_strong_ptr<decltype(gpio_a().acquire_output_pin(15))>(
+        driver_allocator(), gpio_a().acquire_output_pin(15));
   }
   return beacon_output_pin_1_ptr;
 }
@@ -206,7 +210,8 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
   return mast_servo_pwm_channel_1_ptr;
 }
 // PA5_SPI1_SCK will be used for pwm2, this is here as a holder
-static hal::v5::optional_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel>
+  under_chassis_servo_pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
 {
   if (not under_chassis_servo_pwm_channel_2_ptr) {
@@ -240,10 +245,11 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
       hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
         driver_allocator(), std::move(timer_pwm_frequency));
   }
-  return pwm_frequency_tim2_ptr;  
+  return pwm_frequency_tim2_ptr;
 }
 
-static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2>
+  can_manager;
 static std::array<hal::v5::optional_ptr<hal::can_mask_filter>, 2> can_mask;
 static void initialize_can()
 {

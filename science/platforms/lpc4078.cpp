@@ -38,7 +38,6 @@ void initialize_processor()
 {
   hal::cortex_m::initialize_data_section();
   hal::cortex_m::initialize_floating_point_unit();
-
 }
 
 application_framework initialize_platform()
@@ -56,10 +55,10 @@ application_framework initialize_platform()
   // Serial
   static std::array<hal::byte, 1024> recieve_buffer0{};
   static auto uart0 = (hal::lpc40::uart::get(0,
-                                                       recieve_buffer0,
-                                                       hal::serial::settings{
-                                                         .baud_rate = 38400,
-                                                       }));
+                                             recieve_buffer0,
+                                             hal::serial::settings{
+                                               .baud_rate = 38400,
+                                             }));
   // Don't think we need can for the science applications thus far
   //  hal::can::settings can_settings{ .baud_rate = 1.0_MHz };
   //  auto& can = (hal::lpc40::can::get<2>(can_settings));
@@ -79,10 +78,10 @@ application_framework initialize_platform()
 
   std::array<hal::byte, 1024> receive_buffer{};
   static auto uart1 = hal::lpc40::uart::get(0,
-                                                      receive_buffer,
-                                                      {
-                                                        .baud_rate = 115200.0f,
-                                                      });
+                                            receive_buffer,
+                                            {
+                                              .baud_rate = 115200.0f,
+                                            });
 
   static auto i2c = hal::lpc40::i2c::get(2);
 

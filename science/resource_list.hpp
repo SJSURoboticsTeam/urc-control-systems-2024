@@ -13,7 +13,9 @@
 // limitations under the License.
 #pragma once
 
+#include <libhal-actuator/rc_servo.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
+#include <libhal-expander/pca9685.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/adc.hpp>
 #include <libhal/can.hpp>
@@ -31,8 +33,6 @@
 #include <libhal/stream_dac.hpp>
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
-#include <libhal-actuator/rc_servo.hpp>
-#include <libhal-expander/pca9685.hpp>
 namespace sjsu::science {
 
 namespace resources {
@@ -64,8 +64,8 @@ hal::v5::strong_ptr<hal::output_pin> status_led();
 hal::v5::strong_ptr<hal::input_pin> top_door_limit_switch();
 hal::v5::strong_ptr<hal::input_pin> bottom_door_limit_switch();
 hal::v5::strong_ptr<hal::output_pin> output_pin_0();
-hal::v5::strong_ptr<hal::output_pin> kalling_reagent_pump(); 
-hal::v5::strong_ptr<hal::output_pin> biuret_reagent_pump(); 
+hal::v5::strong_ptr<hal::output_pin> kalling_reagent_pump();
+hal::v5::strong_ptr<hal::output_pin> biuret_reagent_pump();
 hal::v5::strong_ptr<hal::output_pin> benedict_reagent_pump();
 hal::v5::strong_ptr<hal::output_pin> deionized_water_pump();
 hal::v5::strong_ptr<hal::adc> adc_0();
@@ -78,7 +78,6 @@ hal::v5::strong_ptr<hal::actuator::rc_servo> arm_servo();
 hal::v5::strong_ptr<hal::actuator::rc_servo> carousel_servo();
 hal::v5::strong_ptr<hal::actuator::rc_servo> cache_servo();
 hal::v5::strong_ptr<hal::expander::pca9685> pca();
-
 
 inline void reset()
 {
