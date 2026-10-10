@@ -20,6 +20,7 @@ libhal_build_demos(
 
 DEMOS
   adc1283_demo
+  blinker_demo
   can_demo
   color_sensor_demo
   h_bridge_demo
@@ -31,8 +32,6 @@ DEMOS
   scd40_demo
   soil_sensor_demo
   tla2528_analog_input_demo
-  serial_commands_demo
-  adc1283_demo
 
 INCLUDES
   include
