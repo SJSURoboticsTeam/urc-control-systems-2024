@@ -1,4 +1,4 @@
-
+#pragma once
 #include <libhal-util/serial.hpp>
 #include <libhal/i2c.hpp>
 #include <libhal/units.hpp>
@@ -61,6 +61,12 @@ public:
   void write_char(char p_character);
 
   /**
+   * @brief destructive backspace, moves cursor left one character, wraps to
+   * previous line if possible (using advance_cursor_left logic)
+   */
+  void backspace();
+
+  /**
    * @brief Moves the cursor to a specific row and column on the display.
    *
    * Execution time: 100 us.
@@ -69,6 +75,18 @@ public:
    * @param p_column refers to the column index by 0 index (0-19).
    */
   void set_cursor_position(hal::byte p_line = 0, hal::byte p_column = 0);
+
+  /**
+   * @brief sets the display contrast
+   * @param p_contrast a value from [1, 50] (default: 40)
+   */
+  void set_display_contrast(hal::byte p_contrast);
+
+  /**
+   * @brief sets the backlight brightness
+   * @param p_brightness a value from [1, 8] (default: 8)
+   */
+  void set_backlight_brightness(hal::byte p_brightness);
 
   /**
    * @brief Moves the cursor one position to the right.
@@ -99,6 +117,30 @@ public:
    */
   void clear_screen();
 
+  /**
+   * @brief turn on/off a underline cursor
+   */
+  void underline_cursor(bool p_on);
+
+  /**
+   * @brief turn on/off a blinking cursor
+   */
+  void blinking_cursor(bool p_on);
+
+  /**
+   * @brief rotates all displayed characters one column to the left, characters
+   * that overflow the left side will reappear on the right (like a bit
+   * rotation) the cursor will also rotate with it
+   */
+  void rotate_left();
+
+  /**
+   * @brief rotates all displayed characters one column to the right, characters
+   * that overflow the right side will reappear on the left (like a bit
+   * rotation) the cursor will also rotate with it
+   */
+  void rotate_right();
+
 private:
   hal::i2c& m_i2c_bus;
   hal::byte m_i2c_address;
@@ -115,6 +157,20 @@ private:
    * if reached the end of the last line.
    */
   void advance_cursor_right();
+
+  /**
+   * @brief moves the in-memory cursor tracker left, wrapping to the last line
+   * when reaching the start of the line, if it is as the home position, it will
+   * do nothing.
+   */
+  void advance_cursor_left();
+
+  /**
+   * @brief moves the in-memory cursor tracker down one line, automatically
+   * returning to home if it tries going beyond the last line. It will move the
+   * cursor to the start of the next line.
+   */
+  void advance_cursor_down();
 
   /**
    * @brief Converts a (line, column) coordinate to a DDRAM address byte.

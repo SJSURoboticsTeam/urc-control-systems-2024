@@ -32,7 +32,6 @@
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
 
-
 namespace sjsu::hub {
 namespace custom {
 /**
@@ -98,3 +97,4 @@ inline void sleep(hal::time_duration p_duration)
 void initialize_platform();
 void application();
 }  // namespace sjsu::hub
+

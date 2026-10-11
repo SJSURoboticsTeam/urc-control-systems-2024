@@ -128,7 +128,8 @@ hal::v5::strong_ptr<hal::adc> adc_1()
 }
 
 static hal::v5::optional_ptr<hal::i2c> i2c_ptr;
-hal::v5::strong_ptr<hal::i2c> i2c()
+hal::v5::strong_ptr<hal::i2c> i2c(float const p_clock_duty_cycle,
+                                  hal::i2c::settings const& p_settings)
 {
   if (not i2c_ptr) {
     static auto sda_output_pin = gpio_b().acquire_output_pin(7);
@@ -140,36 +141,9 @@ hal::v5::strong_ptr<hal::i2c> i2c()
                                                     .sda = &sda_output_pin,
                                                     .scl = &scl_output_pin,
                                                   },
-                                                  *clock);
-  }
-  return i2c_ptr;
-}
-hal::v5::strong_ptr<hal::i2c> i2c2(hal::serial& console)
-{
-  if (not i2c_ptr) {
-    hal::print(console, "i2c 1\n");
-    static auto sda_output_pin = gpio_b().acquire_output_pin(7);
-    hal::print(console, "i2c 2\n");
-    static auto scl_output_pin = gpio_b().acquire_output_pin(6);
-    hal::print(console, "i2c 3\n");
-    auto clock = resources::clock();
-    hal::print(console, "i2c 4\n");
-    try {
-      i2c_ptr = hal::v5::make_strong_ptr<hal::bit_bang_i2c>(
-        driver_allocator(),
-        hal::bit_bang_i2c::pins{
-          .sda = &sda_output_pin,
-          .scl = &scl_output_pin,
-        },
-        *clock,
-        0.5f,
-        hal::i2c::settings{ .clock_rate = 10_kHz });
-    } catch (hal::exception err) {
-      hal::print<32>(console, "code: %d\n", err.error_code());
-    } catch (...) {
-      hal::print(console, "thrown\n");
-    }
-    hal::print(console, "i2c 5\n");
+                                                  *clock,
+                                                  p_clock_duty_cycle,
+                                                  p_settings);
   }
   return i2c_ptr;
 }
