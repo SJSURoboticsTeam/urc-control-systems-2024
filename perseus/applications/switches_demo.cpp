@@ -6,29 +6,25 @@
 
 #include <bldc_servo.hpp>
 #include <can_messaging.hpp>
-#include <switches.hpp>
 #include <resource_list.hpp>
-
+#include <switches.hpp>
 
 using namespace std::chrono_literals;
 namespace sjsu::perseus {
 
-
 void application()
 {
-    using namespace hal::literals;
-    using namespace std::chrono_literals;
+  using namespace hal::literals;
+  using namespace std::chrono_literals;
 
-    auto clock = resources::clock(); 
-    auto console = resources::console(); 
+  auto clock = resources::clock();
+  auto console = resources::console();
 
-    auto switches_ptr = resources::switches(); 
-    while(true) {
-    
-        hal::print<64>(*console, "Pins: %d\n", switches_ptr->read_switch_value()); 
-        hal::delay(*clock, 5000ms); 
-    
-    }
+  auto switches_ptr = resources::switches();
+  while (true) {
 
+    hal::print<64>(*console, "Pins: %d\n", switches_ptr->read_switch_value());
+    hal::delay(*clock, 5000ms);
+  }
 }
 }  // namespace sjsu::perseus

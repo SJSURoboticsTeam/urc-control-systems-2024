@@ -96,26 +96,26 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr; 
+hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
   if (not output_pin_0_ptr) {
-    auto output_pin_0 = gpio_a().acquire_output_pin(0); 
+    auto output_pin_0 = gpio_a().acquire_output_pin(0);
     output_pin_0_ptr = hal::v5::make_strong_ptr<decltype(output_pin_0)>(
       driver_allocator(), std::move(output_pin_0));
   }
-  return output_pin_0_ptr; 
+  return output_pin_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_1_ptr; 
+hal::v5::optional_ptr<hal::output_pin> output_pin_1_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_1()
 {
   if (not output_pin_1_ptr) {
-    auto output_pin_1 = gpio_a().acquire_output_pin(15); 
+    auto output_pin_1 = gpio_a().acquire_output_pin(15);
     output_pin_1_ptr = hal::v5::make_strong_ptr<decltype(output_pin_1)>(
       driver_allocator(), std::move(output_pin_1));
   }
-  return output_pin_1_ptr; 
+  return output_pin_1_ptr;
 }
 
 [[maybe_unused]] static auto& timer1()
@@ -136,7 +136,7 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_1()
   return timer3;
 }
 
-hal::v5::optional_ptr<hal::output_pin> pwm0_a8_ptr; 
+hal::v5::optional_ptr<hal::output_pin> pwm0_a8_ptr;
 hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
 {
   if (not pwm0_a8_ptr) {
@@ -144,32 +144,32 @@ hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
     pwm0_a8_ptr = hal::v5::make_strong_ptr<decltype(pwm0_a8)>(
       driver_allocator(), std::move(pwm0_a8));
   }
-  return pwm0_a8_ptr; 
+  return pwm0_a8_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> rx1_a3_ptr; 
+hal::v5::optional_ptr<hal::output_pin> rx1_a3_ptr;
 hal::v5::strong_ptr<hal::output_pin> rx1_a3()
 {
   if (not rx1_a3_ptr) {
     auto rx1_a3 = gpio_a().acquire_output_pin(3);
-    rx1_a3_ptr = hal::v5::make_strong_ptr<decltype(rx1_a3)>(
-      driver_allocator(), std::move(rx1_a3));
+    rx1_a3_ptr = hal::v5::make_strong_ptr<decltype(rx1_a3)>(driver_allocator(),
+                                                            std::move(rx1_a3));
   }
-  return rx1_a3_ptr; 
+  return rx1_a3_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> tx1_a2_ptr; 
+hal::v5::optional_ptr<hal::output_pin> tx1_a2_ptr;
 hal::v5::strong_ptr<hal::output_pin> tx1_a2()
 {
   if (not tx1_a2_ptr) {
     auto tx1_a2 = gpio_a().acquire_output_pin(2);
-    tx1_a2_ptr = hal::v5::make_strong_ptr<decltype(tx1_a2)>(
-      driver_allocator(), std::move(tx1_a2));
+    tx1_a2_ptr = hal::v5::make_strong_ptr<decltype(tx1_a2)>(driver_allocator(),
+                                                            std::move(tx1_a2));
   }
-  return tx1_a2_ptr; 
+  return tx1_a2_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_0_ptr; 
+hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_0_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   if (not pwm_channel_0_ptr) {
@@ -178,10 +178,10 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
     pwm_channel_0_ptr = hal::v5::make_strong_ptr<decltype(pwm_channel_0)>(
       driver_allocator(), std::move(pwm_channel_0));
   }
-  return pwm_channel_0_ptr; 
+  return pwm_channel_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_1_ptr; 
+hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_1_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
 {
   if (not pwm_channel_1_ptr) {
@@ -190,10 +190,10 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
     pwm_channel_1_ptr = hal::v5::make_strong_ptr<decltype(pwm_channel_1)>(
       driver_allocator(), std::move(pwm_channel_1));
   }
-  return pwm_channel_1_ptr; 
+  return pwm_channel_1_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_2_ptr; 
+hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_2()
 {
   if (not pwm_channel_2_ptr) {
@@ -202,33 +202,35 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_2()
     pwm_channel_2_ptr = hal::v5::make_strong_ptr<decltype(pwm_channel_2)>(
       driver_allocator(), std::move(pwm_channel_2));
   }
-  return pwm_channel_2_ptr; 
+  return pwm_channel_2_ptr;
 }
 
-hal::v5::optional_ptr<hal::rotation_sensor> encoder_ptr; 
-hal::v5::strong_ptr<hal::rotation_sensor> encoder() 
+hal::v5::optional_ptr<hal::rotation_sensor> encoder_ptr;
+hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 {
   if (not encoder_ptr) {
     encoder_ptr = timer2().acquire_quadrature_encoder(
-    driver_allocator(),
-    {.channel_a=static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
-      .channel_b=static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa1) },
-      1); 
-      // returns ticks multiplied by 360 degrees 
-      // need to divide by ticks per rotation and gear ratio to get pure degrees or linear movement 
+      driver_allocator(),
+      { .channel_a =
+          static_cast<hal::stm32f1::timer_pins>(hal::stm32f1::timer2_pin::pa0),
+        .channel_b = static_cast<hal::stm32f1::timer_pins>(
+          hal::stm32f1::timer2_pin::pa1) },
+      1);
+    // returns ticks multiplied by 360 degrees
+    // need to divide by ticks per rotation and gear ratio to get pure degrees
+    // or linear movement
   }
-  return encoder_ptr; 
+  return encoder_ptr;
 }
 
-// all the pins for the switches at the bottom of the pcb 
+// all the pins for the switches at the bottom of the pcb
 hal::v5::optional_ptr<hal::input_pin> switch_g1_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g1()
 {
   if (not switch_g1_ptr) {
-    auto switch_g1 = gpio_a().acquire_input_pin(15); 
-    switch_g1_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g1)>(
-        driver_allocator(), std::move(switch_g1));
+    auto switch_g1 = gpio_a().acquire_input_pin(15);
+    switch_g1_ptr = hal::v5::make_strong_ptr<decltype(switch_g1)>(
+      driver_allocator(), std::move(switch_g1));
   }
   return switch_g1_ptr;
 }
@@ -236,10 +238,9 @@ hal::v5::optional_ptr<hal::input_pin> switch_g2_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g2()
 {
   if (not switch_g2_ptr) {
-    auto switch_g2 = gpio_b().acquire_input_pin(3); 
-    switch_g2_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g2)>(
-        driver_allocator(), std::move(switch_g2));
+    auto switch_g2 = gpio_b().acquire_input_pin(3);
+    switch_g2_ptr = hal::v5::make_strong_ptr<decltype(switch_g2)>(
+      driver_allocator(), std::move(switch_g2));
   }
   return switch_g2_ptr;
 }
@@ -247,10 +248,9 @@ hal::v5::optional_ptr<hal::input_pin> switch_g3_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g3()
 {
   if (not switch_g3_ptr) {
-    auto switch_g3 = gpio_b().acquire_input_pin(4); 
-    switch_g3_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g3)>(
-        driver_allocator(), std::move(switch_g3));
+    auto switch_g3 = gpio_b().acquire_input_pin(4);
+    switch_g3_ptr = hal::v5::make_strong_ptr<decltype(switch_g3)>(
+      driver_allocator(), std::move(switch_g3));
   }
   return switch_g3_ptr;
 }
@@ -258,10 +258,9 @@ hal::v5::optional_ptr<hal::input_pin> switch_g4_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g4()
 {
   if (not switch_g4_ptr) {
-    auto switch_g4 = gpio_b().acquire_input_pin(12); 
-    switch_g4_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g4)>(
-        driver_allocator(), std::move(switch_g4));
+    auto switch_g4 = gpio_b().acquire_input_pin(12);
+    switch_g4_ptr = hal::v5::make_strong_ptr<decltype(switch_g4)>(
+      driver_allocator(), std::move(switch_g4));
   }
   return switch_g4_ptr;
 }
@@ -269,10 +268,9 @@ hal::v5::optional_ptr<hal::input_pin> switch_g5_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g5()
 {
   if (not switch_g5_ptr) {
-    auto switch_g5 = gpio_b().acquire_input_pin(13); 
-    switch_g5_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g5)>(
-        driver_allocator(), std::move(switch_g5));
+    auto switch_g5 = gpio_b().acquire_input_pin(13);
+    switch_g5_ptr = hal::v5::make_strong_ptr<decltype(switch_g5)>(
+      driver_allocator(), std::move(switch_g5));
   }
   return switch_g5_ptr;
 }
@@ -280,10 +278,9 @@ hal::v5::optional_ptr<hal::input_pin> switch_g6_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g6()
 {
   if (not switch_g6_ptr) {
-    auto switch_g6 = gpio_b().acquire_input_pin(14); 
-    switch_g6_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g6)>(
-        driver_allocator(), std::move(switch_g6));
+    auto switch_g6 = gpio_b().acquire_input_pin(14);
+    switch_g6_ptr = hal::v5::make_strong_ptr<decltype(switch_g6)>(
+      driver_allocator(), std::move(switch_g6));
   }
   return switch_g6_ptr;
 }
@@ -291,44 +288,47 @@ hal::v5::optional_ptr<hal::input_pin> switch_g7_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g7()
 {
   if (not switch_g7_ptr) {
-    auto switch_g7 = gpio_b().acquire_input_pin(15); 
-    switch_g7_ptr =
-      hal::v5::make_strong_ptr<decltype(switch_g7)>(
-        driver_allocator(), std::move(switch_g7));
+    auto switch_g7 = gpio_b().acquire_input_pin(15);
+    switch_g7_ptr = hal::v5::make_strong_ptr<decltype(switch_g7)>(
+      driver_allocator(), std::move(switch_g7));
   }
   return switch_g7_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr; 
+hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr;
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
   if (not h_bridge_ptr) {
     auto a_low = resources::pwm0_a8();
     auto b_low = resources::rx1_a3();
-    // auto c_low = resources::tx1_a2(); 
+    // auto c_low = resources::tx1_a2();
     hal::print(*console_ptr, "Acquired h-bridge low pins\n");
     auto a_high = resources::pwm_channel_0();
     auto b_high = resources::pwm_channel_1();
-    // auto c_high = resources::pwm_channel_2(); 
+    // auto c_high = resources::pwm_channel_2();
     hal::print(*console_ptr, "Acquired h-bridge high pins\n");
-    // auto h_bridge = sjsu::drivers::h_bridge({ a_high, a_low }, { b_high, b_low });
-    auto h_bridge = sjsu::drivers::h_bridge(
-      { .p_high=a_high, .p_low=a_low }, { .p_high=b_high, .p_low=b_low });
+    // auto h_bridge = sjsu::drivers::h_bridge({ a_high, a_low }, { b_high,
+    // b_low });
+    auto h_bridge =
+      sjsu::drivers::h_bridge({ .p_high = a_high, .p_low = a_low },
+                              { .p_high = b_high, .p_low = b_low });
     h_bridge_ptr = hal::v5::make_strong_ptr<decltype(h_bridge)>(
       resources::driver_allocator(), std::move(h_bridge));
   }
-  return h_bridge_ptr; 
+  return h_bridge_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::perseus::bldc_perseus> servo_ptr; 
-hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo() {
+hal::v5::optional_ptr<sjsu::perseus::bldc_perseus> servo_ptr;
+hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo()
+{
   if (not servo_ptr) {
     auto h_bridge = resources::h_bridge();
     auto encoder = resources::encoder();
-    auto servo = sjsu::perseus::bldc_perseus(h_bridge, encoder); 
-    servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(resources::driver_allocator(), std::move(servo));
+    auto servo = sjsu::perseus::bldc_perseus(h_bridge, encoder);
+    servo_ptr = hal::v5::make_strong_ptr<decltype(servo)>(
+      resources::driver_allocator(), std::move(servo));
   }
-  return servo_ptr; 
+  return servo_ptr;
 }
 
 hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
@@ -353,9 +353,10 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
   initialize_can();
   if (not can_transceiver_ptr) {
-   can_transceiver_ptr = hal::acquire_can_transceiver(driver_allocator(), can_manager);
+    can_transceiver_ptr =
+      hal::acquire_can_transceiver(driver_allocator(), can_manager);
   }
-  return can_transceiver_ptr; 
+  return can_transceiver_ptr;
 }
 
 hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
@@ -369,46 +370,55 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
   return can_bus_manager_ptr;
 }
 
-hal::v5::optional_ptr<hal::can_identifier_filter> can_identifier_filter_ptr;
-hal::v5::strong_ptr<hal::can_identifier_filter> can_identifier_filter()
+unsigned int can_filters_index = 0;
+std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
+  can_identifier_filters;
+hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
+{
+  if (can_filters_index >= can_identifier_filters.size()) {
+    throw hal::unknown(nullptr);
+  }
+  initialize_can();
+  if (can_filters_index % 4 == 0) {
+    auto filter_batch =
+      hal::acquire_can_identifier_filter(driver_allocator(), can_manager);
+    for (unsigned int i = 0; i < filter_batch.size(); i++) {
+      can_identifier_filters[i + can_filters_index] = filter_batch[i];
+    }
+  }
+  auto can_id_filter = can_identifier_filters[can_filters_index];
+  can_filters_index++;
+  return can_id_filter;
+}
+
+hal::v5::optional_ptr<hal::can_mask_filter> can_mask_filter_ptr;
+hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter()
 {
   initialize_can();
-  if (not can_identifier_filter_ptr) {
-    can_identifier_filter_ptr = 
-        hal::acquire_can_identifier_filter(driver_allocator(), can_manager)[0];
-  }
-  return can_identifier_filter_ptr;
-}
-
-hal::v5::optional_ptr<hal::can_mask_filter> can_mask_filter_ptr; 
-hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter() 
-{
-  initialize_can(); 
   if (not can_mask_filter_ptr) {
     auto f = hal::acquire_can_mask_filter(driver_allocator(), can_manager);
-    auto p = hal::can_mask_filter::pair(0,0);
-    f.at(0)->allow(p); 
-    can_mask_filter_ptr = f.at(0); 
+    auto p = hal::can_mask_filter::pair(0, 0);
+    f.at(0)->allow(p);
+    can_mask_filter_ptr = f.at(0);
   }
-  return can_mask_filter_ptr; 
+  return can_mask_filter_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::perseus::switches_bldc> switches_ptr; 
-hal::v5::strong_ptr<sjsu::perseus::switches_bldc> switches() {
+hal::v5::optional_ptr<sjsu::perseus::switches_bldc> switches_ptr;
+hal::v5::strong_ptr<sjsu::perseus::switches_bldc> switches()
+{
   if (not switches_ptr) {
-    auto switches = switches_bldc(resources::switch_g1(), 
-                    resources::switch_g2(), 
-                    resources::switch_g3(), 
-                    resources::switch_g4(), 
-                    resources::switch_g5(), 
-                    resources::switch_g6()); 
+    auto switches = switches_bldc(resources::switch_g1(),
+                                  resources::switch_g2(),
+                                  resources::switch_g3(),
+                                  resources::switch_g4(),
+                                  resources::switch_g5(),
+                                  resources::switch_g6());
     switches_ptr = hal::v5::make_strong_ptr<decltype(switches)>(
-      resources::driver_allocator(), std::move(switches)); 
+      resources::driver_allocator(), std::move(switches));
   }
-  return switches_ptr; 
+  return switches_ptr;
 }
-
-
 
 // add one for quadrature encoder
 
