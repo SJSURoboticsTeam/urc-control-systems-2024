@@ -17,8 +17,9 @@ struct int16_axis
 
 struct gimbal_target_request
 {
-  uint8_t x_angle;
-  uint8_t y_angle;
+  uint8_t mast_angle_x;
+  uint8_t mast_angle_y;
+  uint8_t wheels_angle_x;
 };
 
 struct imu_toggle_request
@@ -62,7 +63,7 @@ public:
    * @param x_angle current x servo angle (0-180)
    * @param y_angle current y servo angle (0-180)
    */
-  void send_servo_position(uint8_t x_angle, uint8_t y_angle);
+  void send_servo_position(uint8_t x_angle, uint8_t y_angle, uint8_t wheels_angle);
 
   /**
    * @brief sends accelerometer data over CAN. Only called when accelerometer

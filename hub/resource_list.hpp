@@ -35,8 +35,8 @@
 #include <libhal/timer.hpp>
 #include <libhal/zero_copy_serial.hpp>
 
-#include <icm20948_adapters.hpp>
 #include <gimbal.hpp>
+#include <icm20948_adapters.hpp>
 
 namespace sjsu::hub {
 namespace custom {
@@ -84,8 +84,10 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2();
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim3();
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::adc> voltage_sensor_adc_0();
 hal::v5::strong_ptr<hal::adc> temperature_sensor_adc_1();
@@ -98,9 +100,12 @@ hal::v5::strong_ptr<hal::sensor::icm20948> icm();
 hal::v5::strong_ptr<sjsu::hub::icm20948_gyroscope> gyroscope();
 hal::v5::strong_ptr<sjsu::hub::icm20948_accelerometer> accelerometer();
 hal::v5::strong_ptr<sjsu::hub::icm20948_magnetometer> magnetometer();
-hal::v5::strong_ptr<hal::actuator::rc_servo16> yaw_servo();
-hal::v5::strong_ptr<hal::actuator::rc_servo16> pitch_servo();
-hal::v5::strong_ptr<sjsu::hub::gimbal> mast();
+hal::v5::strong_ptr<sjsu::hub::imu_angle_estimator> imu_angle_estimator();
+hal::v5::strong_ptr<hal::servo> mast_servo_aboutx();
+hal::v5::strong_ptr<hal::servo> mast_servo_abouty();
+hal::v5::strong_ptr<hal::servo> wheels_servo_aboutx();
+hal::v5::strong_ptr<sjsu::hub::gimbal> mast_gimbal_abouty();
+hal::v5::strong_ptr<sjsu::hub::mast_gimbal_controller> mast_gimbal_controller(hal::serial& console);
 
 inline void reset()
 {

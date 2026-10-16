@@ -40,11 +40,10 @@ mission_control_manager::read_gimbal_target_request()
   std::optional<hal::can_message> gimbal_request_message;
 
   while (true) {
-    std::optional<hal::can_message> check =
-      m_gimbal_message_finder.find();
+    std::optional<hal::can_message> check = m_gimbal_message_finder.find();
 
     if (check) {
-      if (check->length == 2) {
+      if (check->length == 3) {
         gimbal_request_message = check;
       }
     } else {
@@ -59,8 +58,9 @@ mission_control_manager::read_gimbal_target_request()
   auto& payload = gimbal_request_message->payload;
 
   gimbal_target_request gtr = {
-    .x_angle = static_cast<uint8_t>(payload[0]),
-    .y_angle = static_cast<uint8_t>(payload[1]),
+    .mast_angle_x = static_cast<uint8_t>(payload[0]),
+    .mast_angle_y = static_cast<uint8_t>(payload[1]),
+    .wheels_angle_x = static_cast<uint8_t>(payload[2]),
   };
 
   hal::print<64>(
@@ -75,8 +75,7 @@ mission_control_manager::read_imu_toggle_request()
   std::optional<hal::can_message> toggle_message;
 
   while (true) {
-    std::optional<hal::can_message> check =
-      m_imu_toggle_message_finder.find();
+    std::optional<hal::can_message> check = m_imu_toggle_message_finder.find();
 
     if (check) {
       if (check->length == 3) {
@@ -102,25 +101,25 @@ mission_control_manager::read_imu_toggle_request()
   return itr;
 }
 
-void mission_control_manager::send_servo_position(uint8_t x_angle,
-                                                  uint8_t y_angle)
+void mission_control_manager::send_servo_position(uint8_t mast_x_angle,
+                                                  uint8_t mast_y_angle,
+                                                  uint8_t wheels_x_angle)
 {
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::servo_position),
       .length = 2,
-      .payload = { x_angle, y_angle } });
+      .payload = { mast_x_angle, mast_y_angle, wheels_x_angle } });
 }
 
 void mission_control_manager::send_imu_accel(int16_axis accel)
 {
-  std::array<hal::byte, 8> payload{
-    static_cast<uint8_t>(accel.x & 0xFF),
-    static_cast<uint8_t>((accel.x >> 8) & 0xFF),
-    static_cast<uint8_t>(accel.y & 0xFF),
-    static_cast<uint8_t>((accel.y >> 8) & 0xFF),
-    static_cast<uint8_t>(accel.z & 0xFF),
-    static_cast<uint8_t>((accel.z >> 8) & 0xFF)
-  };
+  std::array<hal::byte, 8> payload{ static_cast<uint8_t>(accel.x & 0xFF),
+                                    static_cast<uint8_t>((accel.x >> 8) & 0xFF),
+                                    static_cast<uint8_t>(accel.y & 0xFF),
+                                    static_cast<uint8_t>((accel.y >> 8) & 0xFF),
+                                    static_cast<uint8_t>(accel.z & 0xFF),
+                                    static_cast<uint8_t>((accel.z >> 8) &
+                                                         0xFF) };
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::imu_accel),
       .length = 6,

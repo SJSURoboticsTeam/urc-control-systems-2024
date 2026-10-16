@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <mission_control_manager.hpp>
+#include <numbers>
 
 namespace sjsu::hub {
 int16_axis round_clamp_int16(float x, float y, float z)
@@ -17,5 +18,10 @@ int16_axis round_clamp_int16(float x, float y, float z)
   return int16_axis{ .x = round_and_cast(x),
                      .y = round_and_cast(y),
                      .z = round_and_cast(z) };
+}
+
+double rad_to_deg(double rad)
+{
+  return rad * 180.0f / std::numbers::pi;
 }
 }  // namespace sjsu::hub

@@ -1,104 +1,128 @@
 #pragma once
-#include <algorithm>
-#include <cmath>
 
 #include <libhal-actuator/rc_servo.hpp>
+#include <libhal-util/steady_clock.hpp>
+#include <libhal/accelerometer.hpp>
+#include <libhal/gyroscope.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
-#include <libhal/gyroscope.hpp>
-#include <libhal/accelerometer.hpp>
+#include <mission_control_manager.hpp>
 
 namespace sjsu::hub {
-
-struct gimbal_control_settings
+/**
+ * @brief estimates the angle
+ */
+class imu_angle_estimator
 {
-  float tau = 0.2f;  // For the complementary filter
+public:
+  struct settings
+  {
+    /**
+     * @brief the proportion of the
+     */
+    float tau;
+  };
+
+  imu_angle_estimator(hal::v5::strong_ptr<hal::steady_clock> p_clock,
+                      hal::v5::strong_ptr<hal::accelerometer> p_accel,
+                      hal::v5::strong_ptr<hal::gyroscope> p_gyro,
+                      settings p_settings = { .tau = 0.2f });
+
+  /**
+   * @brief returns the last estimated yaw about z of the servo as calculated
+   * from the sensor readings
+   */
+  hal::degrees get_angle_aboutx();
+
+  /**
+   * @brief returns the last estimated rotation about y of the servo as
+   * calculated from the sensor readings
+   */
+  hal::degrees get_angle_abouty();
+
+  /**
+   * @brief updates all angle estimates
+   *
+   * @note this uses the clock passed to it to compute the time that has passed
+   * since it was last called for use in calculations.
+   */
+  void update();
+
+private:
+  hal::v5::strong_ptr<hal::steady_clock> m_clock;
+  hal::v5::strong_ptr<hal::accelerometer> m_accel;
+  hal::v5::strong_ptr<hal::gyroscope> m_gyro;
+  settings m_settings;
+  hal::degrees m_estimated_aboutx;
+  hal::degrees m_estimated_abouty;
+  hal::u64 m_last_uptime;
+  float delta_time();
 };
 
+/**
+ * @brief clamped_servo simply clamps angles between a given min and max
+ * range before calling position on hal::actuator::rc_servo16
+ */
+class clamped_servo : public hal::servo
+{
+public:
+  struct settings
+  {
+    hal::degrees min_angle;
+    hal::degrees max_angle;
+  };
+
+  clamped_servo(hal::strong_ptr<hal::servo> p_servo,
+                     settings p_settings);
+
+private:
+  hal::strong_ptr<hal::servo> m_servo;
+  settings m_settings;
+  void driver_position(hal::degrees p_position) override;
+};
+
+/**
+ * @brief gimbal implements a simple gimbal stabilizer.
+ */
 class gimbal
 {
 public:
-  /**
-   * @param p_yaw_servo servo motor for yaw (left/right)
-   * @param p_pitch_servo servo motor for pitch (up/down), tilt compensated
-   * @param p_yaw_min minimum servo angle from rc_servo settings
-   * @param p_yaw_max maximum servo angle from rc_servo settings
-   * @param p_pitch_min minimum pitch servo angle (default 30)
-   * @param p_pitch_max maximum pitch servo angle (default 150)
-   */
-  gimbal(hal::v5::strong_ptr<hal::actuator::rc_servo16> p_yaw_servo,
-         hal::v5::strong_ptr<hal::actuator::rc_servo16> p_pitch_servo,
-         hal::degrees p_yaw_min,
-         hal::degrees p_yaw_max,
-         hal::degrees p_pitch_min = 0.0f,
-         hal::degrees p_pitch_max = 180.f);
+  gimbal(hal::v5::strong_ptr<hal::servo> p_servo);
 
   /**
-   * @brief sets both yaw and pitch targets at once
-   *
-   * @param p_yaw_deg target yaw angle (0-180, 0=left)
-   * @param p_pitch_deg target pitch angle (clamped to pitch range)
+   * @brief sets the target angle for the gimbal
    */
-  void set_target(hal::degrees p_yaw_deg, hal::degrees p_pitch_deg);
+  void set_target(hal::degrees p_angle);
 
   /**
-   * @brief sets the yaw servo to a target angle directly
-   *
-   * @param p_yaw_deg target yaw angle, clamped to full servo range
+   * @brief updates the gimbal given a new estimate for current angle, should be
+   * called periodically.
    */
-  void set_yaw_target(hal::degrees p_yaw_deg);
-
-  /**
-   * @brief sets the pitch target offset. Converted from external range
-   * to internal offset from level.
-   *
-   * @param p_pitch_deg target pitch angle
-   */
-  void set_pitch_target(hal::degrees p_pitch_deg);
-
-  /**
-   * @brief compensates the pitch servo for rover tilt using IMU data.
-   * Uses a complementary filter to estimate tilt, then directly
-   * compensates the servo angle to keep the camera level.
-   *
-   * @param p_delta_time time since last update in seconds
-   * @param p_accel accelerometer reading for tilt estimation
-   * @param p_gyro gyroscope reading for complementary filter
-   */
-  void update_pitch_servo(float p_delta_time,
-                          hal::accelerometer::read_t const& p_accel,
-                          hal::gyroscope::read_t const& p_gyro);
-
-  /**
-   * @brief returns the current yaw
-   * @return yaw within limits
-   */
-  hal::degrees get_yaw_angle() const;
-
-  /**
-   * @brief returns an estimated current pitch of the servo
-   * @return pitch within limits
-   */
-  hal::degrees get_pitch_angle() const;
+  void update(hal::degrees p_angle_estimate);
 
 private:
-  hal::v5::strong_ptr<hal::actuator::rc_servo16> m_yaw_servo;
-  hal::v5::strong_ptr<hal::actuator::rc_servo16> m_pitch_servo;
+  hal::v5::strong_ptr<hal::servo> m_servo;
+  hal::degrees m_target_angle;
+};
 
-  // Full servo range (used for X/yaw)
-  hal::degrees m_yaw_min, m_yaw_max;
+class mast_gimbal_controller
+{
+public:
+  struct components
+  {
+    hal::v5::strong_ptr<imu_angle_estimator> angle_estimator;
+    hal::v5::strong_ptr<gimbal> mast_gimbal_abouty;
+    clamped_servo mast_servo_aboutx;
+    clamped_servo wheels_servo_aboutx;
+  };
 
-  // Restricted pitch range (used for Y/pitch)
-  hal::degrees m_pitch_min, m_pitch_max;
+  // components are extracted into a struct because positional parameters with
+  // similar types are easy to mix up
+  mast_gimbal_controller(components p_comp);
+  void set_target(gimbal_target_request const& target);
+  void update();
 
-  hal::degrees m_curr_yaw_servo_angle, m_curr_pitch_servo_angle;
-
-  // Complementary filter output
-  float m_filtered_sensor_pitch = 0.0f;
-
-  // Pitch offset from level, set via set_pitch_target
-  float m_target_pitch = 0.0f;
-
-  gimbal_control_settings m_settings;
+private:
+  components m_comp;
 };
 }  // namespace sjsu::hub
