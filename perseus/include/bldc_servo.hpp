@@ -1,12 +1,11 @@
 #pragma once
-#include <h_bridge.hpp>
 #include <libhal-arm-mcu/stm32_generic/quadrature_encoder.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/rotation_sensor.hpp>
 #include <libhal/units.hpp>
 
-#include <resource_list.hpp>
+#include <h_bridge.hpp>
 
 using sec = float;
 
@@ -24,9 +23,9 @@ public:
    */
   struct status
   {
-    hal::degrees position;
-    float power;
-    float velocity;
+    hal::degrees position = 0.0;
+    float power = 0.0;
+    float velocity = 0.0;
   };
 
   /**
@@ -34,9 +33,9 @@ public:
    */
   struct PID_settings
   {
-    float kp = 0.1;
-    float ki = 0.1;
-    float kd = 0.1;
+    float kp = 0.0;
+    float ki = 0.0;
+    float kd = 0.0;
   };
   /**
    * @brief Struct keeps previous PID settings for the servo.
@@ -44,30 +43,35 @@ public:
    */
   struct PID_prev_values
   {
-    float integral;
-    float last_error;
-    float prev_dt_time;
+    float integral = 0.0;
+    float last_error = 0.0;
+    float prev_timestamp = 0.0;
   };
   /**
    * @brief Struct for the values that are individual to each servo.
    */
-  struct servo_values
+  struct physical_servo_values
   {
-    // for reading value
-    float gear_ratio;
-    // for feedforward
-    float feedforward_clamp;  // power needed to keep position at max gravity
-    float length;
-    float angle_offset;
-    float weight_beam;
-    float weight_end;
+    // convert from ticks to degrees or mm
+    float gear_ratio = 0.0;
+    // offset of starting angle from 0 (perpendicular to ground)
+    float angle_offset = 0.0;
+    // power needed to keep servo in place when link parallel to ground
+    float fight_gravity = 0.0;
+    // limits on power for safety
+    float high_clamped_value = 0.0;
+    float low_clamped_value = 0.0;
+    // whether motor direction is flipped
+    // true: motor spins clockwise when positive power applied
+    // false: motor spins counter-clockwise when positive power applied
+    bool clockwise_positive = false;
   };
   /**
    * @brief Set the target position of the servo.
-   * @param target_position The target position to set, it is float value in
+   * @param p_target_position The target position to set, it is float value in
    * degrees.
    */
-  void set_target_position(hal::degrees target_position);
+  void set_target_position(hal::degrees p_target_position);
   /**
    * @brief Get the target position of the servo.
    * @return Gets the position relative to the home position.
@@ -83,31 +87,35 @@ public:
    * @brief Set the current position of the servo.
    * It will not immediately go to the target position, but will try to reach it
    * using velocity control.
-   * @param reading_position The current position to set, it is a hal::degrees
+   * @param p_reading_position The current position to set, it is a hal::degrees
    * value. This is relative to the home position.
    */
-  void set_reading_position(hal::degrees reading_position);
+  void set_reading_position(hal::degrees p_reading_position);
 
   /**
    * @brief Set the target velocity of the servo.
    * The servo will try to reach this velocity using acceleration limits.
    * This may change the clamped speed.
-   * @param target_velocity The target velocity to set, it is a float value.
+   * @param p_target_velocity The target velocity to set, it is a float value.
    */
-  void set_target_velocity(float target_velocity);
+  void set_target_velocity(float p_target_velocity);
 
   /**
    * @brief Set the current velocity of the servo.
    *  This should only be used to set the velocity to 0.
-   * @param reading_velocity The current velocity to set, it is a float value.
+   * @param p_reading_velocity The current velocity to set, it is a float value.
    */
-  void set_reading_velocity(float reading_velocity);
+  void set_reading_velocity(float p_reading_velocity);
 
   /**
    * @brief TURNS OFF (Power = 0)
    */
   void stop();
 
+  /**
+   * @brief Returns the visible angle (ticks adjusted by gear ratio).
+   * @return Angle in hal::degrees
+   */
   hal::degrees read_angle();
 
   /**
@@ -126,15 +134,15 @@ public:
 
   /**
    * @brief Update the PID settings of the servo.
-   * @param settings The PID settings to update.
+   * @param p_settings The PID settings to update.
    */
-  void update_pid_position(PID_settings settings);
+  void update_pid_position(PID_settings p_settings);
 
   /**
    * @brief Update the PID settings of the servo.
-   * @param settings The PID settings to update.
+   * @param p_settings The PID settings to update.
    */
-  void update_pid_velocity(PID_settings settings);
+  void update_pid_velocity(PID_settings p_settings);
 
   /**
    * @brief Remembers the current position of the encoder as the home position.
@@ -145,18 +153,18 @@ public:
   /**
     * @brief Update velocity to the target velocity using PID control and
     feedforward.
-      @param from_scratch A bool indicator of if the target being moved to is
+      @param p_from_scratch A bool indicator of if the target being moved to is
     new (1) or not (0). If the target is new, reset integral value to 0.
 
   */
-  void update_velocity(bool from_scratch);
+  void update_velocity(bool p_from_scratch);
   /**
     * @brief Update position to the target position using PID control and
     feedforward.
-      @param from_scratch A bool indicator of if the target being moved to is
+      @param p_from_scratch A bool indicator of if the target being moved to is
     new (1) or not (0). If the target is new, reset integral value to 0.
   */
-  void update_position(bool from_scratch);
+  void update_position(bool p_from_scratch);
   /**
    * @brief Feedforward values to account for gravity/weight
    * @return Current feedforward value
@@ -164,37 +172,53 @@ public:
   float position_feedforward();
 
   /**
-   * @brief Set the maximum power the PID controller is allowed to use.
-   * @param power The clamped power as a float between 0.0 and 1.0, representing
-   * 0% to 100% of maximum possible power.
+   * @brief Set the clamped power in the positive direction.
+   * @param p_power The upper bounds of the power.
    */
-  void set_pid_clamped_power(float power);
-
+  void set_pos_clamped_power(float p_power);
   /**
-   * @brief Get the maximum power the PID controller is allowed to use.
-   * @return The clamped power as a float between 0.0 and 1.0, representing 0%
-   * to 100% of maximum possible power.
+   * @brief Returns the clamped power in the positive direction.
+   * @return power (float)
    */
-  float get_pid_clamped_power();
+  float get_pos_clamped_power();
+  /**
+   * @brief Set the clamped power in the negative direction.
+   * @param p_power The lower bounds of the power.
+   */
+  void set_neg_clamped_power(float p_power);
+  /**
+   * @brief Returns the clamped power in the negative direction.
+   * @return power (float)
+   */
+  float get_neg_clamped_power();
 
   /**
    * @brief Sets the power (ignores clamped power)
    * Use with caution. Check max power beforehand.
-   * @param power The power to set the motor to, as a float between -1.0 and 1.0
-   * where -1 is the maximum in one direction and 1 is the maximum in the other
-   * direction.
+   * @param p_power The power to set the motor to, as a float between -1.0
+   * and 1.0 where -1 is the maximum in one direction and 1 is the maximum in
+   * the other direction.
    */
-  void set_power(float power);
+  void set_power(float p_power);
 
   /**
    * @brief Get the power the servo is using.
-   * @return The power as a float between -1.0 and 1.0, representing maximum
-   * power in the negative and positive directions. The spin is dependant on the
-   * wiring, but assuming the positive is wired to Channel A and negative to
-   * Channel B, facing the motor, a positive value will spin clockwise and
-   * negative will spin counterclockwise.
+   * @return The power as a float between 0.0 and 1.0, representing 0% to 100%
+   * of maximum possible power.
    */
   float get_power();
+
+  /**
+   * @brief Set the servo's current action
+   * @param p_action can_perseus::action value to be set
+   */
+  void set_active_action(uint32_t p_action);
+
+  /**
+   * @brief Get the servo's current action
+   * @return Returns the current action as a can_perseus::action
+   */
+  uint32_t get_active_action();
 
   /**
    * @brief Resets the internal time tracking for the servo, this will be done
@@ -208,17 +232,48 @@ public:
    */
   bldc_perseus::PID_settings get_pid_settings();
 
-  // Helper conversion functions (copied from drivetrain_math.hpp)
-  constexpr hal::time_duration sec_to_hal_time_duration(sec p_time)
-  {
-    return static_cast<hal::time_duration>(
-      static_cast<long long>(p_time * 1e9f));
-  }
+  void periodic_action(bool p_new_action);
 
-  constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
-  {
-    return static_cast<float>(p_time.count()) * 1e-9f;
-  }
+  /**
+   * @brief Set the angle offset of the servo.
+   * @param p_angle_offset The new angle offset (float).
+   */
+  void set_angle_offset(float p_angle_offset);
+  /**
+   * @brief Get the angle offset of the servo.
+   * @return The current angle offset (float).
+   */
+  float get_angle_offset();
+
+  /**
+   * @brief Set the previous joint's recorded position.
+   * @param p_prev_joint_pos The previous joint's position (float).
+   */
+  void set_prev_joint_position(float p_prev_joint_pos);
+  /**
+   * @brief Get the previous joint's recorded position.
+   * @return The previous joint's position (float).
+   */
+  float get_prev_joint_position();
+
+  /**
+   * @brief Get actual position of the servo (0 = perpendicular to ground).
+   */
+  float get_actual_position();
+
+  /**
+   * @brief Set servo values
+   * @param p_physical_servo_values The values to set (physical_servo_values
+   * class)
+   */
+  void set_physical_servo_values(physical_servo_values p_physical_servo_values);
+
+  /**
+   * @brief Get servo values object
+   *
+   * @return physical_servo_values
+   */
+  physical_servo_values get_physical_servo_values();
 
   hal::time_duration get_clock_time(hal::steady_clock& p_clock);
 
@@ -227,16 +282,16 @@ private:
   hal::v5::strong_ptr<hal::rotation_sensor> m_encoder;
   hal::v5::strong_ptr<hal::steady_clock> m_clock;
   hal::u64 m_last_clock_check;
-  status m_reading;
   status m_target;
   PID_settings m_reading_position_settings;
   PID_settings m_reading_velocity_settings;
   PID_prev_values m_PID_prev_velocity_values;
   PID_prev_values m_PID_prev_position_values;
-  servo_values m_servo_values;
-  float m_clamped_power;
-  float m_prev_encoder_value;
-  float home_encoder_value;
+  physical_servo_values m_physical_servo_values;
+  float m_actual_position;
+  float m_prev_joint_position;
+  float m_active_power;
+  uint32_t m_active_action;
 };
 
 }  // namespace sjsu::perseus

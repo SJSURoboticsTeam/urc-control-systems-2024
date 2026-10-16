@@ -19,6 +19,9 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
   DEMOS
     application
+    can_messaging_demo
+    switches_demo
+
   
   INCLUDES
     ../drivers/include/
@@ -29,6 +32,8 @@ SOURCES
     ../drivers/src/h_bridge.cpp
     src/bldc_servo.cpp
     ../drivers/src/serial_commands.cpp
+    src/can_messaging.cpp
+    src/switches.cpp
     
 PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
