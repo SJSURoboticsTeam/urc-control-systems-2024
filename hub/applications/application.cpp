@@ -1,22 +1,18 @@
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
 #include <libhal-actuator/rc_servo.hpp>
 #include <libhal-sensor/imu/icm20948.hpp>
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/accelerometer.hpp>
 #include <libhal/can.hpp>
-#include <limits>
-#include <optional>
+#include <libhal/error.hpp>
+#include <libhal/gyroscope.hpp>
 
 #include <gimbal.hpp>
 #include <mission_control_manager.hpp>
 #include <resource_list.hpp>
 
 #include <icm20948_adapters.hpp>
-
-#include <math_helpers.hpp>
 
 namespace sjsu::hub {
 
@@ -32,71 +28,102 @@ void application()
 {
   auto clock = resources::clock();
   auto console = resources::console();
+
   hal::print(*console, "=== HUB APPLICATION START ===\n");
-  
+
   auto can_transceiver = resources::can_transceiver();
   mission_control_manager mcm(can_transceiver);
 
-  auto gyro = resources::gyroscope();
-  auto accel = resources::accelerometer();
-  auto mag = resources::magnetometer();
+  hal::print(*console, "init mission control manager\n");
 
-  auto p_mast = resources::mast();
+  // auto p_mast_gimbal_controller =
+  // resources::mast_gimbal_controller(*console);
 
-  bool accel_on = false;
-  bool gyro_on = false;
-  bool mag_on = false;
+  auto mast_aboutx = resources::mast_servo_aboutx();
+  auto mast_abouty = resources::mast_servo_abouty();
+  auto wheels_aboutx = resources::wheels_servo_aboutx();
+  clamped_servo clamped_mast_aboutx{ mast_aboutx,
+                                     {
+                                       .min_angle = 0,
+                                       .max_angle = 180,
+                                     } };
+  clamped_servo clamped_mast_abouty{ mast_abouty,
+                                       {
+                                         .min_angle = 0,
+                                         .max_angle = 180,
+                                       } };
+  clamped_servo clamped_wheels_aboutx{ wheels_aboutx,
+                                       {
+                                         .min_angle = 0,
+                                         .max_angle = 180,
+                                       } };
 
-  constexpr float dt = 0.01f;
+  hal::print(*console, "init mast gimbal manager\n");
+
+  // bool accel_on = false;
+  // bool gyro_on = false;
+  // bool mag_on = false;
+
   int send_count = 0;
 
   hal::print(*console, "=== ENTERING MAIN LOOP ===\n");
 
   while (true) {
+    // p_mast_gimbal_controller->update();
+    // hal::print(*console, "frame\n");
+
     hal::u64 frame_end = hal::future_deadline(*clock, 10ms);
 
     auto gimbal_req = mcm.read_gimbal_target_request();
     if (gimbal_req) {
-      p_mast->set_target(gimbal_req->x_angle, gimbal_req->y_angle);
+      clamped_mast_aboutx.position(gimbal_req->mast_angle_x);
+      clamped_mast_abouty.position(gimbal_req->mast_angle_y);
+      clamped_wheels_aboutx.position(gimbal_req->wheels_angle_x);
+      // p_mast_gimbal_controller->set_target(gimbal_req.value());
+
       hal::print<64>(*console,
-                     "gimbal cmd: x=%d y=%d\n",
-                     gimbal_req->x_angle,
-                     gimbal_req->y_angle);
+                     "gimbal cmd: mast_x=%d mast_y=%d wheels_x=%d\n",
+                     gimbal_req->mast_angle_x,
+                     gimbal_req->mast_angle_y,
+                     gimbal_req->wheels_angle_x);
     }
 
-    auto toggle_req = mcm.read_imu_toggle_request();
-    if (toggle_req) {
-      accel_on = toggle_req->accel_on;
-      gyro_on = toggle_req->gyro_on;
-      mag_on = toggle_req->mag_on;
-      hal::print<64>(
-        *console, "imu toggle: a=%d g=%d m=%d\n", accel_on, gyro_on, mag_on);
-    }
-
-    auto raw_accel = accel->read();
-    auto raw_gyro = gyro->read();
-    auto raw_mag = mag->read();
-
-    p_mast->update_pitch_servo(dt, raw_accel, raw_gyro);
+    // auto toggle_req = mcm.read_imu_toggle_request();
+    // if (toggle_req) {
+    //   accel_on = toggle_req->accel_on;
+    //   gyro_on = toggle_req->gyro_on;
+    //   mag_on = toggle_req->mag_on;
+    //   hal::print<64>(
+    //     *console, "imu toggle: a=%d g=%d m=%d\n", accel_on, gyro_on,
+    //     mag_on);
+    // }
 
     send_count++;
     if (send_count >= send_interval) {
       send_count = 0;
 
-      mcm.send_servo_position(p_mast->get_yaw_angle(),
-                              p_mast->get_pitch_angle());
+      // try {
+      //   mcm.send_servo_position(
+      //     p_mast->get_yaw_angle(), p_mast->get_pitch_angle(),
+      //     wheels_yaw);
+      // } catch (hal::resource_unavailable_try_again err) {
+      //   hal::print(*console, "resource unavailable\n");
+      // } catch (...) {
+      //   hal::print(*console, "other error\n");
+      // }
 
-      if (accel_on) {
-        mcm.send_imu_accel(
-          round_clamp_int16(raw_accel.x, raw_accel.y, raw_accel.z));
-      }
-      if (gyro_on) {
-        mcm.send_imu_gyro(
-          round_clamp_int16(raw_gyro.x, raw_gyro.y, raw_gyro.z));
-      }
-      if (mag_on) {
-        mcm.send_imu_mag(round_clamp_int16(raw_mag.x, raw_mag.y, raw_mag.z));
-      }
+      // if (accel_on) {
+      //   mcm.send_imu_accel(
+      //     round_clamp_int16(raw_accel.x, raw_accel.y, raw_accel.z));
+      // }
+      // if (gyro_on) {
+      //   mcm.send_imu_gyro(
+      //     round_clamp_int16(raw_gyro.x, raw_gyro.y, raw_gyro.z));
+      // }
+      // if (mag_on) {
+      //   mcm.send_imu_mag(round_clamp_int16(raw_mag.x, raw_mag.y,
+      //   raw_mag.z));
+      // }
     }
 
     while (clock->uptime() < frame_end)

@@ -1,27 +1,18 @@
 #pragma once
 
-#include <algorithm>
-#include <cmath>
-#include <limits>
 #include <mission_control_manager.hpp>
-#include <numbers>
 
 namespace sjsu::hub {
-int16_axis round_clamp_int16(float x, float y, float z)
-{
-  auto round_and_cast = [](float f) {
-    constexpr int16_t int16_min = std::numeric_limits<std::int16_t>::min();
-    constexpr int16_t int16_max = std::numeric_limits<std::int16_t>::max();
-    return static_cast<int16_t>(
-      std::clamp<long>(lroundf(f), int16_min, int16_max));
-  };
-  return int16_axis{ .x = round_and_cast(x),
-                     .y = round_and_cast(y),
-                     .z = round_and_cast(z) };
-}
 
-double rad_to_deg(double rad)
+struct float_axis
 {
-  return rad * 180.0f / std::numbers::pi;
-}
+  float x;
+  float y;
+  float z;
+};
+
+int16_axis round_clamp_int16(float_axis p_axis);
+
+double rad_to_deg(double p_rad);
+
 }  // namespace sjsu::hub
