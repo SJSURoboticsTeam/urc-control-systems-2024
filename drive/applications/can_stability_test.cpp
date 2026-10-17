@@ -12,7 +12,8 @@ namespace sjsu::drive {
 void application()
 {
   // This demo is a mixed set of can message items to check can stability
-  // Everything is intended to be easily commented out & modified for different tests
+  // Everything is intended to be easily commented out & modified for different
+  // tests
   auto clock = resources::clock();
   auto console = resources::console();
   hal::print(*console, "app starting\n");
@@ -43,7 +44,7 @@ void application()
         motor->feedback_request(
           hal::actuator::rmd_mc_x_v2::read::multi_turns_angle);
       } else {
-          hal::print(*console, "r");
+        hal::print(*console, "r");
       }
     }
     count++;

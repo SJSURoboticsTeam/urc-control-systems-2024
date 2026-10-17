@@ -9,7 +9,6 @@
 #include <tla2528.hpp>
 #include <tla2528_adapters.hpp>
 
-
 using namespace hal::literals;
 using namespace std::chrono_literals;
 

@@ -7,8 +7,8 @@
 #include <resource_list.hpp>
 
 constexpr int sample_rate = 40;
-/*Constants for digital filter obtained though signal.firwin2(20, [0, fs / 2], [1.0, 0], fs = fs) 
-20 is number of sample and fs is sample frequency: 1/100ms*/
+/*Constants for digital filter obtained though signal.firwin2(20, [0, fs / 2],
+[1.0, 0], fs = fs) 20 is number of sample and fs is sample frequency: 1/100ms*/
 constexpr std::array<float, sample_rate> filter_const = {
   2.30217199e-05, 2.72703862e-05, 3.64891392e-05, 5.21727953e-05,
   7.62544386e-05, 1.11288539e-04, 1.60733417e-04, 2.29399083e-04,
@@ -26,7 +26,7 @@ using namespace std::chrono_literals;
 namespace sjsu::science {
 
 // Digital fileter
-// arr: buffer, begin: pointer to the start of the  
+// arr: buffer, begin: pointer to the start of the
 float filter(std::array<float, sample_rate> arr, int begin)
 {
   float sum = 0;

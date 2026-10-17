@@ -32,17 +32,28 @@ void steer_controller_perseus::hard_home()
 
 void steer_controller_perseus::home()
 {
-  throw hal::operation_not_supported(this);
+  m_perseus->home();
 }
 
 void steer_controller_perseus::home_periodic()
 {
-  throw hal::operation_not_supported(this);
+  if (!m_perseus->is_homing()) {
+    // not done homing and no homing in progress -> finish
+    m_is_homed = true;
+  } else {
+    // not done homing and homing in progress -> OK
+  }
+}
+
+void steer_controller_perseus::stop_home()
+{
+  // effectively cancels homing by telling motor to stop moving
+  m_perseus->set_target_velocity(0);
 }
 
 bool steer_controller_perseus::is_homing()
 {
-  throw hal::operation_not_supported(this);
+  return m_perseus->is_homing();
 }
 
 bool steer_controller_perseus::is_homed()
@@ -53,18 +64,27 @@ bool steer_controller_perseus::is_homed()
 void steer_controller_perseus::set_target_position(
   hal::degrees p_target_position)
 {
+  if (!m_is_homed) {
+    throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+  }
   m_target_position = p_target_position;
   m_perseus->set_target_position(p_target_position);
 }
 
 hal::degrees steer_controller_perseus::get_target_postion()
 {
+  if (!m_is_homed) {
+    throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+  }
   // TODO: make get target position on perseus when implemented
   return m_target_position;
 }
 
 hal::degrees steer_controller_perseus::get_actual_postion()
 {
+  if (!m_is_homed) {
+    throw hal::exception(std::errc::operation_not_permitted, &m_perseus);
+  }
   return m_perseus->get_position();
 }
 }  // namespace sjsu::drive

@@ -19,14 +19,11 @@ void application()
   auto chip_select = resources::spi_chip_select();
 
   adc1283 adc_driver = adc1283(spi, chip_select, hal::volts(3.3f));
-  std::array<adc1283_adc, 8> adcs{ make_adc(adc_driver, 0),
-                                   make_adc(adc_driver, 1),
-                                   make_adc(adc_driver, 2),
-                                   make_adc(adc_driver, 3),
-                                   make_adc(adc_driver, 4),
-                                   make_adc(adc_driver, 5),
-                                   make_adc(adc_driver, 6),
-                                   make_adc(adc_driver, 7) };
+  std::array<adc1283_adc, 8> adcs{
+    make_adc(adc_driver, 0), make_adc(adc_driver, 1), make_adc(adc_driver, 2),
+    make_adc(adc_driver, 3), make_adc(adc_driver, 4), make_adc(adc_driver, 5),
+    make_adc(adc_driver, 6), make_adc(adc_driver, 7)
+  };
 
   while (true) {
     hal::print(*console, "ADC1283 Readings:\n");

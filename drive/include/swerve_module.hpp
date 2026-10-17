@@ -14,7 +14,6 @@
 #include <swerve_structs.hpp>
 #include <vector2d.hpp>
 
-
 namespace sjsu::drive {
 
 using namespace std::chrono_literals;
@@ -110,6 +109,21 @@ public:
    * interupted)
    */
   void hard_home();
+  /**
+   * @brief begin homing without blocking (you must call `home_periodic`
+   * periodically to advance homing)
+   */
+  void home();
+  /**
+   * @brief advance homing progress
+   *
+   * @return false if the homing has finished
+   */
+  bool home_periodic();
+  /**
+   * @brief is the swerve module currently homing
+   */
+  bool is_homing();
   /**
    * @brief gets steer encoder offset
    * @return returns encoder reading in degrees when facing forward

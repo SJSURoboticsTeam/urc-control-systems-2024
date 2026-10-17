@@ -15,7 +15,8 @@ steer_controller_mock::steer_controller_mock(
 {
 }
 
-void steer_controller_mock::stop() {
+void steer_controller_mock::stop()
+{
   set_target_position(get_actual_postion());
 }
 void steer_controller_mock::hard_home()
@@ -38,14 +39,20 @@ bool steer_controller_mock::is_homed()
 {
   return m_is_homed;
 }
+void steer_controller_mock::stop_home()
+{
+  return;
+}
 void steer_controller_mock::set_target_position(hal::degrees p_target_position)
 {
   m_target_position = p_target_position;
 }
-hal::degrees steer_controller_mock::get_target_postion() {
+hal::degrees steer_controller_mock::get_target_postion()
+{
   return m_target_position;
 }
-hal::degrees steer_controller_mock::get_actual_postion() {
+hal::degrees steer_controller_mock::get_actual_postion()
+{
   return m_servo.position();
 }
 }  // namespace sjsu::drive
