@@ -1,0 +1,26 @@
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <math_helpers.hpp>
+#include <mission_control_manager.hpp>
+#include <numbers>
+
+namespace sjsu::hub {
+int16_axis round_clamp_int16(float_axis p_axis)
+{
+  auto round_and_cast = [](float f) {
+    constexpr int16_t int16_min = std::numeric_limits<std::int16_t>::min();
+    constexpr int16_t int16_max = std::numeric_limits<std::int16_t>::max();
+    return static_cast<int16_t>(
+      std::clamp<long>(lroundf(f), int16_min, int16_max));
+  };
+  return int16_axis{ .x = round_and_cast(p_axis.x),
+                     .y = round_and_cast(p_axis.y),
+                     .z = round_and_cast(p_axis.z) };
+}
+
+double rad_to_deg(double rad)
+{
+  return rad * 180.0f / std::numbers::pi;
+}
+}  // namespace sjsu::hub
