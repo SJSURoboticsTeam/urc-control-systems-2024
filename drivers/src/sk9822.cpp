@@ -1,10 +1,10 @@
-#include <sk9822.hpp>
 #include <array>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/steady_clock.hpp>
 #include <libhal/units.hpp>
+#include <sk9822.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

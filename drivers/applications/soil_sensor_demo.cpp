@@ -7,8 +7,8 @@
 #include <libhal/units.hpp>
 
 #include <pressure_sensor_bme680.hpp>
-#include <soil_sensor_sht21.hpp>
 #include <resource_list.hpp>
+#include <soil_sensor_sht21.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

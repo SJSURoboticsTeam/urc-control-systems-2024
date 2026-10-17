@@ -2,7 +2,6 @@
 #include <libhal/i2c.hpp>
 #include <libhal/pointers.hpp>
 
-
 namespace sjsu::drivers {
 class sht21
 {

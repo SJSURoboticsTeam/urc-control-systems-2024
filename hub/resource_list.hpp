@@ -97,4 +97,3 @@ inline void sleep(hal::time_duration p_duration)
 void initialize_platform();
 void application();
 }  // namespace sjsu::hub
-

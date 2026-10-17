@@ -138,7 +138,7 @@ public:
   // void print_register(hal::v5::strong_ptr<hal::serial> console, hal::byte
   // register_address, format format = format::hex);
 
-  /// @brief Construct a 
+  /// @brief Construct a
   /// @param p_i2c bus
   /// @param p_address address
   explicit bme680(hal::v5::strong_ptr<hal::i2c> p_i2c, hal::byte p_address);
