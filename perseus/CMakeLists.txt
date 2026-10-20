@@ -19,7 +19,7 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
   DEMOS
     application
-  
+
   INCLUDES
     ../drivers/include/
     include
@@ -29,7 +29,7 @@ SOURCES
     ../drivers/src/h_bridge.cpp
     src/bldc_servo.cpp
     ../drivers/src/serial_commands.cpp
-    
+
 PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import
@@ -39,5 +39,5 @@ LINK_LIBRARIES
     #Template for linking libhal namespaces is "libhal::__device__"
     #replace "__device__" with the libhal device you wish to import
     #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
-    
+
 )

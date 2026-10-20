@@ -28,4 +28,4 @@ libhal_build_demos(
     libhal::actuator
     libhal::expander
 
-) 
+)
