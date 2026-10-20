@@ -12,12 +12,6 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-  while (true) {
-    hal::print(*console, "hello\n");
-    hal::delay(*clock, 200ms);
-  }
-
-  /*
   bool flashing = true;
 
   std::array cmd_defs = {
@@ -109,6 +103,5 @@ void application()
       led_stat = !led_stat;
     }
   }
-*/
 }
 }  // namespace sjsu::drivers
