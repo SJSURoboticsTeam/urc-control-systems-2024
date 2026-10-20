@@ -108,7 +108,7 @@ void application()
     try {
       dt.periodic();
     } catch (hal::exception e) {
-      hal::print(*console, "\nexpection thown in periodic\n");
+      hal::print(*console, "\nexception thrown in periodic\n");
       throw;
     }
   }

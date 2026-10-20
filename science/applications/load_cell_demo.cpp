@@ -25,7 +25,7 @@ constexpr std::array<float, sample_rate> filter_const = {
 using namespace std::chrono_literals;
 namespace sjsu::science {
 
-// Digital fileter
+// Digital filter
 // arr: buffer, begin: pointer to the start of the
 float filter(std::array<float, sample_rate> arr, int begin)
 {

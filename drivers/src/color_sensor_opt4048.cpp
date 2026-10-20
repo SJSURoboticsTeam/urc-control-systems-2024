@@ -16,7 +16,7 @@ opt4048::opt4048(hal::v5::strong_ptr<hal::i2c> p_i2c,
   adjust_settings();
 };
 
-// whyy not working
+// why not working
 static void print_byte_array(hal::v5::strong_ptr<hal::serial> console,
                              std::span<hal::byte> arr)
 {
@@ -30,7 +30,7 @@ void opt4048::adjust_settings()
 {
   // Datasheet:
   // write BYTE 1: [QWAKE, 0, RANGE (0xC), conversion time part 1]
-  // write BYTE 2: [converstion time part 2, operating mode, 1, 0, 11]
+  // write BYTE 2: [conversion time part 2, operating mode, 1, 0, 11]
   //  1ms conversion time for now: 0010
   //  0xC=1100
   // settings are predetermined
@@ -62,7 +62,7 @@ void opt4048::read_channel(hal::byte address, std::span<hal::byte> output)
 
 opt4048::adc_codes opt4048::get_adc_codes()
 {  // returns x,y,
-  // read x channel, y channel and z channel do mantisssa math
+  // read x channel, y channel and z channel do mantissa math
   // mantissa channel_x = result_msb_chx << 8 + RESULT_LSB_CHx
   // ADC_CODES_CHx = (MANTISSA_CHx<<EXPONENT_CHx)
   /*
@@ -165,7 +165,7 @@ opt4048::xyz_values opt4048::adc_codes_to_xyz(adc_codes adc)
     { 0, 0, 0, 0 }
   };
 
-  // matrix multipliations from the datasheet, got the actual calculations from
+  // matrix multiplications from the datasheet, got the actual calculations from
   // @retrospy's Github and www.brucelindbloom.com
   values.x = adc.ch0 * ADC_to_XYZ[0][0] + adc.ch1 * ADC_to_XYZ[1][0] +
              adc.ch2 * ADC_to_XYZ[2][0] + adc.ch3 * ADC_to_XYZ[3][0];

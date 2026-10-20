@@ -115,7 +115,6 @@ hal::v5::strong_ptr<hal::i2c> i2c()
   return i2c_ptr;
 }
 
-// sree promised status led
 static hal::v5::optional_ptr<hal::output_pin> led_ptr;
 hal::v5::strong_ptr<hal::output_pin> status_led()
 {

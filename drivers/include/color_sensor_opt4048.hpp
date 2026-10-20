@@ -8,7 +8,7 @@
 #include <libhal/serial.hpp>
 
 namespace sjsu::drivers {
-// functions we ened to make
+// functions we need to make
 class opt4048
 {
   // private:
@@ -89,7 +89,7 @@ public:
           hal::v5::strong_ptr<hal::serial> p_terminal);
 
   // select light range
-  // select conversiokn time
+  // select conversion time
   // measure light and color
   // choose mode of operation
   // set automatic full scale range setting, continuous mode, conversion time
