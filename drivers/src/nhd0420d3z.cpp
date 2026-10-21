@@ -49,7 +49,7 @@ void nhd0420d3z::send_prefix()
   send_data(commands::prefix);
 }
 
-void nhd0420d3z::advance_cursor_right()
+void nhd0420d3z::virtual_cursor_right()
 {
   m_cursor_column++;
   if (m_cursor_column >= display_columns) {
@@ -61,7 +61,7 @@ void nhd0420d3z::advance_cursor_right()
   }
 }
 
-void nhd0420d3z::advance_cursor_left()
+void nhd0420d3z::virtual_cursor_left()
 {
   if (m_cursor_column == 0) {
     if (m_cursor_line == 0) {
@@ -75,7 +75,7 @@ void nhd0420d3z::advance_cursor_left()
   }
 }
 
-void nhd0420d3z::advance_cursor_down()
+void nhd0420d3z::start_new_line()
 {
   m_cursor_line++;
   if (m_cursor_line >= display_lines) {
@@ -117,7 +117,7 @@ void nhd0420d3z::set_backlight_brightness(hal::byte p_brightness)
 
 void nhd0420d3z::write_char(char p_c)
 {
-  bool is_custom_char = p_c >= 0x00 && p_c < 0x07;
+  bool is_custom_char = p_c < 0x07;
   if (is_custom_char) {
     // display custom_character behavior, unused
   }
@@ -126,7 +126,7 @@ void nhd0420d3z::write_char(char p_c)
   if (is_ascii) {
     // display standard ASCII characters
     send_data(p_c);
-    advance_cursor_right();
+    virtual_cursor_right();
     // explicitly set cursor position for same reason as backspace()
     set_cursor_position(m_cursor_line, m_cursor_column);
   }
@@ -142,7 +142,7 @@ void nhd0420d3z::backspace()
 {
   send_prefix();
   send_data(commands::backspace);
-  advance_cursor_left();
+  virtual_cursor_left();
   // we explicitly set cursor position because while the display does move the
   // cursor back, it has undesirable behavior when deleting from the start of
   // the line.
@@ -177,16 +177,6 @@ void nhd0420d3z::set_cursor_position(hal::byte p_line, hal::byte p_column)
   m_cursor_column = p_column;
 }
 
-void nhd0420d3z::move_cursor_right()
-{
-  m_cursor_line++;
-  if (m_cursor_line >= display_columns - 1) {
-    return;
-  }
-  send_prefix();
-  send_data(commands::move_cursor_right_one_place);
-}
-
 void nhd0420d3z::home_cursor()
 {
   send_prefix();
@@ -208,7 +198,7 @@ void nhd0420d3z::display_message(std::string_view p_str)
   auto strIt = p_str.begin();
   while (m_cursor_line < display_lines && strIt != p_str.end()) {
     if (*strIt == '\n') {
-      advance_cursor_down();
+      start_new_line();
     } else {
       write_char(*strIt);
     }
@@ -244,5 +234,13 @@ void nhd0420d3z::rotate_left() {
 void nhd0420d3z::rotate_right() {
   send_prefix();
   send_data(commands::shift_display_right);
+}
+
+hal::byte nhd0420d3z::current_line() {
+  return m_cursor_line;
+}
+
+hal::byte nhd0420d3z::current_column() {
+  return m_cursor_column;
 }
 }  // namespace sjsu::drivers

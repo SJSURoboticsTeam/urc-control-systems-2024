@@ -25,14 +25,14 @@ DEMOS
   color_sensor_demo
   h_bridge_demo
   led_strip_demo
+  nhd0420d3z_demo
   perseus_demo
   perseus_serial_demo
   pressure_sensor_demo
   scd40_demo
+  serial_commands_demo
   soil_sensor_demo
   tla2528_analog_input_demo
-  serial_commands_demo
-  nhd0420d3z_demo
 
 INCLUDES
   include

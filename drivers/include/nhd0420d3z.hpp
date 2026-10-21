@@ -8,6 +8,21 @@ class nhd0420d3z
 {
 public:
   /**
+   * @brief number of lines available on the display
+   */
+  constexpr static hal::byte display_lines = 4;
+
+  /**
+   * @brief number of columns available on the display
+   */
+  constexpr static hal::byte display_columns = 20;
+
+  /**
+   * @brief default i2c address of display
+   */
+  constexpr static hal::byte default_i2c_address = 0x28;
+
+  /**
    * @brief Constructs a new nhd0420d3z (LCD text display with 4 lines and 20
    * columns of characters) driver instance.
    *
@@ -62,7 +77,7 @@ public:
 
   /**
    * @brief destructive backspace, moves cursor left one character, wraps to
-   * previous line if possible (using advance_cursor_left logic)
+   * previous line if possible (using virtual_cursor_left logic)
    */
   void backspace();
 
@@ -77,6 +92,16 @@ public:
   void set_cursor_position(hal::byte p_line = 0, hal::byte p_column = 0);
 
   /**
+   * @brief returns the current line the LCD cursor is on (a value from 0-3)
+   */
+  hal::byte current_line();
+
+  /**
+   * @brief returns the current column the LCD cursor is on (a value from 0-19)
+   */
+  hal::byte current_column();
+
+  /**
    * @brief sets the display contrast
    * @param p_contrast a value from [1, 50] (default: 40)
    */
@@ -89,13 +114,11 @@ public:
   void set_backlight_brightness(hal::byte p_brightness);
 
   /**
-   * @brief Moves the cursor one position to the right.
-   *
-   * If cursor tracker is at the end of row the command is suppressed
-   *
-   * Execution time: 100 us.
+   * @brief moves the in-memory cursor tracker down one line, automatically
+   * returning to home if it tries going beyond the last line. It will move the
+   * cursor to the start of the next line.
    */
-  void move_cursor_right();
+  void start_new_line();
 
   /**
    * @brief Returns the cursor to top left
@@ -147,30 +170,19 @@ private:
   hal::byte m_cursor_line = 0;    // Current row (0-3)
   hal::byte m_cursor_column = 0;  // Current column (0-19)
 
-  constexpr static hal::byte display_lines = 4;
-  constexpr static hal::byte display_columns = 20;
-  constexpr static hal::byte default_i2c_address = 0x28;
-
   /**
    * @brief moves the in-memory cursor tracker right, wrapping to the next line
    * or to when reaching the end of a line, and returning automatically to home
    * if reached the end of the last line.
    */
-  void advance_cursor_right();
+  void virtual_cursor_right();
 
   /**
    * @brief moves the in-memory cursor tracker left, wrapping to the last line
    * when reaching the start of the line, if it is as the home position, it will
    * do nothing.
    */
-  void advance_cursor_left();
-
-  /**
-   * @brief moves the in-memory cursor tracker down one line, automatically
-   * returning to home if it tries going beyond the last line. It will move the
-   * cursor to the start of the next line.
-   */
-  void advance_cursor_down();
+  void virtual_cursor_left();
 
   /**
    * @brief Converts a (line, column) coordinate to a DDRAM address byte.

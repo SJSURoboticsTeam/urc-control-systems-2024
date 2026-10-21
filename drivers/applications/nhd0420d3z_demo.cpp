@@ -18,7 +18,8 @@ void application()
 
   auto console = resources::console();
 
-  auto p_i2c = resources::i2c(0.5f, hal::i2c::settings{ .clock_rate = 10'000 });
+  auto p_i2c = resources::i2c();
+  p_i2c->configure({ .clock_rate = 10'000 });
 
   hal::print(*console, "init i2c\n");
 
@@ -62,7 +63,8 @@ void application()
   display.write_char('h');
   hal::delay(*clock, delay);
 
-  display.display_message("123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABCDEFGHIJK");
+  display.display_message("123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABC"
+                          "DEFGHIJK123456789ABCDEFGHIJK");
   hal::delay(*clock, delay);
 
   display.display_message("foo");
@@ -73,7 +75,8 @@ void application()
   display.blinking_cursor(true);
   hal::delay(*clock, delay);
 
-  display.display_message("123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABCDEFGHIJK");
+  display.display_message("123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABC"
+                          "DEFGHIJK123456789ABCDEFGHIJK");
   hal::delay(*clock, delay_short);
   display.rotate_left();
   hal::delay(*clock, delay_short);
