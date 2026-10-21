@@ -38,19 +38,20 @@ INCLUDES
   .
 
 SOURCES
-    src/serial_commands.cpp
+    src/adc1283.cpp
+    src/adc1283_adapters.cpp
+    src/clamped_servo.cpp
     src/color_sensor_opt4048.cpp
+    src/h_bridge.cpp
     src/mq4.cpp
     src/pressure_sensor_bme680.cpp
     src/perseus_bldc.cpp
     src/scd40.cpp
-    src/soil_sensor_sht21.cpp
+    src/serial_commands.cpp
     src/sk9822.cpp
-    src/h_bridge.cpp
+    src/soil_sensor_sht21.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
-    src/adc1283.cpp
-    src/adc1283_adapters.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"

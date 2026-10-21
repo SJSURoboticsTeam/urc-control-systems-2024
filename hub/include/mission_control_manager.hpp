@@ -6,15 +6,9 @@
 #include <libhal/can.hpp>
 #include <libhal/pointers.hpp>
 #include <optional>
+#include <math_helpers.hpp>
 
 namespace sjsu::hub {
-struct int16_axis
-{
-  int16_t x;
-  int16_t y;
-  int16_t z;
-};
-
 struct gimbal_target_request
 {
   uint8_t mast_angle_x;

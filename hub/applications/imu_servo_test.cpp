@@ -23,9 +23,9 @@ void application()
   auto gyro = resources::gyroscope();
   auto accel = resources::accelerometer();
 
-  auto p_yaw_servo = resources::mast_servo_aboutx();
-  auto p_pitch_servo = resources::mast_gimbal_abouty();
-  auto p_angle_estimator = resources::imu_angle_estimator();
+  auto yaw_servo = resources::mast_servo_about_x();
+  auto pitch_servo = resources::mast_gimbal_about_y();
+  auto angle_estimator = resources::imu_angle_estimator();
 
   int print_count = 0;
 
@@ -37,9 +37,9 @@ void application()
     auto raw_accel = accel->read();
     auto raw_gyro = gyro->read();
 
-    p_angle_estimator->update();
-    auto aboutx = p_angle_estimator->get_angle_aboutx();
-    p_pitch_servo->update(aboutx);
+    angle_estimator->update();
+    auto about_x = angle_estimator->get_angle_about_x();
+    pitch_servo->update(about_x);
 
     print_count++;
     if (print_count >= 100) {

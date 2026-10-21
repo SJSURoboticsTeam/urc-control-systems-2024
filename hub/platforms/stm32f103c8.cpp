@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "gimbal.hpp"
+#include <gimbal.hpp>
 #include <libhal-actuator/rc_servo.hpp>
 #include <memory_resource>
 
@@ -258,106 +258,92 @@ constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
   .max_microseconds = max_pulse_width_range,
 };
 
-static hal::v5::optional_ptr<hal::servo> mast_servo_aboutx_ptr;
-hal::v5::strong_ptr<hal::servo> mast_servo_aboutx()
+static hal::v5::optional_ptr<hal::servo> mast_servo_about_x_ptr;
+hal::v5::strong_ptr<hal::servo> mast_servo_about_x()
 {
-  if (not mast_servo_aboutx_ptr) {
+  if (not mast_servo_about_x_ptr) {
     auto tim1 = pwm_frequency_tim1();
     auto chan0 = mast_servo_pwm_channel_0();
-    mast_servo_aboutx_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-      driver_allocator(), *tim1, chan0, gimbal_servo_settings);
+    mast_servo_about_x_ptr =
+      hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+        driver_allocator(), *tim1, chan0, gimbal_servo_settings);
   }
-  return mast_servo_aboutx_ptr;
+  return mast_servo_about_x_ptr;
 }
 
-static hal::v5::optional_ptr<hal::servo> mast_servo_abouty_ptr;
-hal::v5::strong_ptr<hal::servo> mast_servo_abouty()
+static hal::v5::optional_ptr<hal::servo> mast_servo_about_y_ptr;
+hal::v5::strong_ptr<hal::servo> mast_servo_about_y()
 {
-  if (not mast_servo_abouty_ptr) {
+  if (not mast_servo_about_y_ptr) {
     auto tim2 = pwm_frequency_tim2();
     auto chan1 = mast_servo_pwm_channel_1();
-    mast_servo_abouty_ptr = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
-      driver_allocator(), *tim2, chan1, gimbal_servo_settings);
+    mast_servo_about_y_ptr =
+      hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+        driver_allocator(), *tim2, chan1, gimbal_servo_settings);
   }
-  return mast_servo_abouty_ptr;
+  return mast_servo_about_y_ptr;
 }
 
-static hal::v5::optional_ptr<gimbal> mast_gimbal_abouty_ptr;
-hal::v5::strong_ptr<gimbal> mast_gimbal_abouty()
+static hal::v5::optional_ptr<gimbal> mast_gimbal_about_y_ptr;
+hal::v5::strong_ptr<gimbal> mast_gimbal_about_y()
 {
-  if (not mast_gimbal_abouty_ptr) {
-    auto servo = mast_servo_abouty();
-    // clamped_servo clamped_servo{ servo,
-    //                              {
-    //                                .min_angle =
-    //                                gimbal_servo_settings.min_angle,
-    //                                .max_angle =
-    //                                gimbal_servo_settings.max_angle,
-    //                              } };
-    clamped_servo::settings p_settings{
-      .min_angle = gimbal_servo_settings.min_angle,
-      .max_angle = gimbal_servo_settings.max_angle,
+  if (not mast_gimbal_about_y_ptr) {
+    auto servo = mast_servo_about_y();
+    hal::basic_servo::position_range_t p_range{
+      .min = gimbal_servo_settings.min_angle,
+      .max = gimbal_servo_settings.max_angle,
     };
     hal::v5::strong_ptr<hal::servo> p_clamped_servo =
-      hal::v5::make_strong_ptr<clamped_servo>(
-        driver_allocator(), servo, p_settings);
-    mast_gimbal_abouty_ptr =
+      hal::v5::make_strong_ptr<drivers::clamped_servo>(
+        driver_allocator(), servo, p_range);
+    mast_gimbal_about_y_ptr =
       hal::v5::make_strong_ptr<gimbal>(driver_allocator(), p_clamped_servo);
   }
-  return mast_gimbal_abouty_ptr;
+  return mast_gimbal_about_y_ptr;
 }
 
-static hal::v5::optional_ptr<hal::servo> wheels_servo_aboutx_ptr;
-hal::v5::strong_ptr<hal::servo> wheels_servo_aboutx()
+static hal::v5::optional_ptr<hal::servo> wheels_servo_about_x_ptr;
+hal::v5::strong_ptr<hal::servo> wheels_servo_about_x()
 {
-  if (not wheels_servo_aboutx_ptr) {
+  if (not wheels_servo_about_x_ptr) {
     auto tim3 = pwm_frequency_tim3();
     auto chan2 = mast_servo_pwm_channel_2();
-    wheels_servo_aboutx_ptr =
+    wheels_servo_about_x_ptr =
       hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
         driver_allocator(), *tim3, chan2, gimbal_servo_settings);
   }
-  return wheels_servo_aboutx_ptr;
+  return wheels_servo_about_x_ptr;
 }
 
 static hal::v5::optional_ptr<sjsu::hub::mast_gimbal_controller>
   mast_gimbal_controller_ptr;
-hal::v5::strong_ptr<sjsu::hub::mast_gimbal_controller> mast_gimbal_controller(
-  hal::serial& console)
+hal::v5::strong_ptr<sjsu::hub::mast_gimbal_controller> mast_gimbal_controller()
 {
   if (not mast_gimbal_controller_ptr) {
-    hal::print(console, "1\n");
-    hal::v5::strong_ptr<hal::servo> mast_aboutx = mast_servo_aboutx();
-    hal::print(console, "2\n");
-    hal::v5::strong_ptr<hal::servo> wheels_aboutx = wheels_servo_aboutx();
-    hal::print(console, "3\n");
-    clamped_servo clamped_mast_aboutx{
-      mast_aboutx,
+    hal::v5::strong_ptr<hal::servo> mast_about_x = mast_servo_about_x();
+    hal::v5::strong_ptr<hal::servo> wheels_about_x = wheels_servo_about_x();
+    drivers::clamped_servo clamped_mast_about_x{
+      mast_about_x,
       {
-        .min_angle = gimbal_servo_settings.min_angle,
-        .max_angle = gimbal_servo_settings.max_angle,
+        .min = gimbal_servo_settings.min_angle,
+        .max = gimbal_servo_settings.max_angle,
       }
     };
-    hal::print(console, "4\n");
-    clamped_servo clamped_wheels_aboutx{
-      wheels_servo_aboutx(),
+    drivers::clamped_servo clamped_wheels_about_x{
+      wheels_servo_about_x(),
       {
-        .min_angle = gimbal_servo_settings.min_angle,
-        .max_angle = gimbal_servo_settings.max_angle,
+        .min = gimbal_servo_settings.min_angle,
+        .max = gimbal_servo_settings.max_angle,
       }
     };
-    hal::print(console, "5\n");
     auto angle_estimator = imu_angle_estimator();
-    hal::print(console, "6\n");
-    auto mast_gimbal_y = mast_gimbal_abouty();
-    hal::print(console, "7\n");
+    auto mast_gimbal_y = mast_gimbal_about_y();
     sjsu::hub::mast_gimbal_controller::components p_comp{
       .angle_estimator = angle_estimator,
-      .mast_gimbal_abouty = mast_gimbal_y,
-      .mast_servo_aboutx = clamped_mast_aboutx,
-      .wheels_servo_aboutx = clamped_wheels_aboutx,
+      .mast_gimbal_about_y = mast_gimbal_y,
+      .mast_servo_about_x = clamped_mast_about_x,
+      .wheels_servo_about_x = clamped_wheels_about_x,
     };
-    hal::print(console, "8\n");
     mast_gimbal_controller_ptr =
       hal::v5::make_strong_ptr<sjsu::hub::mast_gimbal_controller>(
         driver_allocator(), p_comp);
@@ -378,7 +364,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
   return mast_servo_pwm_channel_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
 {
   if (not mast_servo_pwm_channel_1_ptr) {
@@ -391,7 +377,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
   return mast_servo_pwm_channel_1_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2()
 {
   if (not mast_servo_pwm_channel_2_ptr) {

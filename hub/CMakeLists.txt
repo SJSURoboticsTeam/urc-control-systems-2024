@@ -20,19 +20,21 @@ libhal_build_demos(
 DEMOS
   application
   can_test
-  servo_test
   imu_servo_test
+  servo_test
 
 
 INCLUDES
   include
   .
+  ../drivers/include
 
 SOURCES
-  ./src/math_helpers.cpp
+  ../drivers/src/clamped_servo.cpp
   ./src/gimbal.cpp
-  ./src/mission_control_manager.cpp
   ./src/icm20948_adapters.cpp
+  ./src/math_helpers.cpp
+  ./src/mission_control_manager.cpp
 
   PACKAGES
   libhal-actuator

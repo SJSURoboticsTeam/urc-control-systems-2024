@@ -97,15 +97,15 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager();
 hal::v5::strong_ptr<hal::can_interrupt> can_interrupt();
 hal::v5::strong_ptr<custom::watchdog> watchdog();
 hal::v5::strong_ptr<hal::sensor::icm20948> icm();
-hal::v5::strong_ptr<sjsu::hub::icm20948_gyroscope> gyroscope();
-hal::v5::strong_ptr<sjsu::hub::icm20948_accelerometer> accelerometer();
-hal::v5::strong_ptr<sjsu::hub::icm20948_magnetometer> magnetometer();
-hal::v5::strong_ptr<sjsu::hub::imu_angle_estimator> imu_angle_estimator();
-hal::v5::strong_ptr<hal::servo> mast_servo_aboutx();
-hal::v5::strong_ptr<hal::servo> mast_servo_abouty();
-hal::v5::strong_ptr<hal::servo> wheels_servo_aboutx();
-hal::v5::strong_ptr<sjsu::hub::gimbal> mast_gimbal_abouty();
-hal::v5::strong_ptr<sjsu::hub::mast_gimbal_controller> mast_gimbal_controller(hal::serial& console);
+hal::v5::strong_ptr<icm20948_gyroscope> gyroscope();
+hal::v5::strong_ptr<icm20948_accelerometer> accelerometer();
+hal::v5::strong_ptr<icm20948_magnetometer> magnetometer();
+hal::v5::strong_ptr<imu_angle_estimator> imu_angle_estimator();
+hal::v5::strong_ptr<hal::servo> mast_servo_about_x();
+hal::v5::strong_ptr<hal::servo> mast_servo_about_y();
+hal::v5::strong_ptr<hal::servo> wheels_servo_about_x();
+hal::v5::strong_ptr<gimbal> mast_gimbal_about_y();
+hal::v5::strong_ptr<mast_gimbal_controller> mast_gimbal_controller();
 
 inline void reset()
 {

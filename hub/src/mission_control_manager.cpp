@@ -113,13 +113,11 @@ void mission_control_manager::send_servo_position(uint8_t mast_x_angle,
 
 void mission_control_manager::send_imu_accel(int16_axis accel)
 {
-  std::array<hal::byte, 8> payload{ static_cast<uint8_t>(accel.x & 0xFF),
-                                    static_cast<uint8_t>((accel.x >> 8) & 0xFF),
-                                    static_cast<uint8_t>(accel.y & 0xFF),
-                                    static_cast<uint8_t>((accel.y >> 8) & 0xFF),
-                                    static_cast<uint8_t>(accel.z & 0xFF),
-                                    static_cast<uint8_t>((accel.z >> 8) &
-                                                         0xFF) };
+  std::array<hal::byte, 8> payload{
+    static_cast<uint8_t>(accel.x), static_cast<uint8_t>(accel.x >> 8),
+    static_cast<uint8_t>(accel.y), static_cast<uint8_t>(accel.y >> 8),
+    static_cast<uint8_t>(accel.z), static_cast<uint8_t>(accel.z >> 8)
+  };
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::imu_accel),
       .length = 6,
@@ -129,12 +127,9 @@ void mission_control_manager::send_imu_accel(int16_axis accel)
 void mission_control_manager::send_imu_gyro(int16_axis gyro)
 {
   std::array<hal::byte, 8> payload{
-    static_cast<uint8_t>(gyro.x & 0xFF),
-    static_cast<uint8_t>((gyro.x >> 8) & 0xFF),
-    static_cast<uint8_t>(gyro.y & 0xFF),
-    static_cast<uint8_t>((gyro.y >> 8) & 0xFF),
-    static_cast<uint8_t>(gyro.z & 0xFF),
-    static_cast<uint8_t>((gyro.z >> 8) & 0xFF)
+    static_cast<uint8_t>(gyro.x), static_cast<uint8_t>(gyro.x >> 8),
+    static_cast<uint8_t>(gyro.y), static_cast<uint8_t>(gyro.y >> 8),
+    static_cast<uint8_t>(gyro.z), static_cast<uint8_t>(gyro.z >> 8)
   };
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::imu_gyro),
@@ -145,12 +140,12 @@ void mission_control_manager::send_imu_gyro(int16_axis gyro)
 void mission_control_manager::send_imu_mag(int16_axis mag)
 {
   std::array<hal::byte, 8> payload{
-    static_cast<uint8_t>(mag.x & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(mag.x) >> 8) & 0xFF),
-    static_cast<uint8_t>(mag.y & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(mag.y) >> 8) & 0xFF),
-    static_cast<uint8_t>(mag.z & 0xFF),
-    static_cast<uint8_t>((static_cast<uint16_t>(mag.z) >> 8) & 0xFF)
+    static_cast<uint8_t>(mag.x),
+    static_cast<uint8_t>(static_cast<uint16_t>(mag.x) >> 8),
+    static_cast<uint8_t>(mag.y),
+    static_cast<uint8_t>(static_cast<uint16_t>(mag.y) >> 8),
+    static_cast<uint8_t>(mag.z),
+    static_cast<uint8_t>(static_cast<uint16_t>(mag.z) >> 8)
   };
   m_can_transceiver->send(
     { .id = static_cast<uint32_t>(can_message_id::imu_mag),

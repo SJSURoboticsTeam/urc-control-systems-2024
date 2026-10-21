@@ -16,8 +16,8 @@ void application()
   auto console = resources::console();
   hal::print(*console, "=== SERVO SWEEP TEST ===\n");
 
-  auto x_servo = resources::mast_servo_aboutx();
-  auto y_servo = resources::mast_servo_abouty();
+  auto x_servo = resources::mast_servo_about_x();
+  auto y_servo = resources::mast_servo_about_y();
 
   hal::print(*console, "starting sweep in 2 seconds...\n");
   hal::delay(*clock, 2000ms);
