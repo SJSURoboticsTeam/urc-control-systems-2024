@@ -92,8 +92,8 @@ public:
   {
     hal::v5::strong_ptr<imu_angle_estimator> angle_estimator;
     hal::v5::strong_ptr<gimbal> mast_gimbal_about_y;
-    drivers::clamped_servo mast_servo_about_x;
-    drivers::clamped_servo wheels_servo_about_x;
+    hal::v5::strong_ptr<drivers::clamped_servo> mast_servo_about_x;
+    hal::v5::strong_ptr<drivers::clamped_servo> wheels_servo_about_x;
   };
 
   // components are extracted into a struct because positional parameters with
@@ -105,7 +105,7 @@ public:
 private:
   hal::v5::strong_ptr<imu_angle_estimator> m_angle_estimator;
   hal::v5::strong_ptr<gimbal> m_mast_gimbal_about_y;
-  drivers::clamped_servo m_mast_servo_about_x;
-  drivers::clamped_servo m_wheels_servo_about_x;
+  hal::v5::strong_ptr<drivers::clamped_servo> m_mast_servo_about_x;
+  hal::v5::strong_ptr<drivers::clamped_servo> m_wheels_servo_about_x;
 };
 }  // namespace sjsu::hub

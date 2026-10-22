@@ -101,8 +101,8 @@ mast_gimbal_controller::mast_gimbal_controller(components p_comp)
 void mast_gimbal_controller::set_target(gimbal_target_request const& target)
 {
   m_mast_gimbal_about_y->set_target(target.mast_angle_y);
-  m_mast_servo_about_x.position(target.mast_angle_x);
-  m_wheels_servo_about_x.position(target.wheels_angle_x);
+  m_mast_servo_about_x->position(target.mast_angle_x);
+  m_wheels_servo_about_x->position(target.wheels_angle_x);
 }
 
 void mast_gimbal_controller::update()

@@ -101,9 +101,9 @@ hal::v5::strong_ptr<icm20948_gyroscope> gyroscope();
 hal::v5::strong_ptr<icm20948_accelerometer> accelerometer();
 hal::v5::strong_ptr<icm20948_magnetometer> magnetometer();
 hal::v5::strong_ptr<imu_angle_estimator> imu_angle_estimator();
-hal::v5::strong_ptr<hal::servo> mast_servo_about_x();
-hal::v5::strong_ptr<hal::servo> mast_servo_about_y();
-hal::v5::strong_ptr<hal::servo> wheels_servo_about_x();
+hal::v5::strong_ptr<drivers::clamped_servo> mast_servo_about_x();
+hal::v5::strong_ptr<drivers::clamped_servo> mast_servo_about_y();
+hal::v5::strong_ptr<drivers::clamped_servo> wheels_servo_about_x();
 hal::v5::strong_ptr<gimbal> mast_gimbal_about_y();
 hal::v5::strong_ptr<mast_gimbal_controller> mast_gimbal_controller();
 

@@ -39,30 +39,9 @@ void application()
   // auto p_mast_gimbal_controller =
   // resources::mast_gimbal_controller();
 
-  auto mast_about_x = resources::mast_servo_about_x();
-  auto mast_about_y = resources::mast_servo_about_y();
-  auto wheels_about_x = resources::wheels_servo_about_x();
-  drivers::clamped_servo clamped_mast_about_x{
-    mast_about_x,
-    {
-      .min = 0,
-      .max = 180,
-    },
-  };
-  drivers::clamped_servo clamped_mast_about_y{
-    mast_about_y,
-    {
-      .min = 0,
-      .max = 180,
-    },
-  };
-  drivers::clamped_servo clamped_wheels_about_x{
-    wheels_about_x,
-    {
-      .min = 0,
-      .max = 180,
-    },
-  };
+  auto clamped_mast_about_x = resources::mast_servo_about_x();
+  auto clamped_mast_about_y = resources::mast_servo_about_y();
+  auto clamped_wheels_about_x = resources::wheels_servo_about_x();
 
   hal::print(*console, "init mast gimbal manager\n");
 
@@ -82,9 +61,9 @@ void application()
 
     auto gimbal_req = mcm.read_gimbal_target_request();
     if (gimbal_req) {
-      clamped_mast_about_x.position(gimbal_req->mast_angle_x);
-      clamped_mast_about_y.position(gimbal_req->mast_angle_y);
-      clamped_wheels_about_x.position(gimbal_req->wheels_angle_x);
+      clamped_mast_about_x->position(gimbal_req->mast_angle_x);
+      clamped_mast_about_y->position(gimbal_req->mast_angle_y);
+      clamped_wheels_about_x->position(gimbal_req->wheels_angle_x);
       // p_mast_gimbal_controller->set_target(gimbal_req.value());
 
       hal::print<64>(*console,
