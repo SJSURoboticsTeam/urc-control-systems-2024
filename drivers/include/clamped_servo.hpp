@@ -8,7 +8,7 @@ namespace sjsu::drivers {
 
 /**
  * @brief clamped_servo simply clamps angles between a given min and max
- * range before calling position on hal::actuator::rc_servo16
+ * range before calling position on hal::servo
  */
 class clamped_servo : public hal::servo
 {
