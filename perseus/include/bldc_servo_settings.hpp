@@ -79,7 +79,7 @@ constexpr bldc_perseus::physical_servo_values
                                         .low_clamped_value = -0.3,
                                         .clockwise_positive = true };
 
-// wrist_right
+// end_effector
 constexpr bldc_perseus::PID_settings end_effector_pid_settings = {
   .kp = 0.05,
   .ki = 0.00,

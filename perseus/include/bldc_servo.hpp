@@ -288,7 +288,6 @@ private:
   PID_prev_values m_PID_prev_velocity_values;
   PID_prev_values m_PID_prev_position_values;
   physical_servo_values m_physical_servo_values;
-  float m_actual_position;
   float m_prev_joint_position;
   float m_active_power;
   uint32_t m_active_action;

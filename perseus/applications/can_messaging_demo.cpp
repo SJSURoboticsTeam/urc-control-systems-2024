@@ -77,8 +77,6 @@ void application()
   auto can_bus_manager = resources::can_bus_manager();
   auto can_id_filter = resources::get_new_can_filter();
   auto can_group_filter = resources::get_new_can_filter();
-  hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter =
-    resources::can_mask_filter();
   can_perseus servo_can(allowed_id,
                         listen_prev,
                         group_id,
@@ -86,8 +84,7 @@ void application()
                         can_transceiver,
                         can_bus_manager,
                         can_id_filter,
-                        can_group_filter,
-                        can_mask_filter);
+                        can_group_filter);
 
   hal::print(*console, "Begin.\n");
 

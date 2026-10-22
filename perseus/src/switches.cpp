@@ -24,7 +24,7 @@ hal::u8 switches_bldc::read_switch_value()
 {
   hal::u8 switch_value = 0x000000000000;
   for (size_t i = 0; i < m_switch_array.size(); i++) {
-    switch_value |= static_cast<hal::u8>(m_switch_array[i]->level()) << (5 - i);
+    switch_value |= static_cast<hal::u8>(m_switch_array[i]->level()) << (m_switch_array.size() - i);
   }
   return switch_value;
 }

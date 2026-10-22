@@ -24,8 +24,7 @@ public:
               hal::v5::strong_ptr<hal::can_identifier_filter>
                 p_can_individual_identifier_filter,
               hal::v5::strong_ptr<hal::can_identifier_filter>
-                p_can_group_identifier_filter,
-              hal::v5::strong_ptr<hal::can_mask_filter> p_can_mask_filter);
+                p_can_group_identifier_filter);
 
   enum class action : uint8_t
   {
@@ -96,7 +95,6 @@ private:
   hal::v5::strong_ptr<hal::can_identifier_filter>
     m_can_command_identifier_filter;
   hal::v5::strong_ptr<hal::can_identifier_filter> m_can_group_identifier_filter;
-  hal::v5::strong_ptr<hal::can_mask_filter> m_can_mask_filter;
   hal::can_message_finder m_individual_command_message_finder;
   hal::can_message_finder m_group_command_message_finder;
 };

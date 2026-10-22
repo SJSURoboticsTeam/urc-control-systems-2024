@@ -173,7 +173,7 @@ void bldc_perseus::update_position(bool from_scratch)
     *console,
     "Target: %f, Position: %f, Error: %f, pid: %f, projected: %f\n",
     m_target.position,
-    m_actual_position,
+    get_actual_position(),
     error,
     pid_sum,
     projected_power);
@@ -185,7 +185,7 @@ void bldc_perseus::update_position(bool from_scratch)
 float bldc_perseus::position_feedforward()
 {
   return std::sin(static_cast<float>(std::numbers::pi / 180) *
-                  m_actual_position) *
+                  get_actual_position()) *
          m_physical_servo_values.fight_gravity;
 }
 
@@ -211,9 +211,7 @@ float bldc_perseus::get_angle_offset()
 
 float bldc_perseus::get_actual_position()
 {
-  m_actual_position =
-    read_angle() + m_physical_servo_values.angle_offset + m_prev_joint_position;
-  return m_actual_position;
+  return read_angle() + m_physical_servo_values.angle_offset + m_prev_joint_position;
 }
 
 void bldc_perseus::set_physical_servo_values(

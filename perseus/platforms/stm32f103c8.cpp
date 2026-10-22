@@ -96,7 +96,7 @@ hal::v5::strong_ptr<hal::output_pin> status_led()
   return led_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
+static hal::v5::optional_ptr<hal::output_pin> output_pin_0_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_0()
 {
   if (not output_pin_0_ptr) {
@@ -107,7 +107,7 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_0()
   return output_pin_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> output_pin_1_ptr;
+static hal::v5::optional_ptr<hal::output_pin> output_pin_1_ptr;
 hal::v5::strong_ptr<hal::output_pin> output_pin_1()
 {
   if (not output_pin_1_ptr) {
@@ -136,7 +136,7 @@ hal::v5::strong_ptr<hal::output_pin> output_pin_1()
   return timer3;
 }
 
-hal::v5::optional_ptr<hal::output_pin> pwm0_a8_ptr;
+static hal::v5::optional_ptr<hal::output_pin> pwm0_a8_ptr;
 hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
 {
   if (not pwm0_a8_ptr) {
@@ -147,7 +147,7 @@ hal::v5::strong_ptr<hal::output_pin> pwm0_a8()
   return pwm0_a8_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> rx1_a3_ptr;
+static hal::v5::optional_ptr<hal::output_pin> rx1_a3_ptr;
 hal::v5::strong_ptr<hal::output_pin> rx1_a3()
 {
   if (not rx1_a3_ptr) {
@@ -158,7 +158,7 @@ hal::v5::strong_ptr<hal::output_pin> rx1_a3()
   return rx1_a3_ptr;
 }
 
-hal::v5::optional_ptr<hal::output_pin> tx1_a2_ptr;
+static hal::v5::optional_ptr<hal::output_pin> tx1_a2_ptr;
 hal::v5::strong_ptr<hal::output_pin> tx1_a2()
 {
   if (not tx1_a2_ptr) {
@@ -169,7 +169,7 @@ hal::v5::strong_ptr<hal::output_pin> tx1_a2()
   return tx1_a2_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_0_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_0_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
 {
   if (not pwm_channel_0_ptr) {
@@ -181,7 +181,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_0()
   return pwm_channel_0_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_1_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_1_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
 {
   if (not pwm_channel_1_ptr) {
@@ -193,7 +193,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_1()
   return pwm_channel_1_ptr;
 }
 
-hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_2_ptr;
+static hal::v5::optional_ptr<hal::pwm16_channel> pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_2()
 {
   if (not pwm_channel_2_ptr) {
@@ -205,7 +205,7 @@ hal::v5::strong_ptr<hal::pwm16_channel> pwm_channel_2()
   return pwm_channel_2_ptr;
 }
 
-hal::v5::optional_ptr<hal::rotation_sensor> encoder_ptr;
+static hal::v5::optional_ptr<hal::rotation_sensor> encoder_ptr;
 hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 {
   if (not encoder_ptr) {
@@ -224,7 +224,7 @@ hal::v5::strong_ptr<hal::rotation_sensor> encoder()
 }
 
 // all the pins for the switches at the bottom of the pcb
-hal::v5::optional_ptr<hal::input_pin> switch_g1_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g1_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g1()
 {
   if (not switch_g1_ptr) {
@@ -234,7 +234,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g1()
   }
   return switch_g1_ptr;
 }
-hal::v5::optional_ptr<hal::input_pin> switch_g2_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g2_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g2()
 {
   if (not switch_g2_ptr) {
@@ -244,7 +244,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g2()
   }
   return switch_g2_ptr;
 }
-hal::v5::optional_ptr<hal::input_pin> switch_g3_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g3_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g3()
 {
   if (not switch_g3_ptr) {
@@ -254,7 +254,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g3()
   }
   return switch_g3_ptr;
 }
-hal::v5::optional_ptr<hal::input_pin> switch_g4_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g4_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g4()
 {
   if (not switch_g4_ptr) {
@@ -264,7 +264,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g4()
   }
   return switch_g4_ptr;
 }
-hal::v5::optional_ptr<hal::input_pin> switch_g5_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g5_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g5()
 {
   if (not switch_g5_ptr) {
@@ -274,7 +274,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g5()
   }
   return switch_g5_ptr;
 }
-hal::v5::optional_ptr<hal::input_pin> switch_g6_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g6_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g6()
 {
   if (not switch_g6_ptr) {
@@ -284,7 +284,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g6()
   }
   return switch_g6_ptr;
 }
-hal::v5::optional_ptr<hal::input_pin> switch_g7_ptr;
+static hal::v5::optional_ptr<hal::input_pin> switch_g7_ptr;
 hal::v5::strong_ptr<hal::input_pin> switch_g7()
 {
   if (not switch_g7_ptr) {
@@ -295,7 +295,7 @@ hal::v5::strong_ptr<hal::input_pin> switch_g7()
   return switch_g7_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr;
+static hal::v5::optional_ptr<sjsu::drivers::h_bridge> h_bridge_ptr;
 hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
 {
   if (not h_bridge_ptr) {
@@ -318,7 +318,7 @@ hal::v5::strong_ptr<sjsu::drivers::h_bridge> h_bridge()
   return h_bridge_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::perseus::bldc_perseus> servo_ptr;
+static hal::v5::optional_ptr<sjsu::perseus::bldc_perseus> servo_ptr;
 hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo()
 {
   if (not servo_ptr) {
@@ -331,7 +331,7 @@ hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo()
   return servo_ptr;
 }
 
-hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
 void initialize_can()
 {
   if (not can_manager) {
@@ -348,7 +348,7 @@ void initialize_can()
   }
 }
 
-hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
+static hal::v5::optional_ptr<hal::can_transceiver> can_transceiver_ptr;
 hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
 {
   initialize_can();
@@ -359,7 +359,7 @@ hal::v5::strong_ptr<hal::can_transceiver> can_transceiver()
   return can_transceiver_ptr;
 }
 
-hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
+static hal::v5::optional_ptr<hal::can_bus_manager> can_bus_manager_ptr;
 hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 {
   initialize_can();
@@ -371,7 +371,7 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 }
 
 unsigned int can_filters_index = 0;
-std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
+static std::array<hal::v5::optional_ptr<hal::can_identifier_filter>, 4>
   can_identifier_filters;
 hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
 {
@@ -391,7 +391,7 @@ hal::v5::strong_ptr<hal::can_identifier_filter> get_new_can_filter()
   return can_id_filter;
 }
 
-hal::v5::optional_ptr<hal::can_mask_filter> can_mask_filter_ptr;
+static hal::v5::optional_ptr<hal::can_mask_filter> can_mask_filter_ptr;
 hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter()
 {
   initialize_can();
@@ -404,7 +404,7 @@ hal::v5::strong_ptr<hal::can_mask_filter> can_mask_filter()
   return can_mask_filter_ptr;
 }
 
-hal::v5::optional_ptr<sjsu::perseus::switches_bldc> switches_ptr;
+static hal::v5::optional_ptr<sjsu::perseus::switches_bldc> switches_ptr;
 hal::v5::strong_ptr<sjsu::perseus::switches_bldc> switches()
 {
   if (not switches_ptr) {

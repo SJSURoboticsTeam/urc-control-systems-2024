@@ -25,8 +25,7 @@ can_perseus::can_perseus(
   hal::v5::strong_ptr<hal::can_bus_manager> p_can_bus_manager,
   hal::v5::strong_ptr<hal::can_identifier_filter>
     p_can_command_identifier_filter,
-  hal::v5::strong_ptr<hal::can_identifier_filter> p_can_group_identifier_filter,
-  hal::v5::strong_ptr<hal::can_mask_filter> p_can_mask_filter)
+  hal::v5::strong_ptr<hal::can_identifier_filter> p_can_group_identifier_filter)
   : m_self_servo_addr(p_curr_servo_addr)
   , m_prev_servo_addr(p_listen_prev)
   , m_group_servo_addr(p_group_servo_addr)
@@ -35,7 +34,6 @@ can_perseus::can_perseus(
   , m_can_bus_manager(p_can_bus_manager)
   , m_can_command_identifier_filter(p_can_command_identifier_filter)
   , m_can_group_identifier_filter(p_can_group_identifier_filter)
-  , m_can_mask_filter(p_can_mask_filter)
   , m_individual_command_message_finder(
       hal::can_message_finder(*m_can_transceiver, m_self_servo_addr))
   , m_group_command_message_finder(
@@ -44,8 +42,6 @@ can_perseus::can_perseus(
   auto console = resources::console();
   m_can_command_identifier_filter->allow(m_self_servo_addr);
   m_can_group_identifier_filter->allow(m_group_servo_addr);
-  m_can_mask_filter->allow(hal::can_mask_filter::pair(0x120, 0x006));
-  m_can_bus_manager->baud_rate(m_baudrate);
   hal::print<32>(*console,
                  "Receiver buffer size = %zu\n",
                  m_can_transceiver->receive_buffer().size());
@@ -129,17 +125,14 @@ hal::can_message can_perseus::float_getter(action p_act,
     } else {
       dir = 0x01;
     }
-    return hal::can_message{ .id =
-                               static_cast<hal::u16>(m_self_servo_addr + 0x100),
-                             .length = 4,
-                             .payload = { static_cast<hal::byte>(p_act),
-                                          dir,
-                                          static_cast<hal::byte>(fixed_pt >> 8),
-                                          static_cast<hal::byte>(fixed_pt >> 0),
-                                          0x00,
-                                          0x00,
-                                          0x00,
-                                          0x00 } };
+    return hal::can_message{
+      .id = static_cast<hal::u16>(m_self_servo_addr + 0x100),
+      .length = 4,
+      .payload = { static_cast<hal::byte>(p_act),
+                   dir,
+                   static_cast<hal::byte>(fixed_pt >> 8),
+                   static_cast<hal::byte>(fixed_pt >> 0) }
+    };
   } else {
     hal::i32 fixed_pt =
       can_util::floating_to_fixed_point_32(p_read_value, p_exponent);
@@ -151,9 +144,7 @@ hal::can_message can_perseus::float_getter(action p_act,
                    static_cast<hal::byte>(fixed_pt >> 24),
                    static_cast<hal::byte>(fixed_pt >> 16),
                    static_cast<hal::byte>(fixed_pt >> 8),
-                   static_cast<hal::byte>(fixed_pt >> 0),
-                   0X00,
-                   0X00 }
+                   static_cast<hal::byte>(fixed_pt >> 0) }
     };
   }
 }
@@ -215,12 +206,7 @@ void can_perseus::process_can_message(hal::can_message const& p_message,
           .payload = { static_cast<hal::byte>(
                          action::prev_joint_actual_position),
                        static_cast<hal::byte>(m_self_servo_addr >> 8),
-                       static_cast<hal::byte>(m_self_servo_addr >> 0),
-                       0x00,
-                       0x00,
-                       0x00,
-                       0x00,
-                       0x00 }
+                       static_cast<hal::byte>(m_self_servo_addr >> 0) }
         };
         m_can_transceiver->send(request);
       }
