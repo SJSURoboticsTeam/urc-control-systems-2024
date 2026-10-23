@@ -8,6 +8,7 @@
 
 namespace sjsu::drivers {
 
+// cspell:ignore SPLC
 namespace {
 enum commands : hal::byte
 {

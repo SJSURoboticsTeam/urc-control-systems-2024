@@ -7,6 +7,7 @@
 #include <libhal/pointers.hpp>
 #include <libhal/serial.hpp>
 
+// cspell:ignore brucelindbloom
 namespace sjsu::drivers {
 // functions we need to make
 class opt4048

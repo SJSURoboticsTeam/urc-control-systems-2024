@@ -17,10 +17,7 @@
 #include <libhal-util/i2c.hpp>
 #include <libhal-util/serial.hpp>
 
-// enum format {
-//   binary, decimal, hex
-// };
-
+// cspell:ignore xlsb
 namespace sjsu::drivers {
 class bme680
 {

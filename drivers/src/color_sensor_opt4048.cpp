@@ -5,6 +5,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
+// cspell:ignore brucelindbloom QWAKE retrospy
 namespace sjsu::drivers {
 opt4048::opt4048(hal::v5::strong_ptr<hal::i2c> p_i2c,
                  hal::v5::strong_ptr<hal::steady_clock> p_clock,

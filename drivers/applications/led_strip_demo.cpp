@@ -12,6 +12,7 @@
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
+// cspell:ignore NYPD beedoo
 namespace sjsu::drivers {
 struct effect_hardware
 {
