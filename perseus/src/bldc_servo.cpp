@@ -1,5 +1,7 @@
+#include "bldc_servo.hpp"
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/error.hpp>
 #include <libhal/units.hpp>
 #include <sys/types.h>
 
@@ -93,6 +95,7 @@ void bldc_perseus::update_pid_velocity(PID_settings settings)
 void bldc_perseus::home_encoder()
 {
   // TODO!
+  throw hal::operation_not_supported(this); 
 }
 
 hal::degrees bldc_perseus::read_angle()
@@ -103,8 +106,10 @@ hal::degrees bldc_perseus::read_angle()
 void bldc_perseus::update_velocity(bool from_scratch)
 {
   // TODO : implement velocity PID control
-  if (from_scratch)
+  if (from_scratch) {
     m_PID_prev_velocity_values.integral = 0;
+  }
+  throw hal::operation_not_supported(this); 
 }
 
 void bldc_perseus::reset_time()
