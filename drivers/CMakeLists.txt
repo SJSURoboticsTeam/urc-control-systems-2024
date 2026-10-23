@@ -25,11 +25,12 @@ DEMOS
   color_sensor_demo
   h_bridge_demo
   led_strip_demo
+  nhd0420d3z_demo
   perseus_demo
   perseus_serial_demo
   pressure_sensor_demo
-  serial_commands_demo
   scd40_demo
+  serial_commands_demo
   soil_sensor_demo
   tla2528_analog_input_demo
 
@@ -38,19 +39,21 @@ INCLUDES
   .
 
 SOURCES
-    src/serial_commands.cpp
+    src/adc1283.cpp
+    src/adc1283_adapters.cpp
+    src/clamped_servo.cpp
     src/color_sensor_opt4048.cpp
+    src/h_bridge.cpp
     src/mq4.cpp
+    src/nhd0420d3z.cpp
     src/pressure_sensor_bme680.cpp
     src/perseus_bldc.cpp
     src/scd40.cpp
-    src/soil_sensor_sht21.cpp
+    src/serial_commands.cpp
     src/sk9822.cpp
-    src/h_bridge.cpp
+    src/soil_sensor_sht21.cpp
     src/tla2528.cpp
     src/tla2528_adapters.cpp
-    src/adc1283.cpp
-    src/adc1283_adapters.cpp
 
     PACKAGES
     #Template for importing libhal packages is "libhal-__device__"

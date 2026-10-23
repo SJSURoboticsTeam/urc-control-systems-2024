@@ -11,6 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <clamped_servo.hpp>
+#include <gimbal.hpp>
+#include <libhal-actuator/rc_servo.hpp>
+#include <memory_resource>
 
 #include <libhal-arm-mcu/dwt_counter.hpp>
 #include <libhal-arm-mcu/startup.hpp>
@@ -35,6 +39,8 @@
 #include <libhal-util/inert_drivers/inert_adc.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
+#include <libhal/can.hpp>
+#include <libhal/error.hpp>
 #include <libhal/pwm.hpp>
 #include <libhal/units.hpp>
 
@@ -47,7 +53,7 @@ using st_peripheral = hal::stm32f1::peripheral;
 
 std::pmr::polymorphic_allocator<> driver_allocator()
 {
-  static std::array<hal::byte, 1024> driver_memory{};
+  static std::array<hal::byte, 4096> driver_memory{};
   static std::pmr::monotonic_buffer_resource resource(
     driver_memory.data(),
     driver_memory.size(),
@@ -182,8 +188,181 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1()  // G1 ->PA15
   return timer2;
 }
 
-// pwm0 - 32 -> ch8
-// pwm1 - 47 -> ch1
+[[maybe_unused]] static auto& timer3()
+{
+  static hal::stm32f1::general_purpose_timer<st_peripheral::timer3> timer3{};
+  return timer3;
+}
+
+static hal::v5::optional_ptr<hal::sensor::icm20948> icm_ptr;
+hal::v5::strong_ptr<hal::sensor::icm20948> icm()
+{
+  if (not icm_ptr) {
+    auto i2c_ref = i2c();
+    auto clock_ref = clock();
+    icm_ptr = hal::v5::make_strong_ptr<hal::sensor::icm20948>(
+      driver_allocator(), *i2c_ref, *clock_ref);
+    icm_ptr->init_mag();
+  }
+  return icm_ptr;
+}
+
+static hal::v5::optional_ptr<icm20948_gyroscope> gyroscope_ptr;
+hal::v5::strong_ptr<icm20948_gyroscope> gyroscope()
+{
+  if (not gyroscope_ptr) {
+    gyroscope_ptr =
+      hal::v5::make_strong_ptr<icm20948_gyroscope>(driver_allocator(), icm());
+  }
+  return gyroscope_ptr;
+}
+
+static hal::v5::optional_ptr<icm20948_accelerometer> accelerometer_ptr;
+hal::v5::strong_ptr<icm20948_accelerometer> accelerometer()
+{
+  if (not accelerometer_ptr) {
+    accelerometer_ptr = hal::v5::make_strong_ptr<icm20948_accelerometer>(
+      driver_allocator(), icm());
+  }
+  return accelerometer_ptr;
+}
+
+static hal::v5::optional_ptr<icm20948_magnetometer> magnetometer_ptr;
+hal::v5::strong_ptr<icm20948_magnetometer> magnetometer()
+{
+  if (not magnetometer_ptr) {
+    magnetometer_ptr = hal::v5::make_strong_ptr<icm20948_magnetometer>(
+      driver_allocator(), icm());
+  }
+  return magnetometer_ptr;
+}
+
+static hal::v5::optional_ptr<sjsu::hub::imu_angle_estimator>
+  imu_angle_estimator_ptr;
+hal::v5::strong_ptr<sjsu::hub::imu_angle_estimator> imu_angle_estimator()
+{
+  if (not imu_angle_estimator_ptr) {
+    imu_angle_estimator_ptr =
+      hal::v5::make_strong_ptr<sjsu::hub::imu_angle_estimator>(
+        driver_allocator(), clock(), accelerometer(), gyroscope());
+  }
+  return imu_angle_estimator_ptr;
+}
+
+constexpr int min_pulse_width_range = 900;
+constexpr int max_pulse_width_range = 2100;
+constexpr hal::actuator::rc_servo16::settings gimbal_servo_settings{
+  .frequency = 50,
+  .min_angle = 0,
+  .max_angle = 180,
+  .min_microseconds = min_pulse_width_range,
+  .max_microseconds = max_pulse_width_range,
+};
+
+static hal::v5::optional_ptr<drivers::clamped_servo> mast_servo_about_x_ptr;
+hal::v5::strong_ptr<drivers::clamped_servo> mast_servo_about_x()
+{
+  if (not mast_servo_about_x_ptr) {
+    auto tim1 = pwm_frequency_tim1();
+    auto chan0 = mast_servo_pwm_channel_0();
+
+    auto rc_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+      driver_allocator(), *tim1, chan0, gimbal_servo_settings);
+
+    mast_servo_about_x_ptr = hal::v5::make_strong_ptr<drivers::clamped_servo>(
+      driver_allocator(),
+      rc_servo,
+      hal::basic_servo::position_range_t{
+        .min = gimbal_servo_settings.min_angle,
+        .max = gimbal_servo_settings.max_angle,
+      });
+  }
+  return mast_servo_about_x_ptr;
+}
+
+static hal::v5::optional_ptr<drivers::clamped_servo> mast_servo_about_y_ptr;
+hal::v5::strong_ptr<drivers::clamped_servo> mast_servo_about_y()
+{
+  if (not mast_servo_about_y_ptr) {
+    auto tim2 = pwm_frequency_tim2();
+    auto chan1 = mast_servo_pwm_channel_1();
+
+    auto rc_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+      driver_allocator(), *tim2, chan1, gimbal_servo_settings);
+    mast_servo_about_y_ptr = hal::v5::make_strong_ptr<drivers::clamped_servo>(
+      driver_allocator(),
+      rc_servo,
+      hal::basic_servo::position_range_t{
+        .min = gimbal_servo_settings.min_angle,
+        .max = gimbal_servo_settings.max_angle,
+      });
+  }
+  return mast_servo_about_y_ptr;
+}
+
+static hal::v5::optional_ptr<gimbal> mast_gimbal_about_y_ptr;
+hal::v5::strong_ptr<gimbal> mast_gimbal_about_y()
+{
+  if (not mast_gimbal_about_y_ptr) {
+    auto servo = mast_servo_about_y();
+    hal::basic_servo::position_range_t p_range{
+      .min = gimbal_servo_settings.min_angle,
+      .max = gimbal_servo_settings.max_angle,
+    };
+    hal::v5::strong_ptr<hal::servo> p_clamped_servo =
+      hal::v5::make_strong_ptr<drivers::clamped_servo>(
+        driver_allocator(), servo, p_range);
+    mast_gimbal_about_y_ptr =
+      hal::v5::make_strong_ptr<gimbal>(driver_allocator(), p_clamped_servo);
+  }
+  return mast_gimbal_about_y_ptr;
+}
+
+static hal::v5::optional_ptr<drivers::clamped_servo> wheels_servo_about_x_ptr;
+hal::v5::strong_ptr<drivers::clamped_servo> wheels_servo_about_x()
+{
+  if (not wheels_servo_about_x_ptr) {
+    auto tim3 = pwm_frequency_tim3();
+    auto chan2 = mast_servo_pwm_channel_2();
+
+    auto rc_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
+      driver_allocator(), *tim3, chan2, gimbal_servo_settings);
+
+    wheels_servo_about_x_ptr = hal::v5::make_strong_ptr<drivers::clamped_servo>(
+      driver_allocator(),
+      rc_servo,
+      hal::basic_servo::position_range_t{
+        .min = gimbal_servo_settings.min_angle,
+        .max = gimbal_servo_settings.max_angle,
+      });
+  }
+  return wheels_servo_about_x_ptr;
+}
+
+static hal::v5::optional_ptr<sjsu::hub::mast_gimbal_controller>
+  mast_gimbal_controller_ptr;
+hal::v5::strong_ptr<sjsu::hub::mast_gimbal_controller> mast_gimbal_controller()
+{
+  if (not mast_gimbal_controller_ptr) {
+    hal::v5::strong_ptr<drivers::clamped_servo> mast_about_x =
+      mast_servo_about_x();
+    hal::v5::strong_ptr<drivers::clamped_servo> wheels_about_x =
+      wheels_servo_about_x();
+    auto angle_estimator = imu_angle_estimator();
+    auto mast_gimbal_y = mast_gimbal_about_y();
+    sjsu::hub::mast_gimbal_controller::components p_comp{
+      .angle_estimator = angle_estimator,
+      .mast_gimbal_about_y = mast_gimbal_y,
+      .mast_servo_about_x = mast_about_x,
+      .wheels_servo_about_x = wheels_about_x,
+    };
+    mast_gimbal_controller_ptr =
+      hal::v5::make_strong_ptr<sjsu::hub::mast_gimbal_controller>(
+        driver_allocator(), p_comp);
+  }
+  return mast_gimbal_controller_ptr;
+}
+
 static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0()
 {
@@ -209,6 +388,20 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
   }
   return mast_servo_pwm_channel_1_ptr;
 }
+
+static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2_ptr;
+hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2()
+{
+  if (not mast_servo_pwm_channel_2_ptr) {
+    auto timer_pwm_channel =
+      timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
+    mast_servo_pwm_channel_2_ptr =
+      hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
+        driver_allocator(), std::move(timer_pwm_channel));
+  }
+  return mast_servo_pwm_channel_2_ptr;
+}
+
 // PA5_SPI1_SCK will be used for pwm2, this is here as a holder
 static hal::v5::optional_ptr<hal::pwm16_channel>
   under_chassis_servo_pwm_channel_2_ptr;
@@ -246,6 +439,18 @@ hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2()
         driver_allocator(), std::move(timer_pwm_frequency));
   }
   return pwm_frequency_tim2_ptr;
+}
+
+static hal::v5::optional_ptr<hal::pwm_group_manager> pwm_frequency_tim3_ptr;
+hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim3()
+{
+  if (not pwm_frequency_tim3_ptr) {
+    auto timer_pwm_frequency = timer3().acquire_pwm_group_frequency();
+    pwm_frequency_tim3_ptr =
+      hal::v5::make_strong_ptr<decltype(timer_pwm_frequency)>(
+        driver_allocator(), std::move(timer_pwm_frequency));
+  }
+  return pwm_frequency_tim3_ptr;
 }
 
 static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2>
@@ -321,13 +526,11 @@ hal::v5::strong_ptr<hal::can_bus_manager> can_bus_manager()
 [[noreturn]] void terminate_handler() noexcept
 {
   if (not led_ptr && not clock_ptr) {
-    // spin here until debugger is connected
     while (true) {
       continue;
     }
   }
 
-  // Otherwise, blink the led in a pattern
   auto status_led = resources::status_led();
   auto clock = resources::clock();
 
@@ -350,7 +553,6 @@ void initialize_platform()
 {
   using namespace hal::literals;
   hal::set_terminate(sjsu::hub::resources::terminate_handler);
-  // Set the MCU to the maximum clock speed
 
   hal::stm32f1::configure_clocks(hal::stm32f1::clock_tree{
     .high_speed_external = 8.0_MHz,
@@ -376,9 +578,6 @@ void initialize_platform()
       },
     },
   });
-  // pwm0 uses pa8
-  // hal::stm32f1::activate_mco_pa8(
-  //  hal::stm32f1::mco_source::pll_clock_divided_by_2);
 
   hal::stm32f1::release_jtag_pins();
 }

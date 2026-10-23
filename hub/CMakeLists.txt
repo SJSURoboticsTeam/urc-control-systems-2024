@@ -19,21 +19,37 @@ project(demos LANGUAGES CXX)
 libhal_build_demos(
 DEMOS
   application
+  can_test
+  imu_servo_test
+  servo_test
+
 
 INCLUDES
   include
   .
+  ../drivers/include
 
-#SOURCES
+SOURCES
+  ../drivers/src/clamped_servo.cpp
+  ./src/gimbal.cpp
+  ./src/icm20948_adapters.cpp
+  ./src/math_helpers.cpp
+  ./src/mission_control_manager.cpp
 
-    PACKAGES
-    #Template for importing libhal packages is "libhal-__device__"
-    #replace "__device__" with the libhal device you wish to import
-    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal-rmd"
+  PACKAGES
+  libhal-actuator
+  libhal-sensor
 
-    LINK_LIBRARIES
-    #Template for linking libhal namespaces is "libhal::__device__"
-    #replace "__device__" with the libhal device you wish to import
-    #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
+  #Template for importing libhal packages is "libhal-__device__"
+  #replace "__device__" with the libhal device you wish to import
+  #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal-rmd"
+
+  LINK_LIBRARIES
+  libhal::actuator
+  libhal::sensor
+
+  #Template for linking libhal namespaces is "libhal::__device__"
+  #replace "__device__" with the libhal device you wish to import
+  #ex: to import from https://github.com/libhal/libhal-rmd the next line would be "libhal::rmd"
 
 )
