@@ -95,7 +95,7 @@ void bldc_perseus::update_pid_velocity(PID_settings settings)
 void bldc_perseus::home_encoder()
 {
   // TODO!
-  throw hal::operation_not_supported(this); 
+  throw hal::operation_not_supported(this);
 }
 
 hal::degrees bldc_perseus::read_angle()
@@ -109,7 +109,7 @@ void bldc_perseus::update_velocity(bool from_scratch)
   if (from_scratch) {
     m_PID_prev_velocity_values.integral = 0;
   }
-  throw hal::operation_not_supported(this); 
+  throw hal::operation_not_supported(this);
 }
 
 void bldc_perseus::reset_time()
@@ -216,7 +216,8 @@ float bldc_perseus::get_angle_offset()
 
 float bldc_perseus::get_actual_position()
 {
-  return read_angle() + m_physical_servo_values.angle_offset + m_prev_joint_position;
+  return read_angle() + m_physical_servo_values.angle_offset +
+         m_prev_joint_position;
 }
 
 void bldc_perseus::set_physical_servo_values(

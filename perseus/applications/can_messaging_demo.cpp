@@ -20,7 +20,7 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-  // variables used to initalize can_perseus
+  // variables used to initialize can_perseus
   can_perseus::servo_address allowed_id;
   hal::u16 listen_prev = 0x00;
   auto switches_ptr = resources::switches();
@@ -47,7 +47,8 @@ void application()
   // start loop
   while (true) {
     // receive message
-    std::optional<hal::can_message> msg = servo_can.check_for_individual_message();
+    std::optional<hal::can_message> msg =
+      servo_can.check_for_individual_message();
     // react to message
     if (msg) {
       drivers::can_util::print_can_message(*console, *msg);

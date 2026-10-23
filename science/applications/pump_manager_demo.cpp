@@ -18,7 +18,7 @@ void application(hardware_map_t& p_framework)
   // configure drivers
   auto& clock = *p_framework.steady_clock;
   auto& terminal = *p_framework.terminal;
-  // TODO: replace nullptrs once hardwaremap has been updated
+  // TODO: replace nullptrs once hardware map has been updated
   auto m_pump_manager = pump_manager(clock,
                                      *p_framework.deionized_water_pump,
                                      *p_framework.sample_pump,

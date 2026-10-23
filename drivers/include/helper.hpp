@@ -78,4 +78,3 @@ inline std::string_view to_string_view(std::span<hal::byte const> p_span)
   return std::string_view(reinterpret_cast<char const*>(p_span.data()),
                           p_span.size());
 }
-

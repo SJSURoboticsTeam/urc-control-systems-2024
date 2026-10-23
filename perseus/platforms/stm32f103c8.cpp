@@ -331,7 +331,8 @@ hal::v5::strong_ptr<sjsu::perseus::bldc_perseus> servo()
   return servo_ptr;
 }
 
-static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2> can_manager;
+static hal::v5::optional_ptr<hal::stm32f1::can_peripheral_manager_v2>
+  can_manager;
 void initialize_can()
 {
   if (not can_manager) {
