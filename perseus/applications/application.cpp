@@ -24,10 +24,10 @@ void application()
   auto clock = resources::clock();
   auto console = resources::console();
 
-  // variables used to initalize bldc_perseus
+  // variables used to initialize bldc_perseus
   bldc_perseus::PID_settings pid_settings;
   bldc_perseus::physical_servo_values physical_servo_values;
-  // variables used to initalize can_perseus
+  // variables used to initialize can_perseus
   can_perseus::servo_address allowed_id;
   hal::u16 listen_prev = 0x00;
   auto switches_ptr = resources::switches();

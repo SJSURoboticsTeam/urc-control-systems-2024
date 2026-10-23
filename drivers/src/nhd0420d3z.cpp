@@ -226,21 +226,25 @@ void nhd0420d3z::blinking_cursor(bool p_on)
   }
 }
 
-void nhd0420d3z::rotate_left() {
+void nhd0420d3z::rotate_left()
+{
   send_prefix();
   send_data(commands::shift_display_left);
 }
 
-void nhd0420d3z::rotate_right() {
+void nhd0420d3z::rotate_right()
+{
   send_prefix();
   send_data(commands::shift_display_right);
 }
 
-hal::byte nhd0420d3z::current_line() {
+hal::byte nhd0420d3z::current_line()
+{
   return m_cursor_line;
 }
 
-hal::byte nhd0420d3z::current_column() {
+hal::byte nhd0420d3z::current_column()
+{
   return m_cursor_column;
 }
 }  // namespace sjsu::drivers

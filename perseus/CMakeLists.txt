@@ -22,7 +22,7 @@ libhal_build_demos(
     can_messaging_demo
     switches_demo
 
-  
+
   INCLUDES
     ../drivers/include/
     include
@@ -34,7 +34,7 @@ SOURCES
     src/bldc_servo.cpp
     src/can_messaging.cpp
     src/switches.cpp
-    
+
 PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import
