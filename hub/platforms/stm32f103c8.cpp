@@ -323,7 +323,7 @@ hal::v5::strong_ptr<drivers::clamped_servo> wheels_servo_about_x()
 {
   if (not wheels_servo_about_x_ptr) {
     auto tim3 = pwm_frequency_tim3();
-    auto chan2 = mast_servo_pwm_channel_2();
+    auto chan2 = under_chassis_servo_pwm_channel_1();
 
     auto rc_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
       driver_allocator(), *tim3, chan2, gimbal_servo_settings);
@@ -389,27 +389,15 @@ hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1()
   return mast_servo_pwm_channel_1_ptr;
 }
 
-static hal::v5::optional_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2_ptr;
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2()
-{
-  if (not mast_servo_pwm_channel_2_ptr) {
-    auto timer_pwm_channel =
-      timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pa6);
-    mast_servo_pwm_channel_2_ptr =
-      hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
-        driver_allocator(), std::move(timer_pwm_channel));
-  }
-  return mast_servo_pwm_channel_2_ptr;
-}
-
-// PA5_SPI1_SCK will be used for pwm2, this is here as a holder
+// PB0 will be used for pwm2, even though it looks like an ADC it has a hardware
+// clock
 static hal::v5::optional_ptr<hal::pwm16_channel>
   under_chassis_servo_pwm_channel_2_ptr;
 hal::v5::strong_ptr<hal::pwm16_channel> under_chassis_servo_pwm_channel_2()
 {
   if (not under_chassis_servo_pwm_channel_2_ptr) {
     auto timer_pwm_channel =
-      timer2().acquire_pwm16_channel(hal::stm32f1::timer2_pin::pa2);
+      timer3().acquire_pwm16_channel(hal::stm32f1::timer3_pin::pb0);
     under_chassis_servo_pwm_channel_2_ptr =
       hal::v5::make_strong_ptr<decltype(timer_pwm_channel)>(
         driver_allocator(), std::move(timer_pwm_channel));
