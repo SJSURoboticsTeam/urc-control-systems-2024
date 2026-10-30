@@ -6,7 +6,6 @@
 #include <drv8825.hpp>
 #include <resource_list.hpp>
 
-
 using namespace hal::literals;
 using namespace std::chrono_literals;
 namespace sjsu::drivers {

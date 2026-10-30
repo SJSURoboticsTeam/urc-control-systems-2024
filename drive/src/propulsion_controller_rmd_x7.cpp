@@ -15,10 +15,12 @@ void propulsion_controller_rmd_x7::set_target_velocity(hal::rpm p_velocity)
   m_target_velocity = p_velocity;
   m_motor->velocity_control(p_velocity);
 }
-hal::rpm propulsion_controller_rmd_x7::get_target_velocity() {
+hal::rpm propulsion_controller_rmd_x7::get_target_velocity()
+{
   return m_target_velocity;
 }
-hal::rpm propulsion_controller_rmd_x7::get_actual_velocity() {
+hal::rpm propulsion_controller_rmd_x7::get_actual_velocity()
+{
   return m_motor->feedback().speed();
 }
 }  // namespace sjsu::drive

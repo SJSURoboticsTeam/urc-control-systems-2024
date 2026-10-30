@@ -25,14 +25,14 @@ SOURCES
     ../drivers/src/perseus_bldc.cpp
     ../drivers/src/velocity_motor_mock.cpp
     ../drivers/src/velocity_servo_mock.cpp
-    src/drivetrain.cpp
     src/drivetrain_math.cpp
+    src/drivetrain.cpp
     src/mission_control_manager.cpp
-    src/swerve_module.cpp
     src/propulsion_controller_mock.cpp
     src/propulsion_controller_rmd_x7.cpp
     src/steer_controller_mock.cpp
     src/steer_controller_perseus.cpp
+    src/swerve_module.cpp
 
 PACKAGES
 #    libhal-__device__

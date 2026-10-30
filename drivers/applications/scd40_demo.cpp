@@ -5,8 +5,8 @@
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/units.hpp>
 
-#include <scd40.hpp>
 #include <resource_list.hpp>
+#include <scd40.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;

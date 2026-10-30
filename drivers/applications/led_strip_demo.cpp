@@ -5,13 +5,14 @@
 #include <libhal/pwm.hpp>
 #include <libhal/steady_clock.hpp>
 
-#include <sk9822.hpp>
 #include <array>
 #include <resource_list.hpp>
+#include <sk9822.hpp>
 
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
+// cspell:ignore NYPD beedoo
 namespace sjsu::drivers {
 struct effect_hardware
 {
@@ -52,7 +53,7 @@ void beedoo_beedoo_beedoo(effect_hardware hardware,
  *
  * @param hardware
  */
-void rampup_rampdown(effect_hardware hardware)
+void ramp_up_ramp_down(effect_hardware hardware)
 {
   while (true) {
     for (auto i = hardware.lights.begin(); i != hardware.lights.end(); i++) {
@@ -91,7 +92,7 @@ void application()
                             .clock = clock };
 
   // beedoo_beedoo_beedoo(hardware, hal::color::red, hal::color::black, 100ms);
-  rampup_rampdown(hardware);
+  ramp_up_ramp_down(hardware);
 
   while (true) {
     // Print message

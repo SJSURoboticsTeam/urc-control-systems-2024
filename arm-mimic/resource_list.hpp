@@ -1,10 +1,11 @@
 #pragma once
 
+#include <libhal-actuator/rc_servo.hpp>
 #include <libhal-arm-mcu/system_control.hpp>
 #include <libhal-util/steady_clock.hpp>
-#include <libhal/i2c.hpp>
 #include <libhal/adc.hpp>
 #include <libhal/functional.hpp>
+#include <libhal/i2c.hpp>
 #include <libhal/interrupt_pin.hpp>
 #include <libhal/output_pin.hpp>
 #include <libhal/pointers.hpp>
@@ -15,7 +16,6 @@
 #include <libhal/timer.hpp>
 #include <libhal/usb.hpp>
 #include <libhal/zero_copy_serial.hpp>
-#include <libhal-actuator/rc_servo.hpp>
 
 // Application function must be implemented by one of the compilation units
 // (.cpp) files.

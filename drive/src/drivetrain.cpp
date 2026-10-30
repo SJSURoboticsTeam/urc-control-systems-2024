@@ -210,7 +210,7 @@ hal::degrees drivetrain::get_steer_offset(unsigned int p_module_index) const
 {
   if (p_module_index >= m_modules->size()) {
     auto console = resources::console();
-    hal::print(*console,"invalid index get steer offset\n");
+    hal::print(*console, "invalid index get steer offset\n");
     throw hal::argument_out_of_domain(this);
   }
   return m_modules->at(p_module_index)->get_steer_offset();

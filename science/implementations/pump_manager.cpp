@@ -12,7 +12,7 @@ pump_manager::pump_manager(
   , m_pumps{ p_deionized_water_pump,
              p_benedict_reagent_pump,
              p_biuret_reagent,
-             p_kalling_reagent_pump} {};
+             p_kalling_reagent_pump } {};
 
 void pump_manager::pump(pumps pump, hal::time_duration duration)
 {

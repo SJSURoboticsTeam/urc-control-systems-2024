@@ -31,7 +31,7 @@ INCLUDES
 SOURCES
     ../drivers/src/serial_commands.cpp
     ../drivers/src/h_bridge.cpp
-    
+
 PACKAGES
     #Template for importing libhal packages is "libhal-__device__"
     #replace "__device__" with the libhal device you wish to import

@@ -5,8 +5,8 @@ science_state_machine::science_state_machine(
   hal::v5::strong_ptr<hal::actuator::rc_servo> p_arm_servo,
   hal::v5::strong_ptr<hal::actuator::rc_servo> p_trap_door,
   hal::v5::strong_ptr<hal::actuator::rc_servo> p_mixer,
-  hal::v5::strong_ptr<hal::actuator::rc_servo> p_door, 
-  hal::v5::strong_ptr<hal::actuator::rc_servo> p_cache, 
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_door,
+  hal::v5::strong_ptr<hal::actuator::rc_servo> p_cache,
   hal::v5::strong_ptr<hal::input_pin> p_top_door_limit_switch,
   hal::v5::strong_ptr<hal::input_pin> p_bottom_door_limit_switch,
   hal::v5::strong_ptr<carousel> p_carousel,
@@ -29,24 +29,26 @@ science_state_machine::science_state_machine(
 
 int science_state_machine::get_num_vials()
 {
-    return 0;
+  return 0;
 }
 
-void science_state_machine::turn_on_pump([[maybe_unused]] auto pump, [[maybe_unused]] hal::time_duration duration)
+void science_state_machine::turn_on_pump(
+  [[maybe_unused]] auto pump,
+  [[maybe_unused]] hal::time_duration duration)
 {
 }
 
-
-void science_state_machine::run_state_machine([[maybe_unused]] science_states state)
+void science_state_machine::run_state_machine(
+  [[maybe_unused]] science_states state)
 {
-  switch(state){
+  switch (state) {
     case science_state_machine::science_states::HOME_CAROUSEL:
       break;
     case science_state_machine::science_states::CUP_OUTSIDE:
       m_arm_servo->position(0);
       hal::delay(*m_clock, 1000ms);
       m_door->position(180);
-      hal::delay(*m_clock, 1000ms);   
+      hal::delay(*m_clock, 1000ms);
       break;
     case science_state_machine::science_states::CUP_INSIDE:
       m_arm_servo->position(0);
@@ -54,11 +56,11 @@ void science_state_machine::run_state_machine([[maybe_unused]] science_states st
       m_door->position(180);
       hal::delay(*m_clock, 1000ms);
       break;
-    case science_state_machine::science_states::DUMP_SAMPLE: 
+    case science_state_machine::science_states::DUMP_SAMPLE:
       // trapdoor servo deg: 0 close, 120 open)
       m_trap_door->position(0);
       hal::delay(*m_clock, 1000ms);
-      m_trap_door->position(120); // keep open for 3s
+      m_trap_door->position(120);  // keep open for 3s
       hal::delay(*m_clock, 3000ms);
       m_trap_door->position(0);
       hal::delay(*m_clock, 1000ms);

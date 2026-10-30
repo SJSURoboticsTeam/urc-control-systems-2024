@@ -3,7 +3,6 @@
 #include <libhal-util/steady_clock.hpp>
 #include <resource_list.hpp>
 
-
 using namespace std::chrono_literals;
 namespace sjsu::drivers {
 void application()

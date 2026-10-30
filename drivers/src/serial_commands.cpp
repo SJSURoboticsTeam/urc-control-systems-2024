@@ -60,9 +60,9 @@ handler::read_status handler::read()
         }
         continue;
       case '\r':
-		view[0] = '\n';
+        view[0] = '\n';
         m_console->write(view);
-		[[fallthrough]];
+        [[fallthrough]];
       case '\n':
         m_cursor = 0;
         return read_status::complete;
@@ -154,7 +154,7 @@ void handler::handle(std::span<def> p_commands)
 
   std::span<hal::byte> prefix = segments[0];
   if (prefix.size() == 0) {
-	  return;
+    return;
   }
 
   std::span<std::span<hal::byte>> params{ segments.begin() + 1,

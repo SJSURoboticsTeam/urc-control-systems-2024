@@ -10,14 +10,15 @@ class propulsion_controller_mock : public propulsion_controller
 {
 public:
   propulsion_controller_mock(hal::v5::strong_ptr<hal::steady_clock> p_clock,
-                      hal::rpm p_max_speed,
-                      float p_max_acceleration);
+                             hal::rpm p_max_speed,
+                             float p_max_acceleration);
   virtual void stop() override;
   virtual void set_target_velocity(hal::rpm p_velocity) override;
   virtual hal::rpm get_target_velocity() override;
   virtual hal::rpm get_actual_velocity() override;
+
 private:
-    drivers::velocity_motor_mock m_motor;
-    hal::rpm m_target_velocity;
+  drivers::velocity_motor_mock m_motor;
+  hal::rpm m_target_velocity;
 };
 }  // namespace sjsu::drive

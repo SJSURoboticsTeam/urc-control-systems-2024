@@ -14,7 +14,6 @@
 #include <swerve_structs.hpp>
 #include <vector2d.hpp>
 
-
 namespace sjsu::drive {
 
 using namespace std::chrono_literals;

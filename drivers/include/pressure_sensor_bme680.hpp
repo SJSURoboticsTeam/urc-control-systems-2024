@@ -17,10 +17,7 @@
 #include <libhal-util/i2c.hpp>
 #include <libhal-util/serial.hpp>
 
-// enum format {
-//   binary, decimal, hex
-// };
-
+// cspell:ignore xlsb
 namespace sjsu::drivers {
 class bme680
 {
@@ -138,7 +135,7 @@ public:
   // void print_register(hal::v5::strong_ptr<hal::serial> console, hal::byte
   // register_address, format format = format::hex);
 
-  /// @brief Construct a 
+  /// @brief Construct a
   /// @param p_i2c bus
   /// @param p_address address
   explicit bme680(hal::v5::strong_ptr<hal::i2c> p_i2c, hal::byte p_address);
@@ -199,7 +196,7 @@ private:
   } coefficients;
 
   /// @brief Correct temperature according to datasheet and calibration
-  /// coeffcients. Check the datasheet.
+  /// coefficients. Check the datasheet.
   /// @param adc_temp Raw temperature reading from sensor
   /// @return compensated and fine temperature.
   compensated_temp compensate_temp(double adc_temp);
@@ -210,7 +207,7 @@ private:
   /// @return Compensated pressure
   double compensate_pressure(double t_fine, double adc_press);
   /// @brief Correct humidity according to datasheet, compensated temperature,
-  /// and calibration coefficienst. Check the datasheet.
+  /// and calibration coefficients. Check the datasheet.
   /// @param temp_comp Compensated temperature calculated during
   /// compensate_temp()
   /// @param adc_humid Raw humidity reading from sensor.

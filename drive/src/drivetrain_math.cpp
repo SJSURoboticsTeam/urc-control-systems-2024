@@ -8,7 +8,6 @@
 #include <swerve_module.hpp>
 #include <vector2d.hpp>
 
-
 #include <numbers>
 #include <sys/types.h>
 

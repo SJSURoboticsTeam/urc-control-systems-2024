@@ -16,5 +16,3 @@ class demos(ConanFile):
         self.requires("libhal-arm-mcu/1.21.2")
         self.requires("libhal-actuator/1.2.3")
         self.requires("libhal-expander/1.3.1")
-
-

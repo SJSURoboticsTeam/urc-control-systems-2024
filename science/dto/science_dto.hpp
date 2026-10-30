@@ -1,11 +1,11 @@
 #pragma once
-#include <libhal-util/serial.hpp> //include for print and serial
+#include <libhal-util/serial.hpp>  //include for print and serial
 
 namespace sjsu::science {
 
 // commands are parsed from mission control
-//this file is specific to last year's science project, so will be deleted or completely rewritten
-//for current science plan
+// this file is specific to last year's science project, so will be deleted or
+// completely rewritten for current science plan
 struct science_commands
 {
   int state_step = 0;
@@ -60,4 +60,4 @@ const char kGETRequestFormat[] =
   "clear_status=%d&"
   "unseal_status=%d&methane_level=%d&co2_level=%d&pressure_level=%d";
 
-}  // namespace science
+}  // namespace sjsu::science

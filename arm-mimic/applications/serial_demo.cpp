@@ -58,11 +58,10 @@ void application()
     float deg_value = std::strtof(buffer.data(), nullptr);
     hal::degrees angle = deg_value;
     if (angle > servo_settings.max_angle || angle < servo_settings.min_angle) {
-      hal::print<64>(
-        *console,
-        "Invalid angle. Please enter a value between %f and %f",
-        servo_settings.min_angle,
-        servo_settings.max_angle);
+      hal::print<64>(*console,
+                     "Invalid angle. Please enter a value between %f and %f",
+                     servo_settings.min_angle,
+                     servo_settings.max_angle);
       hal::print(*console, "\n\n");
       continue;
     }

@@ -14,7 +14,8 @@ public:
    * p_perseus should not be touched after passing it to steer_controller
    * otherwise one may run the risk of corrupting state!
    */
-  steer_controller_perseus(hal::v5::strong_ptr<drivers::perseus_bldc> p_perseus, hal::v5::strong_ptr<hal::steady_clock> p_clock);
+  steer_controller_perseus(hal::v5::strong_ptr<drivers::perseus_bldc> p_perseus,
+                           hal::v5::strong_ptr<hal::steady_clock> p_clock);
 
   void stop() override;
 
