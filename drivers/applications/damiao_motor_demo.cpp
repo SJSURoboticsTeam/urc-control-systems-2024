@@ -1,3 +1,5 @@
+// cspell:ignore damiao
+
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -10,10 +12,10 @@
 using namespace std::chrono_literals;
 namespace sjsu::drivers {
 
-void print_data(damiao_motor& motor,
-                hal::v5::strong_ptr<hal::steady_clock> clock,
-                hal::time_duration time,
-                hal::v5::optional_ptr<hal::serial> console);
+void print_data(damiao_motor& p_motor,
+                hal::v5::strong_ptr<hal::steady_clock> p_clock,
+                hal::time_duration p_print_duration,
+                hal::v5::optional_ptr<hal::serial> p_console);
 
 void application()
 {
@@ -59,29 +61,27 @@ void application()
     print_data(motor, clock, std::chrono::milliseconds(5000), console);
     hal::delay(*clock, 300ms);
 
-    motor.velocity_mode_start(-50);
+    motor.velocity_mode(-50);
     print_data(motor, clock, std::chrono::milliseconds(3000), console);
-    motor.velocity_mode_stop();
-    hal::delay(*clock, 300ms);
 
     motor.force_position_hybrid_mode(force_position_hybrid_param);
     print_data(motor, clock, std::chrono::milliseconds(3000), console);
 
     motor.disable();
   } catch (hal::timed_out e) {
-    hal::print(*console, "Something Timed Out");
+    hal::print(*console, "Motor Timed Out");
   }
 }
 
-void print_data(damiao_motor& motor,
-                hal::v5::strong_ptr<hal::steady_clock> clock,
-                hal::time_duration time,
-                hal::v5::optional_ptr<hal::serial> console)
+void print_data(damiao_motor& p_motor,
+                hal::v5::strong_ptr<hal::steady_clock> p_clock,
+                hal::time_duration p_print_duration,
+                hal::v5::optional_ptr<hal::serial> p_console)
 {
-  auto const deadline = hal::future_deadline(*clock, time);
-  while (clock->uptime() < deadline) {
-    damiao_motor_data dat = motor.read_encoder();
-    hal::print<96>(*console,
+  auto const deadline = hal::future_deadline(*p_clock, p_print_duration);
+  while (p_clock->uptime() < deadline) {
+    damiao_motor_data dat = p_motor.read_encoder();
+    hal::print<96>(*p_console,
                    "pos = %f degrees, vel = %f rpm, torque = %f Nm \n",
                    dat.position,
                    dat.velocity,
