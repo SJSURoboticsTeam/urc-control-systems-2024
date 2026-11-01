@@ -66,7 +66,7 @@ void application()
       clamped_wheels_about_x->position(gimbal_req->wheels_angle_x);
       // p_mast_gimbal_controller->set_target(gimbal_req.value());
 
-      hal::print<64>(*console,
+      hal::print<72>(*console,
                      "gimbal cmd: mast_x=%d mast_y=%d wheels_x=%d\n",
                      gimbal_req->mast_angle_x,
                      gimbal_req->mast_angle_y,

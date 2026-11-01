@@ -323,7 +323,7 @@ hal::v5::strong_ptr<drivers::clamped_servo> wheels_servo_about_x()
 {
   if (not wheels_servo_about_x_ptr) {
     auto tim3 = pwm_frequency_tim3();
-    auto chan2 = under_chassis_servo_pwm_channel_1();
+    auto chan2 = under_chassis_servo_pwm_channel_2();
 
     auto rc_servo = hal::v5::make_strong_ptr<hal::actuator::rc_servo16>(
       driver_allocator(), *tim3, chan2, gimbal_servo_settings);
