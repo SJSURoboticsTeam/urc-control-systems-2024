@@ -5,8 +5,8 @@
 #include <libhal-util/can.hpp>
 #include <libhal/can.hpp>
 #include <libhal/pointers.hpp>
-#include <optional>
 #include <math_helpers.hpp>
+#include <optional>
 
 namespace sjsu::hub {
 struct gimbal_target_request
@@ -57,7 +57,9 @@ public:
    * @param x_angle current x servo angle (0-180)
    * @param y_angle current y servo angle (0-180)
    */
-  void send_servo_position(uint8_t x_angle, uint8_t y_angle, uint8_t wheels_angle);
+  void send_servo_position(uint8_t x_angle,
+                           uint8_t y_angle,
+                           uint8_t wheels_angle);
 
   /**
    * @brief sends accelerometer data over CAN. Only called when accelerometer

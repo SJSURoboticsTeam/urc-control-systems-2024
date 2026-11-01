@@ -23,7 +23,7 @@ int main()
   sjsu::hub::initialize_platform();
   auto console_ref = sjsu::hub::resources::console();
   try {
-    print(*console_ref,"App Starting\n");
+    print(*console_ref, "App Starting\n");
     sjsu::hub::application();
   } catch (hal::exception e) {
     print<64>(*console_ref, "App Failed, error code: %d\n", e.error_code());

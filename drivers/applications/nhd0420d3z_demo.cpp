@@ -63,8 +63,9 @@ void application()
   display.write_char('h');
   hal::delay(*clock, delay);
 
-  display.display_message("123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABC"
-                          "DEFGHIJK123456789ABCDEFGHIJK");
+  display.display_message(
+    "123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABC"
+    "DEFGHIJK123456789ABCDEFGHIJK");  // cspell:disable-line
   hal::delay(*clock, delay);
 
   display.display_message("foo");
@@ -75,8 +76,9 @@ void application()
   display.blinking_cursor(true);
   hal::delay(*clock, delay);
 
-  display.display_message("123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABC"
-                          "DEFGHIJK123456789ABCDEFGHIJK");
+  display.display_message(
+    "123456789ABCDEFGHIJK123456789ABCDEFGHIJK123456789ABC"
+    "DEFGHIJK123456789ABCDEFGHIJK");  // cspell:disable-line
   hal::delay(*clock, delay_short);
   display.rotate_left();
   hal::delay(*clock, delay_short);

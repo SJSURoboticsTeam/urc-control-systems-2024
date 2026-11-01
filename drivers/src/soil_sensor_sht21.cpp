@@ -73,10 +73,10 @@ double sht21::get_relative_humidity()
                        response_buffer,
                        hal::never_timeout());
 
-  uint16_t raw_relative_humidty =
+  uint16_t raw_relative_humidity =
     (((hal::byte)response_buffer[0]) << 8) | (response_buffer[1] & 0b11111100);
 
-  return -6 + (125.0 / 0x10000) * raw_relative_humidty;
+  return -6 + (125.0 / 0x10000) * raw_relative_humidity;
 }
 
 double sht21::get_temperature()
