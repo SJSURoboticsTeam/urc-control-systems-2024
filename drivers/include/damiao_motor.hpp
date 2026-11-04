@@ -111,7 +111,8 @@ struct damiao_motor_data
 
 /**
  * @brief This the motor driver for the Damiao series motors, tested on
- * DM-J10010L-2EC motor. The motor uses standard CAN 2.0 communication
+ * DM-J10010L-2EC motor and DM-J6248P-2EC. The motor uses standard CAN 2.0
+ * communication
  *
  */
 class damiao_motor
@@ -123,7 +124,7 @@ public:
    * @param p_can_transceiver Receives a can_transceiver object to send /
    * receive can messages
    * @param p_set Receives damiao_motor_settings struct for motor configuration
-   * @param p_clock Receives clock input for deadlines
+   * @param p_clock Receives clock input for deadlines// cspell:ignore damiao
    * @param p_max_response_time The highest time amount the clock can wait for a
    * response from the motor
    */
@@ -152,9 +153,7 @@ public:
    * come loose.
    *
    * Only do this once the motor does not have to supply extra torque and needs
-   * to be disabled to save power draw, while also remembering its encoder
-   * position to be enabled and used later (The motor does not remember its
-   * position once switched off).
+   * to be disabled to save power draw.
    *
    */
   void disable();

@@ -11,11 +11,10 @@
 
 using namespace std::chrono_literals;
 namespace sjsu::drivers {
-
 void print_data(damiao_motor& p_motor,
                 hal::v5::strong_ptr<hal::steady_clock> p_clock,
                 hal::time_duration p_print_duration,
-                hal::v5::optional_ptr<hal::serial> p_console);
+                hal::v5::strong_ptr<hal::serial> p_console);
 
 void application()
 {
@@ -30,14 +29,14 @@ void application()
     .can_id = 0x0012,
     .minimum_position = -14400.0f,
     .maximum_position = 14400.0f,
-    .minimum_velocity = -240.0f,
-    .maximum_velocity = 240.0f,
+    .minimum_velocity = -190.0f,
+    .maximum_velocity = 190.0f,
     .minimum_proportional_gain = 0.0f,
     .maximum_proportional_gain = 500.0f,
     .minimum_derivative_gain = 0.0f,
     .maximum_derivative_gain = 5.0f,
-    .minimum_torque = -200.0f,
-    .maximum_torque = 200.0f,
+    .minimum_torque = -120.0f,
+    .maximum_torque = 120.0f,
   };
 
   mit_pd_mode_parameters mit_pd_param{ .position = 150.0f,
@@ -65,7 +64,7 @@ void application()
     print_data(motor, clock, std::chrono::milliseconds(3000), console);
 
     motor.force_position_hybrid_mode(force_position_hybrid_param);
-    print_data(motor, clock, std::chrono::milliseconds(3000), console);
+    print_data(motor, clock, std::chrono::milliseconds(5000), console);
 
     motor.disable();
   } catch (hal::timed_out e) {
@@ -76,7 +75,7 @@ void application()
 void print_data(damiao_motor& p_motor,
                 hal::v5::strong_ptr<hal::steady_clock> p_clock,
                 hal::time_duration p_print_duration,
-                hal::v5::optional_ptr<hal::serial> p_console)
+                hal::v5::strong_ptr<hal::serial> p_console)
 {
   auto const deadline = hal::future_deadline(*p_clock, p_print_duration);
   while (p_clock->uptime() < deadline) {
