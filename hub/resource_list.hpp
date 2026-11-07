@@ -84,7 +84,6 @@ hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_0();
 hal::v5::strong_ptr<hal::output_pin> beacon_output_pin_1();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_0();
 hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_1();
-hal::v5::strong_ptr<hal::pwm16_channel> mast_servo_pwm_channel_2();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim1();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim2();
 hal::v5::strong_ptr<hal::pwm_group_manager> pwm_frequency_tim3();
