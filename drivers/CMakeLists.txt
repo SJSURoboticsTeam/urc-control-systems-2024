@@ -23,6 +23,7 @@ DEMOS
   blinker_demo
   can_demo
   color_sensor_demo
+  damiao_motor_demo
   h_bridge_demo
   led_strip_demo
   nhd0420d3z_demo
@@ -43,6 +44,7 @@ SOURCES
     src/adc1283_adapters.cpp
     src/clamped_servo.cpp
     src/color_sensor_opt4048.cpp
+    src/damiao_motor.cpp
     src/h_bridge.cpp
     src/mq4.cpp
     src/nhd0420d3z.cpp
