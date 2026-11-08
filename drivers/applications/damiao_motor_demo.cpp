@@ -1,5 +1,3 @@
-// cspell:ignore damiao
-
 #include <libhal-util/can.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
@@ -46,18 +44,18 @@ void application()
                                        .torque_feed_forward = 0.0f };
 
   force_position_hybrid_mode_parameters force_position_hybrid_param{
-    .position = 0.0f, .velocity = 30.0f, .torque_current_limit = 0.8f
+    .position = -150.0f, .velocity = 60.0f, .torque_current_limit = 0.8f
   };
 
   damiao_motor motor(can_transceiver, set, clock);
   try {
-    motor.enable();
+    motor.enable(true);
     motor.mit_pd_mode(mit_pd_param);
     print_data(motor, clock, std::chrono::milliseconds(1500), console);
     hal::delay(*clock, 300ms);
 
     motor.position_velocity_mode(550, 20);
-    print_data(motor, clock, std::chrono::milliseconds(5000), console);
+    print_data(motor, clock, std::chrono::milliseconds(10000), console);
     hal::delay(*clock, 300ms);
 
     motor.velocity_mode(-50);
@@ -66,7 +64,11 @@ void application()
     motor.force_position_hybrid_mode(force_position_hybrid_param);
     print_data(motor, clock, std::chrono::milliseconds(5000), console);
 
-    motor.disable();
+    motor.position_velocity_mode(0, 20);
+    print_data(motor, clock, std::chrono::milliseconds(10000), console);
+    hal::delay(*clock, 300ms);
+
+    motor.enable(false);
   } catch (hal::timed_out e) {
     hal::print(*console, "Motor Timed Out");
   }

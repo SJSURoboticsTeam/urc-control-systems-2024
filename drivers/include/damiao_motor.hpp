@@ -1,10 +1,18 @@
-// cspell:ignore damiao
-
 #pragma once
 #include <libhal-util/can.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <libhal/units.hpp>
+
+namespace {
+enum class operating_mode : hal::byte
+{
+  mit = 1,
+  position_velocity = 2,
+  velocity = 3,
+  force_position_hybrid = 4
+};
+}
 
 namespace sjsu::drivers {
 
@@ -15,48 +23,65 @@ namespace sjsu::drivers {
  */
 struct damiao_motor_settings
 {
-  /// @brief This is used as the address of the message frame when the motor
-  /// wants to send a message (usually encoder reading feedback) back
+  /**
+   * @brief This is used as the address of the message frame when the motor
+   * wants to send a message (usually encoder reading feedback) back
+   */
   hal::byte master_id = 0x01;
 
-  /// @brief This is the main address used when sending a message frame to the
-  /// damiao motor
+  /**
+   * @brief This is the main address used when sending a message frame to the
+   * damiao motor
+   */
   hal::u16 can_id = 0x0002;
 
-  /// @brief These are the minimum and maximum values for position (in degrees)
-  /// used when the motor uses signed fixed point datatype instead of IEEE
-  /// floats (primarily in MIT (pd) mode and reading feedback frame from the
-  /// motor)
-  /// @brief It is also advised that your position parameter for the motor stay
-  /// within these bounds in general, irrespective of the modes so that the
-  /// motor's encoder can keep track of it
-  hal::degrees minimum_position = 0;
+  /**
+   * @brief These are the minimum and maximum values for position (in degrees)
+   * used when the motor uses signed fixed point datatype instead of IEEE
+   * floats (primarily in MIT (pd) mode and reading feedback frame from the
+   * motor)
+   *
+   * It is also advised that your position parameter for the motor stay
+   * within these bounds in general, irrespective of the modes so that the
+   * motor's encoder can keep track of it
+   */
+  hal::degrees minimum_position = -360;
   hal::degrees maximum_position = 360;
 
-  /// @brief These are the minimum and maximum values for velocity (in RPM) used
-  /// when the motor uses signed fixed point datatype instead of IEEE floats
-  /// (primarily in MIT (pd) mode and reading feedback frame from the motor)
-  /// @brief It is also advised that your velocity parameter for the motor stay
-  /// within these bounds in general, irrespective of the modes so that the
-  /// motor's encoder can keep track of it
-  hal::rpm minimum_velocity = 0;
+  /**
+   * @brief These are the minimum and maximum values for velocity (in rpm)
+   * used when the motor uses signed fixed point datatype instead of IEEE
+   * floats (primarily in MIT (pd) mode and reading feedback frame from the
+   * motor)
+   *
+   * It is also advised that your velocity parameter for the motor stay
+   * within these bounds in general, irrespective of the modes so that the
+   * motor's encoder can keep track of it
+   */
+  hal::rpm minimum_velocity = -100;
   hal::rpm maximum_velocity = 100;
 
-  /// @brief These are the minimum and maximum values for proportional gain used
-  /// when the motor uses signed fixed point datatype instead of IEEE floats
-  /// (primarily in MIT (pd) mode)
+  /**
+   * @brief These are the minimum and maximum values for proportional gain used
+   * when the motor uses signed fixed point datatype instead of IEEE floats
+   * (primarily in MIT (pd) mode)
+   */
   float minimum_proportional_gain = 0;
   float maximum_proportional_gain = 500;
 
-  /// @brief These are the minimum and maximum values for derivative gain used
-  /// when the motor uses signed fixed point datatype instead of IEEE floats
-  /// (primarily in MIT (pd) mode)
+  /**
+   * @brief These are the minimum and maximum values for derivative gain used
+   * when the motor uses signed fixed point datatype instead of IEEE floats
+   * (primarily in MIT (pd) mode)
+   */
   float minimum_derivative_gain = 0;
   float maximum_derivative_gain = 25;
 
-  /// @brief These are the minimum and maximum values for torque (in Nm) used
-  /// when the motor uses signed fixed point datatype instead of IEEE floats
-  /// (primarily in MIT (pd) mode and reading feedback frame from the motor)
+  /**
+   * @brief These are the minimum and maximum values for torque (in Nm) used
+   * when the motor uses signed fixed point datatype instead of IEEE floats
+   * (primarily in MIT (pd) mode and reading feedback frame from the motor)
+   */
   hal::newton_meter minimum_torque = 0;
   hal::newton_meter maximum_torque = 40;
 };
@@ -67,15 +92,10 @@ struct damiao_motor_settings
  */
 struct mit_pd_mode_parameters
 {
-  /// @brief Position parameter for the motor (degrees)
   hal::degrees position;
-  /// @brief Velocity parameter for the motor (RPM)
   hal::rpm velocity;
-  /// @brief Proportional gain for the motor
   float proportional_gain;
-  /// @brief Derivative gain for the motor
   float derivative_gain;
-  /// @brief Torque feed forward for the motor
   hal::newton_meter torque_feed_forward;
 };
 
@@ -85,13 +105,14 @@ struct mit_pd_mode_parameters
  */
 struct force_position_hybrid_mode_parameters
 {
-  /// @brief Position parameter (degrees)
   hal::degrees position;
-  /// @brief Velocity parameter (RPM) with float precision of two digits only
   hal::rpm velocity;
-  /// @brief Percentage of maximum current allowed by the motor for torque (in
-  /// Amperes) (Range 0.000 - 1.000) with float precision of four digits only
-  hal::newton_meter torque_current_limit;
+
+  /**
+   * @brief Portion of maximum current allowed by the motor for torque (in
+   * Amperes) (Range 0.0 - 1.0).
+   */
+  float torque_current_limit;
 };
 
 /**
@@ -101,11 +122,8 @@ struct force_position_hybrid_mode_parameters
  */
 struct damiao_motor_data
 {
-  /// @brief Position of the motor (in degrees)
   hal::degrees position;
-  /// @brief Velocity of the motor (in RPM)
   hal::rpm velocity;
-  /// @brief Torque of the motor (in Nm)
   hal::newton_meter torque;
 };
 
@@ -124,7 +142,7 @@ public:
    * @param p_can_transceiver Receives a can_transceiver object to send /
    * receive can messages
    * @param p_set Receives damiao_motor_settings struct for motor configuration
-   * @param p_clock Receives clock input for deadlines// cspell:ignore damiao
+   * @param p_clock Receives clock input for deadlines
    * @param p_max_response_time The highest time amount the clock can wait for a
    * response from the motor
    */
@@ -135,32 +153,22 @@ public:
     hal::time_duration p_max_response_time = std::chrono::milliseconds(500));
 
   /**
-   * @brief Enable the motor to take in current to the motor's windings.
+   * @brief Use ths API to enable the motor to take in current to the motor's
+   * windings. Could be used for debugging / testing.
    *
-   * The other APIs take care of enabling the motor before sending commands.
-   *
-   * Could be used for debugging / testing.
-   *
-   */
-  void enable();
-
-  /**
-   * @brief Disable the motor to stop it from doing anything.
-   *
+   * You could also use it to disable the motor to stop it from doing anything.
    * This will cut power to the motor's windings.
-   *
    * If something is being held using the motor's torque it will most likely
    * come loose.
-   *
    * Only do this once the motor does not have to supply extra torque and needs
    * to be disabled to save power draw.
    *
+   * @param p_state state of the motor, true for enable, false for disable
    */
-  void disable();
+  void enable(bool p_state);
 
   /**
-   * @brief Use motor's pd controller mode, which takes the
-   * mit_pd_mode_parameters struct declared earlier.
+   * @brief Use motor's pd controller mode.
    *
    * This mode can be used if stiffness (proportional gain) and damping
    * (derivative gain) of the motors for robotic joints is crucial and needs to
@@ -194,9 +202,7 @@ public:
   void velocity_mode(hal::rpm p_velocity);
 
   /**
-   * @brief Position hybrid mode for the motor, that takes in
-   * force_position_hybrid_mode_parameters struct declared earlier.
-   *
+   * @brief Use motor's Position hybrid mode.
    * This mode is important if the motor needs to watch its current draw (and by
    * relation, the torque).
    *
@@ -217,24 +223,17 @@ public:
   damiao_motor_data read_encoder();
 
 private:
-  /// @brief CAN transceiver object passed by the user
   hal::v5::strong_ptr<hal::can_transceiver> m_can_transceiver;
-
-  /// @brief message_finder object used for receiving CAN frames from the motor
   hal::can_message_finder m_message_finder;
-
-  /// @brief Settings for the damiao motor passed by the user
   damiao_motor_settings m_settings;
-
-  /// @brief Steady_clock object passed by the user
   hal::v5::strong_ptr<hal::steady_clock> m_clock;
-
-  /// @brief This is the maximum amount of time a CAN transceiver should wait
-  /// for a CAN message to be read from the motor
   hal::time_duration m_max_response_time;
 
-  /// @brief This is a standard dummy MIT frame to send in read_encoder() to
-  /// read encoder reading, unless changed in mit_pd() mode
+  /**
+   * @brief This is a standard dummy MIT frame to send in read_encoder() to
+   * read encoder reading, unless changed in mit_pd() mode
+   *
+   */
   hal::can_message m_recent_mit_frame{
     .length = 8,
     .payload = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00 }
@@ -252,7 +251,7 @@ private:
    * @brief Set mode for the motor
    * @param p_mode Mode required for the motor
    */
-  void mode_set(uint8_t p_mode);
+  void mode_set(operating_mode p_mode);
 
   /**
    * @brief Convert Convert floating point numbers to 16 or 12 bit fixed point

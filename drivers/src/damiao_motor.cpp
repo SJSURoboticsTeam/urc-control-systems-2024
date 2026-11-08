@@ -1,27 +1,13 @@
-// cspell:ignore damiao
-
 #include <damiao_motor.hpp>
 
 namespace {
-constexpr float DEGREES_TO_RADIANS = (std::numbers::pi / 180.0f);
-constexpr float RADIANS_TO_DEGREES = (180.0f / std::numbers::pi);
 
-constexpr float RPM_TO_RAD_PER_SECOND = ((2 * std::numbers::pi) / 60.0f);
-constexpr float RAD_PER_SECOND_TO_RPM = (60.0f / (2 * std::numbers::pi));
+constexpr float degrees_to_radians = (std::numbers::pi / 180.0f);
+constexpr float radians_to_degrees = (180.0f / std::numbers::pi);
 
-enum operating_mode : hal::byte
-{
-  mit = 1,
-  position_velocity = 2,
-  velocity = 3,
-  force_position_hybrid = 4
-};
+constexpr float rpm_to_rad_per_second = ((2 * std::numbers::pi) / 60.0f);
+constexpr float rad_per_second_to_rpm = (60.0f / (2 * std::numbers::pi));
 
-enum bit_size : hal::byte
-{
-  twelve_bit_number = 12,
-  sixteen_bit_number = 16,
-};
 }  // namespace
 
 namespace sjsu::drivers {
@@ -41,90 +27,82 @@ damiao_motor::damiao_motor(
   m_recent_mit_frame.id = m_settings.can_id;
 }
 
-void damiao_motor::enable()
+void damiao_motor::enable(bool p_state)
 {
-  hal::can_message enable_message{
+  hal::can_message state_message{
     .id = m_settings.can_id,
     .length = 8,
     /// Enable Message Bytes
-    .payload = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfc }
-  };
-
-  send_can_data(enable_message);
-}
-
-void damiao_motor::disable()
-{
-  hal::can_message disable_message{
-    .id = m_settings.can_id,
-    .length = 8,
-    /// Disable Message Bytes
     .payload = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfb }
   };
+  /// payload for enable message is 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  /// 0xfc
+  if (p_state)
+    state_message.payload[7]++;
 
-  send_can_data(disable_message);
+  send_can_data(state_message);
 }
 
 void damiao_motor::mit_pd_mode(mit_pd_mode_parameters& p_param)
 {
   /// enable motor at the start if the user doesn't
-  enable();
+  enable(true);
 
   /// converting to values the motor can use
-  float converted_position = p_param.position * DEGREES_TO_RADIANS;
+  float converted_position = p_param.position * degrees_to_radians;
   float converted_minimum_position =
-    m_settings.minimum_position * DEGREES_TO_RADIANS;
+    m_settings.minimum_position * degrees_to_radians;
   float converted_maximum_position =
-    m_settings.maximum_position * DEGREES_TO_RADIANS;
+    m_settings.maximum_position * degrees_to_radians;
 
-  float converted_velocity = p_param.velocity * RPM_TO_RAD_PER_SECOND;
+  float converted_velocity = p_param.velocity * rpm_to_rad_per_second;
   float converted_minimum_velocity =
-    m_settings.minimum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.minimum_velocity * rpm_to_rad_per_second;
   float converted_maximum_velocity =
-    m_settings.maximum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.maximum_velocity * rpm_to_rad_per_second;
 
   /// Converting from float to 16 Bit fixed point signed integer using ranges
   uint16_t position_bytes = float_to_fixed_point(converted_position,
                                                  converted_minimum_position,
                                                  converted_maximum_position,
-                                                 bit_size::sixteen_bit_number);
+                                                 16);
 
   /// Converting from float to 12 bit fixed point signed integer using ranges
   uint16_t velocity_bytes = float_to_fixed_point(converted_velocity,
                                                  converted_minimum_velocity,
                                                  converted_maximum_velocity,
-                                                 bit_size::twelve_bit_number);
+                                                 12);
 
   uint16_t proportional_gain_bytes =
     float_to_fixed_point(p_param.proportional_gain,
                          m_settings.minimum_proportional_gain,
                          m_settings.maximum_proportional_gain,
-                         bit_size::twelve_bit_number);
+                         12);
 
   uint16_t derivative_gain_bytes =
     float_to_fixed_point(p_param.derivative_gain,
                          m_settings.minimum_derivative_gain,
                          m_settings.maximum_derivative_gain,
-                         bit_size::twelve_bit_number);
+                         12);
 
   uint16_t torque_feed_forward_bytes =
     float_to_fixed_point(p_param.torque_feed_forward,
                          m_settings.minimum_torque,
                          m_settings.maximum_torque,
-                         bit_size::twelve_bit_number);
+                         12);
 
   /// Setting the payload bytes based on documentation for MIT mode
   m_recent_mit_frame.payload = {
     static_cast<hal::byte>(position_bytes >> 8),
-    static_cast<hal::byte>(position_bytes & 0xFF),
+    static_cast<hal::byte>(position_bytes),
     static_cast<hal::byte>(velocity_bytes >> 4),
     static_cast<hal::byte>(((velocity_bytes & 0x0F) << 4) |
                            (proportional_gain_bytes >> 8)),
-    static_cast<hal::byte>(proportional_gain_bytes & 0xFF),
+    static_cast<hal::byte>(proportional_gain_bytes),
     static_cast<hal::byte>(derivative_gain_bytes >> 4),
     static_cast<hal::byte>(((derivative_gain_bytes & 0x0F) << 4) |
                            (torque_feed_forward_bytes >> 8)),
-    static_cast<hal::byte>(torque_feed_forward_bytes & 0xFF)
+    static_cast<hal::byte>(torque_feed_forward_bytes)
   };
 
   mode_set(operating_mode::mit);
@@ -135,20 +113,20 @@ void damiao_motor::position_velocity_mode(hal::degrees p_position,
                                           hal::rpm p_velocity)
 {
   /// enable motor at the start if the user doesn't
-  enable();
+  enable(true);
 
   /// converting to values the motor can use
-  float converted_position = p_position * DEGREES_TO_RADIANS;
+  float converted_position = p_position * degrees_to_radians;
   float converted_minimum_position =
-    m_settings.minimum_position * DEGREES_TO_RADIANS;
+    m_settings.minimum_position * degrees_to_radians;
   float converted_maximum_position =
-    m_settings.maximum_position * DEGREES_TO_RADIANS;
+    m_settings.maximum_position * degrees_to_radians;
 
-  float converted_velocity = p_velocity * RPM_TO_RAD_PER_SECOND;
+  float converted_velocity = p_velocity * rpm_to_rad_per_second;
   float converted_minimum_velocity =
-    m_settings.minimum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.minimum_velocity * rpm_to_rad_per_second;
   float converted_maximum_velocity =
-    m_settings.maximum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.maximum_velocity * rpm_to_rad_per_second;
 
   p_position = std::clamp(
     converted_position, converted_minimum_position, converted_maximum_position);
@@ -160,18 +138,17 @@ void damiao_motor::position_velocity_mode(hal::degrees p_position,
   uint32_t position_bytes = std::bit_cast<uint32_t>(p_position);
   uint32_t velocity_bytes = std::bit_cast<uint32_t>(p_velocity);
 
-  hal::can_message set_value{
-    .id = m_settings.can_id + 0x100u,
-    .length = 8,
-    .payload = { static_cast<hal::byte>(position_bytes & 0xFF),
-                 static_cast<hal::byte>((position_bytes >> 8) & 0xFF),
-                 static_cast<hal::byte>((position_bytes >> 16) & 0xFF),
-                 static_cast<hal::u8>((position_bytes >> 24) & 0xFF),
-                 static_cast<hal::u8>(velocity_bytes & 0xFF),
-                 static_cast<hal::u8>((velocity_bytes >> 8) & 0xFF),
-                 static_cast<hal::u8>((velocity_bytes >> 16) & 0xFF),
-                 static_cast<hal::u8>((velocity_bytes >> 24) & 0xFF) }
-  };
+  hal::can_message set_value{ .id = m_settings.can_id + 0x100u,
+                              .length = 8,
+                              .payload = {
+                                static_cast<hal::byte>(position_bytes),
+                                static_cast<hal::byte>(position_bytes >> 8),
+                                static_cast<hal::byte>(position_bytes >> 16),
+                                static_cast<hal::u8>(position_bytes >> 24),
+                                static_cast<hal::u8>(velocity_bytes),
+                                static_cast<hal::u8>(velocity_bytes >> 8),
+                                static_cast<hal::u8>(velocity_bytes >> 16),
+                                static_cast<hal::u8>(velocity_bytes >> 24) } };
 
   mode_set(operating_mode::position_velocity);
   send_can_data(set_value);
@@ -180,13 +157,13 @@ void damiao_motor::position_velocity_mode(hal::degrees p_position,
 void damiao_motor::velocity_mode(hal::rpm p_velocity)
 {
   /// enable motor at the start if the user doesn't
-  enable();
+  enable(true);
 
-  float converted_velocity = p_velocity * RPM_TO_RAD_PER_SECOND;
+  float converted_velocity = p_velocity * rpm_to_rad_per_second;
   float converted_minimum_velocity =
-    m_settings.minimum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.minimum_velocity * rpm_to_rad_per_second;
   float converted_maximum_velocity =
-    m_settings.maximum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.maximum_velocity * rpm_to_rad_per_second;
 
   p_velocity = std::clamp(
     converted_velocity, converted_minimum_velocity, converted_maximum_velocity);
@@ -197,10 +174,10 @@ void damiao_motor::velocity_mode(hal::rpm p_velocity)
   hal::can_message set_value{
     .id = m_settings.can_id + 0x200u,
     .length = 4,
-    .payload = { static_cast<hal::byte>(velocity_bytes & 0xFF),
-                 static_cast<hal::byte>((velocity_bytes >> 8) & 0xFF),
-                 static_cast<hal::byte>((velocity_bytes >> 16) & 0xFF),
-                 static_cast<hal::byte>((velocity_bytes >> 24) & 0xFF) }
+    .payload = { static_cast<hal::byte>(velocity_bytes),
+                 static_cast<hal::byte>(velocity_bytes >> 8),
+                 static_cast<hal::byte>(velocity_bytes >> 16),
+                 static_cast<hal::byte>(velocity_bytes >> 24) }
   };
 
   mode_set(operating_mode::velocity);
@@ -211,15 +188,15 @@ void damiao_motor::force_position_hybrid_mode(
   force_position_hybrid_mode_parameters& p_param)
 {
   /// enable motor at the start if the user doesn't
-  enable();
+  enable(true);
 
-  float converted_position = p_param.position * DEGREES_TO_RADIANS;
+  float converted_position = p_param.position * degrees_to_radians;
   float converted_minimum_position =
-    m_settings.minimum_position * DEGREES_TO_RADIANS;
+    m_settings.minimum_position * degrees_to_radians;
   float converted_maximum_position =
-    m_settings.maximum_position * DEGREES_TO_RADIANS;
+    m_settings.maximum_position * degrees_to_radians;
 
-  float converted_velocity = p_param.velocity * RPM_TO_RAD_PER_SECOND;
+  float converted_velocity = p_param.velocity * rpm_to_rad_per_second;
 
   p_param.position = std::clamp(
     converted_position, converted_minimum_position, converted_maximum_position);
@@ -243,16 +220,14 @@ void damiao_motor::force_position_hybrid_mode(
   hal::can_message set_value{
     .id = m_settings.can_id + 0x300u,
     .length = 8,
-    .payload = { static_cast<hal::byte>(position_bytes & 0xFF),
-                 static_cast<hal::byte>((position_bytes >> 8) & 0xFF),
-                 static_cast<hal::byte>((position_bytes >> 16) & 0xFF),
-                 static_cast<hal::byte>((position_bytes >> 24) & 0xFF),
-                 static_cast<hal::byte>(velocity_bytes & 0xFF),
-                 static_cast<hal::byte>((velocity_bytes >> 8) & 0xFF),
-                 static_cast<hal::byte>(torque_current_limit_bytes >> 16 &
-                                        0xFF),
-                 static_cast<hal::byte>((torque_current_limit_bytes >> 8) &
-                                        0xFF) }
+    .payload = { static_cast<hal::byte>(position_bytes),
+                 static_cast<hal::byte>(position_bytes >> 8),
+                 static_cast<hal::byte>(position_bytes >> 16),
+                 static_cast<hal::byte>(position_bytes >> 24),
+                 static_cast<hal::byte>(velocity_bytes),
+                 static_cast<hal::byte>(velocity_bytes >> 8),
+                 static_cast<hal::byte>(torque_current_limit_bytes >> 16),
+                 static_cast<hal::byte>(torque_current_limit_bytes >> 8) }
   };
 
   mode_set(operating_mode::force_position_hybrid);
@@ -269,30 +244,28 @@ damiao_motor_data damiao_motor::read_encoder()
   uint16_t torque_bytes = (message.payload[4] & 0x0F) << 8 | message.payload[5];
 
   float converted_minimum_position =
-    m_settings.minimum_position * DEGREES_TO_RADIANS;
+    m_settings.minimum_position * degrees_to_radians;
   float converted_maximum_position =
-    m_settings.maximum_position * DEGREES_TO_RADIANS;
+    m_settings.maximum_position * degrees_to_radians;
 
   float converted_minimum_velocity =
-    m_settings.minimum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.minimum_velocity * rpm_to_rad_per_second;
   float converted_maximum_velocity =
-    m_settings.maximum_velocity * RPM_TO_RAD_PER_SECOND;
+    m_settings.maximum_velocity * rpm_to_rad_per_second;
 
   damiao_motor_data data{
     .position = (fixed_point_to_float(position_bytes,
                                       converted_minimum_position,
                                       converted_maximum_position,
-                                      bit_size::sixteen_bit_number) *
-                 RADIANS_TO_DEGREES),
+                                      16) *
+                 radians_to_degrees),
     .velocity = (fixed_point_to_float(velocity_bytes,
                                       converted_minimum_velocity,
                                       converted_maximum_velocity,
-                                      bit_size::twelve_bit_number) *
-                 RAD_PER_SECOND_TO_RPM),
-    .torque = fixed_point_to_float(torque_bytes,
-                                   m_settings.minimum_torque,
-                                   m_settings.maximum_torque,
-                                   bit_size::twelve_bit_number)
+                                      12) *
+                 rad_per_second_to_rpm),
+    .torque = fixed_point_to_float(
+      torque_bytes, m_settings.minimum_torque, m_settings.maximum_torque, 12)
   };
 
   return data;
@@ -319,7 +292,7 @@ hal::can_message damiao_motor::send_can_data(
   throw hal::timed_out(this);
 }
 
-void damiao_motor::mode_set(uint8_t p_mode)
+void damiao_motor::mode_set(operating_mode p_mode)
 {
   hal::can_message set_mode{ .id = 0x7ffu,
                              .length = 8,
@@ -328,7 +301,7 @@ void damiao_motor::mode_set(uint8_t p_mode)
                                static_cast<uint8_t>(m_settings.can_id >> 8),
                                0x55,
                                0x0a,
-                               p_mode,
+                               static_cast<uint8_t>(p_mode),
                                0x00,
                                0x00,
                                0x00 } };
