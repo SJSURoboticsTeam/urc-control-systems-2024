@@ -236,6 +236,20 @@ void damiao_motor::force_position_hybrid_mode(
 
 damiao_motor_data damiao_motor::read_encoder()
 {
+  /**
+   * @brief  If read_encoder() is called before mit_pd(), m_recent_mit_frame
+   * contains dummy payload bytes initialized at the start. This is NOT a bug.
+   * The dummy frame will not be able to do anything to the motor unless theres
+   * another CAN message sent to the motor explicitly switching the mode to MIT
+   * mode. That CAN message is ONLY sent in mit_pd(), which also changes the
+   * dummy frame to an actual MIT frame.
+   *
+   * If the user calls any other mode after mit_pd(), a CAN message is sent
+   * changing the mode of the motor, and thus the mit frame sent can no longer
+   * affect the state of the motor, and you can still get readings out of the
+   * motor.
+   *
+   */
   hal::can_message message = send_can_data(m_recent_mit_frame);
 
   uint16_t position_bytes = (message.payload[1] << 8) | message.payload[2];
