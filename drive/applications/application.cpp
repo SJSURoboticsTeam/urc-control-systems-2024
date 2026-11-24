@@ -9,6 +9,9 @@
 #include <optional>
 #include <resource_list.hpp>
 #include <swerve_module.hpp>
+#include <time_util.hpp>
+
+using namespace sjsu::drivers::time_util;
 
 namespace sjsu::drive {
 

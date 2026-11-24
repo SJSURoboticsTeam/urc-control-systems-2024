@@ -1,4 +1,3 @@
-#include "vector2d.hpp"
 #include <ctime>
 #include <drivetrain.hpp>
 #include <drivetrain_math.hpp>
@@ -10,6 +9,10 @@
 #include <resource_list.hpp>
 #include <span>
 #include <swerve_module.hpp>
+#include <time_util.hpp>
+#include <vector2d.hpp>
+
+using namespace sjsu::drivers::time_util;
 
 namespace sjsu::drive {
 

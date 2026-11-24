@@ -8,9 +8,11 @@
 #include <libhal/units.hpp>
 #include <resource_list.hpp>
 #include <swerve_module.hpp>
+#include <time_util.hpp>
 
 using namespace std::chrono_literals;
 using namespace hal::literals;
+using namespace sjsu::drivers::time_util;
 
 namespace sjsu::drive {
 

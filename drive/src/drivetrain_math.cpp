@@ -6,14 +6,16 @@
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
 #include <swerve_module.hpp>
+#include <time_util.hpp>
 #include <vector2d.hpp>
 
 #include <numbers>
 #include <sys/types.h>
 
-namespace sjsu::drive {
-
 using namespace std::chrono_literals;
+using namespace sjsu::drivers::time_util;
+
+namespace sjsu::drive {
 
 vector2d chassis_velocities_to_module_vector(
   chassis_velocities const& p_chassis_velocities,
