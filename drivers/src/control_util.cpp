@@ -38,4 +38,21 @@ void slew_rate_limiter::set_slew_rate(float p_slew_rate)
   m_slew_rate = p_slew_rate;
 }
 
+float modulus_range(float p_value, float p_lower, float p_upper)
+{
+  float diff = p_upper - p_lower;
+  float offset = p_value - p_lower;
+  // if less then push up
+  if (offset < 0) {
+    int rounds_below = -offset / diff + 1;
+    offset += diff * rounds_below;
+  }
+  // if more
+  else if (offset >= diff) {
+    int rounds_above = offset / diff;
+    offset -= diff * rounds_above;
+  }
+  return offset + p_lower;
+}
+
 }  // namespace sjsu::drivers::control_util

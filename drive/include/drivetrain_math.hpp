@@ -133,14 +133,4 @@ std::array<swerve_module_state, module_count> interpolate_states(
   std::array<hal::v5::strong_ptr<swerve_module>, module_count> const& p_modules,
   std::array<swerve_module_state, module_count> const& p_end_states);
 
-/**
- * @brief takes a value and places it in a bounds as if it were bounds of a ring
- * or clock. You can use this to convert a angle to the bounds of -pi to pi or
- * some some other similar.
- * @param p_value the value to place in bounds
- * @param p_lower the lower limit of the bounds to place the value in
- * @param p_upper the upper limit of the bounds to place the value in
- */
-float modulus_range(float p_value, float p_lower, float p_upper);
-
 }  // namespace sjsu::drive

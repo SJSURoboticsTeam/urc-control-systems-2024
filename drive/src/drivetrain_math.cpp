@@ -1,19 +1,21 @@
 #include <array>
 #include <cmath>
+#include <control_util.hpp>
 #include <cstdlib>
 #include <drivetrain_math.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/pointers.hpp>
 #include <libhal/units.hpp>
+#include <numbers>
 #include <swerve_module.hpp>
+#include <sys/types.h>
 #include <time_util.hpp>
 #include <vector2d.hpp>
 
-#include <numbers>
-#include <sys/types.h>
 
 using namespace std::chrono_literals;
 using namespace sjsu::drivers::time_util;
+using namespace sjsu::drivers::control_util;
 
 namespace sjsu::drive {
 
@@ -200,23 +202,6 @@ std::array<swerve_module_state, module_count> interpolate_states(
       portion, p_modules[i]->get_actual_state_cache(), p_end_states[i]);
   }
   return interpolated_states;
-}
-
-float modulus_range(float p_value, float p_lower, float p_upper)
-{
-  float diff = p_upper - p_lower;
-  float offset = p_value - p_lower;
-  // if less then push up
-  if (offset < 0) {
-    int rounds_below = -offset / diff + 1;
-    offset += diff * rounds_below;
-  }
-  // if more
-  else if (offset >= diff) {
-    int rounds_above = offset / diff;
-    offset -= diff * rounds_above;
-  }
-  return offset + p_lower;
 }
 
 hal::time_duration get_clock_time_duration(hal::steady_clock& p_clock)
