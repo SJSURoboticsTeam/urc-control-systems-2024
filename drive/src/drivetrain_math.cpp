@@ -12,7 +12,6 @@
 #include <time_util.hpp>
 #include <vector2d.hpp>
 
-
 using namespace std::chrono_literals;
 using namespace sjsu::drivers::time_util;
 using namespace sjsu::drivers::control_util;
