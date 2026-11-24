@@ -151,6 +151,6 @@ constexpr sec hal_time_duration_to_sec(hal::time_duration p_time)
 {
   return static_cast<float>(p_time.count()) * 1e-9f;
 }
-hal::time_duration get_clock_time(hal::steady_clock& p_clock);
+hal::time_duration get_clock_time_duration(hal::steady_clock& p_clock);
 
 }  // namespace sjsu::drive

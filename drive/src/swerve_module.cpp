@@ -131,7 +131,7 @@ void swerve_module::update_tolerance_debouncer()
 
   // true if out of tolerance
   bool current_state = angle_out_of_tolerance || velocity_out_of_tolerance;
-  auto current_time = get_clock_time(*m_clock);
+  auto current_time = get_clock_time_duration(*m_clock);
 
   // if deviated from stable
   if (m_stable_tolerance_state != current_state) {

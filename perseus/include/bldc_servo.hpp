@@ -275,7 +275,7 @@ public:
    */
   physical_servo_values get_physical_servo_values();
 
-  hal::time_duration get_clock_time(hal::steady_clock& p_clock);
+  hal::time_duration get_clock_time_duration(hal::steady_clock& p_clock);
 
 private:
   hal::v5::strong_ptr<sjsu::drivers::h_bridge> m_h_bridge;

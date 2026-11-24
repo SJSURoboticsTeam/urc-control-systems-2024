@@ -217,7 +217,7 @@ float modulus_range(float p_value, float p_lower, float p_upper)
   return offset + p_lower;
 }
 
-hal::time_duration get_clock_time(hal::steady_clock& p_clock)
+hal::time_duration get_clock_time_duration(hal::steady_clock& p_clock)
 {
   hal::time_duration const period =
     sec_to_hal_time_duration(1.0 / p_clock.frequency());
