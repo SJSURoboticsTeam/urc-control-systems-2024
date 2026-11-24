@@ -2,6 +2,7 @@
 #include <cmath>
 #include <control_util.hpp>
 #include <libhal/error.hpp>
+#include <libhal/rotation_sensor.hpp>
 #include <limits>
 #include <time_util.hpp>
 
@@ -53,6 +54,26 @@ float modulus_range(float p_value, float p_lower, float p_upper)
     offset -= diff * rounds_above;
   }
   return offset + p_lower;
+}
+
+unrolled_rotation_sensor::unrolled_rotation_sensor(
+  hal::v5::strong_ptr<hal::rotation_sensor> p_wraping_sensor,
+  hal::degrees p_raw_reading_wrap_distance,
+  hal::degrees p_starting_reading)
+  : m_wraping_sensor(p_wraping_sensor)
+  , m_half_raw_reading_wrap_distance(p_raw_reading_wrap_distance / 2.0f)
+  , m_last_reading(p_starting_reading)
+{
+  driver_read();
+}
+
+hal::rotation_sensor::read_t unrolled_rotation_sensor::driver_read()
+{
+  m_last_reading =
+    modulus_range(m_wraping_sensor->read().angle,
+                  m_last_reading - m_half_raw_reading_wrap_distance,
+                  m_last_reading + m_half_raw_reading_wrap_distance);
+  return { .angle = m_last_reading };
 }
 
 }  // namespace sjsu::drivers::control_util

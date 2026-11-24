@@ -35,4 +35,19 @@ private:
  */
 float modulus_range(float p_value, float p_lower, float p_upper);
 
+class unrolled_rotation_sensor : public hal::rotation_sensor
+{
+public:
+  unrolled_rotation_sensor(
+    hal::v5::strong_ptr<hal::rotation_sensor> p_wraping_sensor,
+    hal::degrees p_raw_reading_wrap_distance = 360.0f,
+    hal::degrees p_starting_reading = 0.0f);
+
+private:
+  hal::v5::strong_ptr<hal::rotation_sensor> m_wraping_sensor;
+  hal::degrees m_half_raw_reading_wrap_distance;
+  hal::degrees m_last_reading;
+  read_t driver_read() override;
+};
+
 }  // namespace sjsu::drivers::control_util
