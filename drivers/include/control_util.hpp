@@ -53,6 +53,17 @@ private:
 float modulus_range(float p_value, float p_lower, float p_upper);
 
 /**
+ * @brief finds closest value to p_previous_values that has the same modulo
+ * p_wrap_distance as p_value
+ * @param p_value the value to place in bounds
+ * @param p_wrap_distance distance before reading wraps
+ * @param p_previous_value value
+ */
+float find_closest_wrapping(float p_value,
+                            float p_wrap_distance,
+                            float p_previous_value = 0.0f);
+
+/**
  * @brief takes a rotation sensor that will wrap around in terms of rotations
  *
  * it dose this by assuming that the encoder will travel less than half the
@@ -67,7 +78,7 @@ public:
    * @param p_wraping_sensor the sensor being read from that wraps around
    * @param p_raw_reading_wrap_distance the distance traveled by the sensor
    * before wraping around to the same value once
-   * @param p_starting_reading the assumed starting position, on construction
+   * @param p_starting_position the assumed starting position, on construction
    * the reading will be set to the closest value that wraps to the same raw
    * reading
    */
@@ -75,10 +86,15 @@ public:
     hal::v5::strong_ptr<hal::rotation_sensor> p_wraping_sensor,
     hal::degrees p_raw_reading_wrap_distance = 360.0f,
     hal::degrees p_starting_reading = 0.0f);
+  /**
+   * @param p_reading the actual postion or position that is withing half of
+   * wraping ranging range of the actual position
+   */
+  void set_last_reading(hal::degrees p_reading);
 
 private:
   hal::v5::strong_ptr<hal::rotation_sensor> m_wraping_sensor;
-  hal::degrees m_half_raw_reading_wrap_distance;
+  hal::degrees m_raw_reading_wrap_distance;
   hal::degrees m_last_reading;
   read_t driver_read() override;
 };

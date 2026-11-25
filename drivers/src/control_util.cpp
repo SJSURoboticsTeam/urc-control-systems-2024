@@ -36,6 +36,9 @@ float slew_rate_limiter::update(float p_target)
 
 void slew_rate_limiter::set_slew_rate(float p_slew_rate)
 {
+  if (std::isnan(p_slew_rate) || p_slew_rate < 0) {
+    throw hal::argument_out_of_domain(this);
+  }
   m_slew_rate = p_slew_rate;
 }
 
@@ -56,23 +59,40 @@ float modulus_range(float p_value, float p_lower, float p_upper)
   return offset + p_lower;
 }
 
+float find_closest_wrapping(float p_value,
+                            float p_wrap_distance,
+                            float p_previous_value)
+{
+  if (not(p_wrap_distance > 0) ||
+      p_wrap_distance == std::numeric_limits<float>::infinity()) {
+    throw hal::argument_out_of_domain(nullptr);
+  }
+  return modulus_range(p_value,
+                       p_previous_value - p_wrap_distance / 2.0f,
+                       p_previous_value + p_wrap_distance / 2.0f);
+}
+
 unrolled_rotation_sensor::unrolled_rotation_sensor(
   hal::v5::strong_ptr<hal::rotation_sensor> p_wraping_sensor,
   hal::degrees p_raw_reading_wrap_distance,
   hal::degrees p_starting_reading)
   : m_wraping_sensor(p_wraping_sensor)
-  , m_half_raw_reading_wrap_distance(p_raw_reading_wrap_distance / 2.0f)
+  , m_raw_reading_wrap_distance(p_raw_reading_wrap_distance / 2.0f)
   , m_last_reading(p_starting_reading)
 {
   driver_read();
 }
 
+void unrolled_rotation_sensor::set_last_reading(hal::degrees p_reading)
+{
+  m_last_reading = p_reading;
+}
+
 hal::rotation_sensor::read_t unrolled_rotation_sensor::driver_read()
 {
-  m_last_reading =
-    modulus_range(m_wraping_sensor->read().angle,
-                  m_last_reading - m_half_raw_reading_wrap_distance,
-                  m_last_reading + m_half_raw_reading_wrap_distance);
+  m_last_reading = find_closest_wrapping(m_wraping_sensor->read().angle,
+                                         m_raw_reading_wrap_distance,
+                                         m_last_reading);
   return { .angle = m_last_reading };
 }
 
