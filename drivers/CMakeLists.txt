@@ -24,6 +24,7 @@ DEMOS
   can_demo
   color_sensor_demo
   h_bridge_demo
+  hr4988_demo
   led_strip_demo
   nhd0420d3z_demo
   perseus_demo
@@ -44,6 +45,7 @@ SOURCES
     src/clamped_servo.cpp
     src/color_sensor_opt4048.cpp
     src/h_bridge.cpp
+    src/hr4988.cpp
     src/mq4.cpp
     src/nhd0420d3z.cpp
     src/pressure_sensor_bme680.cpp
