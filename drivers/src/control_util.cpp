@@ -76,7 +76,7 @@ unrolled_rotation_sensor::unrolled_rotation_sensor(
   hal::v5::strong_ptr<hal::rotation_sensor> p_wraping_sensor,
   hal::degrees p_raw_reading_wrap_distance,
   hal::degrees p_starting_reading)
-  : m_wraping_sensor(p_wraping_sensor)
+  : m_wrapping_sensor(p_wraping_sensor)
   , m_raw_reading_wrap_distance(p_raw_reading_wrap_distance / 2.0f)
   , m_last_reading(p_starting_reading)
 {
@@ -90,7 +90,7 @@ void unrolled_rotation_sensor::set_last_reading(hal::degrees p_reading)
 
 hal::rotation_sensor::read_t unrolled_rotation_sensor::driver_read()
 {
-  m_last_reading = find_closest_wrapping(m_wraping_sensor->read().angle,
+  m_last_reading = find_closest_wrapping(m_wrapping_sensor->read().angle,
                                          m_raw_reading_wrap_distance,
                                          m_last_reading);
   return { .angle = m_last_reading };

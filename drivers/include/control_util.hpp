@@ -48,25 +48,33 @@ private:
  * some some other similar.
  * @param p_value the value to place in bounds
  * @param p_lower the lower limit of the bounds to place the value in
+ * (inclusive)
  * @param p_upper the upper limit of the bounds to place the value in
+ * (exclusive)
+ * @return value of equivalent modulo p_upper-p_lower to p_value that is in
+ * range of p_lower to p_upper
  */
 float modulus_range(float p_value, float p_lower, float p_upper);
 
 /**
- * @brief finds closest value to p_previous_values that has the same modulo
- * p_wrap_distance as p_value
+ * @brief finds closest value to p_reference_value that has the same modulo
+ * p_wrap_distance as p_value (typically used for keeping track of readings that
+ * may wrap around due to a max reading)
  * @param p_value the value to place in bounds
  * @param p_wrap_distance distance before reading wraps
- * @param p_previous_value value
+ * @param p_reference_value the value output should be close to (usually the
+ * previous reading)
+ * @return closest value to p_reference_value that has the same modulo
+ * p_wrap_distance as p_value
  */
 float find_closest_wrapping(float p_value,
                             float p_wrap_distance,
-                            float p_previous_value = 0.0f);
+                            float p_reference_value = 0.0f);
 
 /**
  * @brief takes a rotation sensor that will wrap around in terms of rotations
  *
- * it dose this by assuming that the encoder will travel less than half the
+ * it does this by assuming that the encoder will travel less than half the
  * wraping distance between readings. It returns the closest position to the
  * previous reading that also wraps to current raw reading. To ensure accuracy
  * the driver should be read at a frequency that the assumption holds.
@@ -93,7 +101,7 @@ public:
   void set_last_reading(hal::degrees p_reading);
 
 private:
-  hal::v5::strong_ptr<hal::rotation_sensor> m_wraping_sensor;
+  hal::v5::strong_ptr<hal::rotation_sensor> m_wrapping_sensor;
   hal::degrees m_raw_reading_wrap_distance;
   hal::degrees m_last_reading;
   read_t driver_read() override;

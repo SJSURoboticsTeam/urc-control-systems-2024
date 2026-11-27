@@ -203,11 +203,4 @@ std::array<swerve_module_state, module_count> interpolate_states(
   return interpolated_states;
 }
 
-hal::time_duration get_clock_time_duration(hal::steady_clock& p_clock)
-{
-  hal::time_duration const period =
-    sec_to_hal_time_duration(1.0 / p_clock.frequency());
-  return period * p_clock.uptime();
-}
-
 }  // namespace sjsu::drive
