@@ -5,6 +5,9 @@
 #include <libhal/steady_clock.hpp>
 #include <resource_list.hpp>
 #include <serial_commands.hpp>
+#include <time_util.hpp>
+
+using namespace sjsu::drivers::time_util;
 
 namespace sjsu::drive {
 void application()

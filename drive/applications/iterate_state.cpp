@@ -1,4 +1,3 @@
-#include "vector2d.hpp"
 #include <ctime>
 #include <drivetrain.hpp>
 #include <drivetrain_math.hpp>
@@ -10,6 +9,10 @@
 #include <resource_list.hpp>
 #include <span>
 #include <swerve_module.hpp>
+#include <time_util.hpp>
+#include <vector2d.hpp>
+
+using namespace sjsu::drivers::time_util;
 
 namespace sjsu::drive {
 
@@ -51,7 +54,7 @@ void application()
     *console, "loop_dur:%lld\n", static_cast<long long>(loop_duration / 1ns));
 
   int state_index = 0;
-  hal::time_duration start_time = get_clock_time(*clock);
+  hal::time_duration start_time = get_clock_time_duration(*clock);
   hal::time_duration state_end_time = target_state_queue[0].duration;
   hal::time_duration previous_time = 0ns;
   while (true) {
@@ -59,7 +62,7 @@ void application()
     hal::u64 frame_end = hal::future_deadline(*clock, cycle_time);
 
     // convert clock to hal::time_duration
-    hal::time_duration cur_time = get_clock_time(*clock) - start_time;
+    hal::time_duration cur_time = get_clock_time_duration(*clock) - start_time;
     hal::print<64>(
       *console, "cur_time:%lld\n", static_cast<long long>(cur_time / 1ns));
     hal::print<64>(*console,

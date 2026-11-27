@@ -1,4 +1,4 @@
-#include "bldc_servo.hpp"
+#include <bldc_servo.hpp>
 #include <libhal-util/serial.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
@@ -9,7 +9,7 @@
 #include <time_util.hpp>
 
 using namespace std::chrono_literals;
-
+using namespace sjsu::drivers::time_util;
 namespace sjsu::perseus {
 
 // ...existing code...
@@ -139,21 +139,14 @@ float bldc_perseus::get_neg_clamped_power()
 {
   return m_physical_servo_values.low_clamped_value;
 }
-
-hal::time_duration bldc_perseus::get_clock_time(hal::steady_clock& p_clock)
-{
-  hal::time_duration const period =
-    drivers::time_util::sec_to_hal_time_duration(1.0f / p_clock.frequency());
-  return period * p_clock.uptime();
-}
 // position
 void bldc_perseus::update_position(bool from_scratch)
 {
   auto console = resources::console();
   // pid portion
   float error = m_target.position - get_actual_position();
-  sec curr_time =
-    drivers::time_util::hal_time_duration_to_sec(get_clock_time(*m_clock));
+  sec curr_time = drivers::time_util::hal_time_duration_to_sec(
+    get_clock_time_duration(*m_clock));
   sec dt = curr_time - m_PID_prev_position_values.prev_timestamp;
   if (from_scratch) {
     m_PID_prev_position_values.integral = 0.0f;

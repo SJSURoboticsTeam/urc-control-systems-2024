@@ -11,10 +11,14 @@ constexpr float hal_time_duration_to_sec(hal::time_duration p_time)
 {
   return static_cast<float>(p_time.count()) * 1e-9f;
 }
-constexpr hal::time_duration get_clock_time(hal::steady_clock& p_clock)
+constexpr hal::time_duration get_clock_time_duration(hal::steady_clock& p_clock)
 {
   hal::time_duration const period =
     sec_to_hal_time_duration(1.0 / p_clock.frequency());
   return period * p_clock.uptime();
+}
+constexpr float get_clock_time_sec(hal::steady_clock& p_clock)
+{
+  return p_clock.uptime() / p_clock.frequency();
 }
 }  // namespace sjsu::drivers::time_util

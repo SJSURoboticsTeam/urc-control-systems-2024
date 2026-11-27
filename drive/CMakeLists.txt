@@ -21,6 +21,7 @@ INCLUDES
     ../drivers/include
     include
 SOURCES
+    ../drivers/src/control_util.cpp
     ../drivers/src/serial_commands.cpp
     ../drivers/src/perseus_bldc.cpp
     ../drivers/src/velocity_motor_mock.cpp
